@@ -49,8 +49,8 @@ function Calendario() {
   const { data: blocks = [] } = useBlocks();
   const guestById = Object.fromEntries(guests.map((g) => [g.id, g]));
 
-  const windowStart = days[0];
-  const windowEnd = days[days.length - 1];
+  const windowStart = days[0]!;
+  const windowEnd = days[days.length - 1]!;
 
   return (
     <AppShell
