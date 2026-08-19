@@ -269,3 +269,33 @@ function Row({ label, value, tone, strong }: { label: string; value: string; ton
     </div>
   );
 }
+
+function MovementList({
+  title,
+  empty,
+  rows,
+}: {
+  title: string;
+  empty: string;
+  rows: { id: string; main: string; sub: string; status: string }[];
+}) {
+  return (
+    <Card>
+      <CardHeader className="pb-2">
+        <CardTitle className="text-base">{title}</CardTitle>
+      </CardHeader>
+      <CardContent className="space-y-2">
+        {rows.length === 0 && <p className="text-sm text-muted-foreground">{empty}</p>}
+        {rows.map((r) => (
+          <div key={r.id} className="flex flex-wrap items-center justify-between gap-2 rounded-md border px-3 py-2 text-sm">
+            <div>
+              <p className="font-medium">{r.main}</p>
+              <p className="text-xs text-muted-foreground">{r.sub}</p>
+            </div>
+            <StatusPill value={r.status} />
+          </div>
+        ))}
+      </CardContent>
+    </Card>
+  );
+}
