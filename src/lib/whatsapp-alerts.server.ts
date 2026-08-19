@@ -2,8 +2,8 @@ import type { SupabaseClient } from "@supabase/supabase-js";
 
 export type WhatsAppSendResult = {
   status: "sent" | "failed" | "skipped";
-  providerMessageId?: string;
-  error?: string;
+  providerMessageId?: string | undefined;
+  error?: string | undefined;
 };
 
 export type PendingAlert = {
