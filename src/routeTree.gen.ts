@@ -39,6 +39,7 @@ import { Route as InviteTokenRouteImport } from './routes/invite.$token'
 import { Route as AuthenticatedTrabajoIndexRouteImport } from './routes/_authenticated/trabajo/index'
 import { Route as AuthenticatedTrabajoCalendarioRouteImport } from './routes/_authenticated/trabajo/calendario'
 import { Route as AuthenticatedTrabajoIncidenciasRouteImport } from './routes/_authenticated/trabajo/incidencias'
+import { Route as AuthenticatedTrabajoPerfilRouteImport } from './routes/_authenticated/trabajo/perfil'
 import { Route as AuthenticatedTrabajoTareasRouteImport } from './routes/_authenticated/trabajo/tareas'
 import { Route as ApiPublicEmailAlertsRouteImport } from './routes/api/public/email-alerts'
 
@@ -199,6 +200,12 @@ const AuthenticatedTrabajoIncidenciasRoute =
     path: '/incidencias',
     getParentRoute: () => AuthenticatedTrabajoRouteRoute,
   } as any)
+const AuthenticatedTrabajoPerfilRoute =
+  AuthenticatedTrabajoPerfilRouteImport.update({
+    id: '/perfil',
+    path: '/perfil',
+    getParentRoute: () => AuthenticatedTrabajoRouteRoute,
+  } as any)
 const AuthenticatedTrabajoTareasRoute =
   AuthenticatedTrabajoTareasRouteImport.update({
     id: '/tareas',
@@ -240,6 +247,7 @@ export interface FileRoutesByFullPath {
   '/control/': typeof ControlIndexRoute
   '/trabajo/calendario': typeof AuthenticatedTrabajoCalendarioRoute
   '/trabajo/incidencias': typeof AuthenticatedTrabajoIncidenciasRoute
+  '/trabajo/perfil': typeof AuthenticatedTrabajoPerfilRoute
   '/trabajo/tareas': typeof AuthenticatedTrabajoTareasRoute
   '/api/public/email-alerts': typeof ApiPublicEmailAlertsRoute
   '/trabajo/': typeof AuthenticatedTrabajoIndexRoute
@@ -271,6 +279,7 @@ export interface FileRoutesByTo {
   '/control': typeof ControlIndexRoute
   '/trabajo/calendario': typeof AuthenticatedTrabajoCalendarioRoute
   '/trabajo/incidencias': typeof AuthenticatedTrabajoIncidenciasRoute
+  '/trabajo/perfil': typeof AuthenticatedTrabajoPerfilRoute
   '/trabajo/tareas': typeof AuthenticatedTrabajoTareasRoute
   '/api/public/email-alerts': typeof ApiPublicEmailAlertsRoute
   '/trabajo': typeof AuthenticatedTrabajoIndexRoute
@@ -306,6 +315,7 @@ export interface FileRoutesById {
   '/control/': typeof ControlIndexRoute
   '/_authenticated/trabajo/calendario': typeof AuthenticatedTrabajoCalendarioRoute
   '/_authenticated/trabajo/incidencias': typeof AuthenticatedTrabajoIncidenciasRoute
+  '/_authenticated/trabajo/perfil': typeof AuthenticatedTrabajoPerfilRoute
   '/_authenticated/trabajo/tareas': typeof AuthenticatedTrabajoTareasRoute
   '/api/public/email-alerts': typeof ApiPublicEmailAlertsRoute
   '/_authenticated/trabajo/': typeof AuthenticatedTrabajoIndexRoute
@@ -341,6 +351,7 @@ export interface FileRouteTypes {
     | '/control/'
     | '/trabajo/calendario'
     | '/trabajo/incidencias'
+    | '/trabajo/perfil'
     | '/trabajo/tareas'
     | '/api/public/email-alerts'
     | '/trabajo/'
@@ -372,6 +383,7 @@ export interface FileRouteTypes {
     | '/control'
     | '/trabajo/calendario'
     | '/trabajo/incidencias'
+    | '/trabajo/perfil'
     | '/trabajo/tareas'
     | '/api/public/email-alerts'
     | '/trabajo'
@@ -406,6 +418,7 @@ export interface FileRouteTypes {
     | '/control/'
     | '/_authenticated/trabajo/calendario'
     | '/_authenticated/trabajo/incidencias'
+    | '/_authenticated/trabajo/perfil'
     | '/_authenticated/trabajo/tareas'
     | '/api/public/email-alerts'
     | '/_authenticated/trabajo/'
@@ -633,6 +646,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedTrabajoIncidenciasRouteImport
       parentRoute: typeof AuthenticatedTrabajoRouteRoute
     }
+    '/_authenticated/trabajo/perfil': {
+      id: '/_authenticated/trabajo/perfil'
+      path: '/perfil'
+      fullPath: '/trabajo/perfil'
+      preLoaderRoute: typeof AuthenticatedTrabajoPerfilRouteImport
+      parentRoute: typeof AuthenticatedTrabajoRouteRoute
+    }
     '/_authenticated/trabajo/tareas': {
       id: '/_authenticated/trabajo/tareas'
       path: '/tareas'
@@ -653,6 +673,7 @@ declare module '@tanstack/react-router' {
 interface AuthenticatedTrabajoRouteRouteChildren {
   AuthenticatedTrabajoCalendarioRoute: typeof AuthenticatedTrabajoCalendarioRoute
   AuthenticatedTrabajoIncidenciasRoute: typeof AuthenticatedTrabajoIncidenciasRoute
+  AuthenticatedTrabajoPerfilRoute: typeof AuthenticatedTrabajoPerfilRoute
   AuthenticatedTrabajoTareasRoute: typeof AuthenticatedTrabajoTareasRoute
   AuthenticatedTrabajoIndexRoute: typeof AuthenticatedTrabajoIndexRoute
 }
@@ -661,6 +682,7 @@ const AuthenticatedTrabajoRouteRouteChildren: AuthenticatedTrabajoRouteRouteChil
   {
     AuthenticatedTrabajoCalendarioRoute: AuthenticatedTrabajoCalendarioRoute,
     AuthenticatedTrabajoIncidenciasRoute: AuthenticatedTrabajoIncidenciasRoute,
+    AuthenticatedTrabajoPerfilRoute: AuthenticatedTrabajoPerfilRoute,
     AuthenticatedTrabajoTareasRoute: AuthenticatedTrabajoTareasRoute,
     AuthenticatedTrabajoIndexRoute: AuthenticatedTrabajoIndexRoute,
   }
