@@ -35,7 +35,7 @@ function AuthPage() {
 
   useEffect(() => {
     supabase.auth.getSession().then(({ data }) => {
-      if (data.session) navigate({ to: "/panel", replace: true });
+      if (data.session) navigate({ to: homeForRole(await fetchMyRole()), replace: true });
     });
   }, [navigate]);
 
@@ -78,7 +78,7 @@ function AuthPage() {
       toast.error(traducirError(error.message));
       return;
     }
-    navigate({ to: "/panel", replace: true });
+    navigate({ to: homeForRole(await fetchMyRole()), replace: true });
   }
 
   async function signUp(e: React.FormEvent) {
@@ -102,7 +102,7 @@ function AuthPage() {
     }
     setLoading(false);
     toast.success("Cuenta creada. Ya puedes entrar al panel.");
-    navigate({ to: "/panel", replace: true });
+    navigate({ to: homeForRole(await fetchMyRole()), replace: true });
   }
 
 
