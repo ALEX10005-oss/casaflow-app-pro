@@ -98,17 +98,32 @@ export function isValidEmail(raw: string) {
   return /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(raw.trim());
 }
 
-/** Envía un correo por la infraestructura de email de Lovable. Nunca expone secretos. */
+/** Clave de idempotencia única para envíos sin identificador estable (pruebas). */
+export function generateIdempotencyKey(prefix: string) {
+  const rand =
+    typeof crypto !== "undefined" && "randomUUID" in crypto
+      ? crypto.randomUUID()
+      : Math.random().toString(36).slice(2);
+  return `${prefix}-${Date.now()}-${rand}`.slice(0, 200);
+}
+
+/**
+ * Envía un correo por la infraestructura de email de Lovable. Nunca expone secretos.
+ * `idempotencyKey` es obligatorio: la API exige idempotency_key + purpose=transactional
+ * para correo de aplicación (run_id es solo para correos de autenticación).
+ */
 export async function sendAlertEmail(
   recipient: string,
   subject: string,
   html: string,
   text: string,
-  idempotencyKey?: string,
+  idempotencyKey: string,
 ): Promise<EmailSendResult> {
   const { apiKey, senderDomain, configured } = emailConfig();
   if (!configured) return { status: "skipped", error: "config_missing" };
   if (!isValidEmail(recipient)) return { status: "skipped", error: "invalid_recipient" };
+
+  const key = idempotencyKey?.trim() ? idempotencyKey.trim() : generateIdempotencyKey("alert");
 
   try {
     const { sendLovableEmail } = await import("@lovable.dev/email-js");
@@ -121,9 +136,9 @@ export async function sendAlertEmail(
         html,
         text,
         purpose: "transactional",
-        ...(idempotencyKey ? { idempotency_key: idempotencyKey } : {}),
+        idempotency_key: key,
       },
-      { apiKey: apiKey!, ...(idempotencyKey ? { idempotencyKey } : {}) },
+      { apiKey: apiKey!, idempotencyKey: key },
     );
     if (!res.success) return { status: "failed", error: sanitize(res.status ?? "send_failed") };
     return { status: "sent", providerMessageId: res.message_id };
