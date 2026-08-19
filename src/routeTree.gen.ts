@@ -31,6 +31,7 @@ import { Route as ControlIndexRouteImport } from './routes/control/index'
 import { Route as ControlDashboardRouteImport } from './routes/control/dashboard'
 import { Route as ControlEmpresasRouteImport } from './routes/control/empresas'
 import { Route as ControlLicenciasRouteImport } from './routes/control/licencias'
+import { Route as ControlSistemaRouteImport } from './routes/control/sistema'
 import { Route as ControlUsuariosRouteImport } from './routes/control/usuarios'
 
 const IndexRoute = IndexRouteImport.update({
@@ -146,6 +147,11 @@ const ControlLicenciasRoute = ControlLicenciasRouteImport.update({
   path: '/licencias',
   getParentRoute: () => ControlRouteRoute,
 } as any)
+const ControlSistemaRoute = ControlSistemaRouteImport.update({
+  id: '/sistema',
+  path: '/sistema',
+  getParentRoute: () => ControlRouteRoute,
+} as any)
 const ControlUsuariosRoute = ControlUsuariosRouteImport.update({
   id: '/usuarios',
   path: '/usuarios',
@@ -173,6 +179,7 @@ export interface FileRoutesByFullPath {
   '/control/dashboard': typeof ControlDashboardRoute
   '/control/empresas': typeof ControlEmpresasRoute
   '/control/licencias': typeof ControlLicenciasRoute
+  '/control/sistema': typeof ControlSistemaRoute
   '/control/usuarios': typeof ControlUsuariosRoute
   '/control/': typeof ControlIndexRoute
 }
@@ -196,6 +203,7 @@ export interface FileRoutesByTo {
   '/control/dashboard': typeof ControlDashboardRoute
   '/control/empresas': typeof ControlEmpresasRoute
   '/control/licencias': typeof ControlLicenciasRoute
+  '/control/sistema': typeof ControlSistemaRoute
   '/control/usuarios': typeof ControlUsuariosRoute
   '/control': typeof ControlIndexRoute
 }
@@ -222,6 +230,7 @@ export interface FileRoutesById {
   '/control/dashboard': typeof ControlDashboardRoute
   '/control/empresas': typeof ControlEmpresasRoute
   '/control/licencias': typeof ControlLicenciasRoute
+  '/control/sistema': typeof ControlSistemaRoute
   '/control/usuarios': typeof ControlUsuariosRoute
   '/control/': typeof ControlIndexRoute
 }
@@ -248,6 +257,7 @@ export interface FileRouteTypes {
     | '/control/dashboard'
     | '/control/empresas'
     | '/control/licencias'
+    | '/control/sistema'
     | '/control/usuarios'
     | '/control/'
   fileRoutesByTo: FileRoutesByTo
@@ -271,6 +281,7 @@ export interface FileRouteTypes {
     | '/control/dashboard'
     | '/control/empresas'
     | '/control/licencias'
+    | '/control/sistema'
     | '/control/usuarios'
     | '/control'
   id:
@@ -296,6 +307,7 @@ export interface FileRouteTypes {
     | '/control/dashboard'
     | '/control/empresas'
     | '/control/licencias'
+    | '/control/sistema'
     | '/control/usuarios'
     | '/control/'
   fileRoutesById: FileRoutesById
@@ -463,6 +475,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ControlLicenciasRouteImport
       parentRoute: typeof ControlRouteRoute
     }
+    '/control/sistema': {
+      id: '/control/sistema'
+      path: '/sistema'
+      fullPath: '/control/sistema'
+      preLoaderRoute: typeof ControlSistemaRouteImport
+      parentRoute: typeof ControlRouteRoute
+    }
     '/control/usuarios': {
       id: '/control/usuarios'
       path: '/usuarios'
@@ -514,6 +533,7 @@ interface ControlRouteRouteChildren {
   ControlDashboardRoute: typeof ControlDashboardRoute
   ControlEmpresasRoute: typeof ControlEmpresasRoute
   ControlLicenciasRoute: typeof ControlLicenciasRoute
+  ControlSistemaRoute: typeof ControlSistemaRoute
   ControlUsuariosRoute: typeof ControlUsuariosRoute
   ControlIndexRoute: typeof ControlIndexRoute
 }
@@ -522,6 +542,7 @@ const ControlRouteRouteChildren: ControlRouteRouteChildren = {
   ControlDashboardRoute: ControlDashboardRoute,
   ControlEmpresasRoute: ControlEmpresasRoute,
   ControlLicenciasRoute: ControlLicenciasRoute,
+  ControlSistemaRoute: ControlSistemaRoute,
   ControlUsuariosRoute: ControlUsuariosRoute,
   ControlIndexRoute: ControlIndexRoute,
 }
