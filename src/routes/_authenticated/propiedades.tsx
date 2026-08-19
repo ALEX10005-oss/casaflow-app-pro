@@ -1,10 +1,13 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useState } from "react";
-import { KeyRound, MapPin, Users, Wifi } from "lucide-react";
+import { KeyRound, MapPin, Pencil, Plus, Trash2, Users, Wifi } from "lucide-react";
 import { AppShell } from "@/components/app-shell";
 import { StatusPill } from "@/components/status-pill";
 import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
+import { Button } from "@/components/ui/button";
+import { PropertyForm } from "@/components/property-form";
+import { toast } from "sonner";
 import {
   Dialog,
   DialogContent,
@@ -12,7 +15,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import { money, todayISO, useProperties, useReservations, type Property } from "@/lib/casaflow";
+import { money, todayISO, useDeleteProperty, useProperties, useReservations, type Property } from "@/lib/casaflow";
 
 export const Route = createFileRoute("/_authenticated/propiedades")({
   head: () => ({
@@ -34,6 +37,9 @@ function Propiedades() {
   const { data: reservations = [] } = useReservations();
   const [q, setQ] = useState("");
   const [selected, setSelected] = useState<Property | null>(null);
+  const [formOpen, setFormOpen] = useState(false);
+  const [editing, setEditing] = useState<Property | null>(null);
+  const remove = useDeleteProperty();
   const today = todayISO();
 
   const rows = properties.filter((p) =>
@@ -42,12 +48,40 @@ function Propiedades() {
 
   return (
     <AppShell title="Propiedades" subtitle={`${properties.length} unidades activas en la cartera`}>
-      <Input
-        className="mb-4 max-w-sm"
+      <div className="mb-4 flex flex-wrap items-center gap-3">
+        <Input
+        className="max-w-sm"
         placeholder="Buscar por código, nombre o zona"
         value={q}
         onChange={(e) => setQ(e.target.value)}
-      />
+        />
+        <Button
+          onClick={() => {
+            setEditing(null);
+            setFormOpen(true);
+          }}
+        >
+          <Plus className="size-4" /> Nueva propiedad
+        </Button>
+      </div>
+
+      {properties.length === 0 && (
+        <div className="rounded-lg border border-dashed p-10 text-center">
+          <p className="font-display text-lg font-semibold">Aún no hay propiedades</p>
+          <p className="mt-1 text-sm text-muted-foreground">
+            Agrega tu primera unidad para empezar a operar reservas, limpiezas y finanzas.
+          </p>
+          <Button
+            className="mt-4"
+            onClick={() => {
+              setEditing(null);
+              setFormOpen(true);
+            }}
+          >
+            <Plus className="size-4" /> Agregar propiedad
+          </Button>
+        </div>
+      )}
 
       <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
         {rows.map((p) => {
@@ -77,6 +111,37 @@ function Propiedades() {
                     </span>
                     <span className="font-medium text-foreground">{money(Number(p.nightly_rate))} / noche</span>
                   </div>
+                  <div className="flex gap-2">
+                    <span
+                      role="button"
+                      tabIndex={0}
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        setEditing(p);
+                        setFormOpen(true);
+                      }}
+                      className="inline-flex items-center gap-1 rounded-md border px-2 py-1 text-xs hover:bg-muted"
+                    >
+                      <Pencil className="size-3" /> Editar
+                    </span>
+                    <span
+                      role="button"
+                      tabIndex={0}
+                      onClick={async (e) => {
+                        e.stopPropagation();
+                        if (!confirm(`¿Eliminar ${p.name}?`)) return;
+                        try {
+                          await remove.mutateAsync(p.id);
+                          toast.success("Propiedad eliminada.");
+                        } catch (err) {
+                          toast.error(err instanceof Error ? err.message : "No se pudo eliminar.");
+                        }
+                      }}
+                      className="inline-flex items-center gap-1 rounded-md border px-2 py-1 text-xs text-destructive hover:bg-destructive/10"
+                    >
+                      <Trash2 className="size-3" /> Eliminar
+                    </span>
+                  </div>
                   <p className="rounded-md bg-muted/60 px-2 py-1.5 text-xs">
                     {current
                       ? `Ocupada hasta ${current.check_out}`
@@ -90,6 +155,8 @@ function Propiedades() {
           );
         })}
       </div>
+
+      <PropertyForm open={formOpen} onOpenChange={setFormOpen} property={editing} />
 
       <Dialog open={!!selected} onOpenChange={(o) => !o && setSelected(null)}>
         <DialogContent className="max-w-lg">
