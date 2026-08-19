@@ -74,7 +74,7 @@ export function useProfile() {
   });
 }
 
-export type PropertyInput = Partial<Tables["properties"]["Insert"]> & { id?: string };
+export type PropertyInput = Partial<Tables["properties"]["Insert"]> & { id?: string | undefined };
 
 async function currentOrgId() {
   const { data: auth } = await supabase.auth.getUser();
