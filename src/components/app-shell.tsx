@@ -24,12 +24,13 @@ import { cn } from "@/lib/utils";
 
 const ROLE_ACCESS: Record<string, string[] | "all"> = {
   owner: "all",
-  manager: "all",
-  reception: ["/panel", "/calendario", "/reservas", "/propiedades", "/huespedes", "/whatsapp", "/alertas"],
-  accounting: ["/panel", "/finanzas", "/reportes", "/configuracion"],
-  cleaning: ["/mis-tareas"],
-  maintenance: ["/mis-tareas"],
+  manager: ["/panel", "/calendario", "/reservas", "/propiedades", "/huespedes", "/operaciones", "/whatsapp", "/finanzas", "/reportes", "/integraciones", "/equipo", "/alertas"],
+  accounting: ["/finanzas", "/reportes"],
+  reception: [],
+  cleaning: [],
+  maintenance: [],
 };
+
 
 const GROUPS: { label: string; items: { to: string; label: string; icon: typeof Building2 }[] }[] = [
   {
