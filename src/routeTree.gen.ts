@@ -13,6 +13,7 @@ import { Route as IndexRouteImport } from './routes/index'
 import { Route as AuthenticatedRouteRouteImport } from './routes/_authenticated/route'
 import { Route as AuthRouteImport } from './routes/auth'
 import { Route as AuthenticatedCalendarioRouteImport } from './routes/_authenticated/calendario'
+import { Route as AuthenticatedFinanzasRouteImport } from './routes/_authenticated/finanzas'
 import { Route as AuthenticatedHuespedesRouteImport } from './routes/_authenticated/huespedes'
 import { Route as AuthenticatedOperacionesRouteImport } from './routes/_authenticated/operaciones'
 import { Route as AuthenticatedPanelRouteImport } from './routes/_authenticated/panel'
@@ -36,6 +37,11 @@ const AuthRoute = AuthRouteImport.update({
 const AuthenticatedCalendarioRoute = AuthenticatedCalendarioRouteImport.update({
   id: '/calendario',
   path: '/calendario',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
+const AuthenticatedFinanzasRoute = AuthenticatedFinanzasRouteImport.update({
+  id: '/finanzas',
+  path: '/finanzas',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
 const AuthenticatedHuespedesRoute = AuthenticatedHuespedesRouteImport.update({
@@ -70,6 +76,7 @@ export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/auth': typeof AuthRoute
   '/calendario': typeof AuthenticatedCalendarioRoute
+  '/finanzas': typeof AuthenticatedFinanzasRoute
   '/huespedes': typeof AuthenticatedHuespedesRoute
   '/operaciones': typeof AuthenticatedOperacionesRoute
   '/panel': typeof AuthenticatedPanelRoute
@@ -80,6 +87,7 @@ export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/auth': typeof AuthRoute
   '/calendario': typeof AuthenticatedCalendarioRoute
+  '/finanzas': typeof AuthenticatedFinanzasRoute
   '/huespedes': typeof AuthenticatedHuespedesRoute
   '/operaciones': typeof AuthenticatedOperacionesRoute
   '/panel': typeof AuthenticatedPanelRoute
@@ -92,6 +100,7 @@ export interface FileRoutesById {
   '/_authenticated': typeof AuthenticatedRouteRouteWithChildren
   '/auth': typeof AuthRoute
   '/_authenticated/calendario': typeof AuthenticatedCalendarioRoute
+  '/_authenticated/finanzas': typeof AuthenticatedFinanzasRoute
   '/_authenticated/huespedes': typeof AuthenticatedHuespedesRoute
   '/_authenticated/operaciones': typeof AuthenticatedOperacionesRoute
   '/_authenticated/panel': typeof AuthenticatedPanelRoute
@@ -104,6 +113,7 @@ export interface FileRouteTypes {
     | '/'
     | '/auth'
     | '/calendario'
+    | '/finanzas'
     | '/huespedes'
     | '/operaciones'
     | '/panel'
@@ -114,6 +124,7 @@ export interface FileRouteTypes {
     | '/'
     | '/auth'
     | '/calendario'
+    | '/finanzas'
     | '/huespedes'
     | '/operaciones'
     | '/panel'
@@ -125,6 +136,7 @@ export interface FileRouteTypes {
     | '/_authenticated'
     | '/auth'
     | '/_authenticated/calendario'
+    | '/_authenticated/finanzas'
     | '/_authenticated/huespedes'
     | '/_authenticated/operaciones'
     | '/_authenticated/panel'
@@ -168,6 +180,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedCalendarioRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/_authenticated/finanzas': {
+      id: '/_authenticated/finanzas'
+      path: '/finanzas'
+      fullPath: '/finanzas'
+      preLoaderRoute: typeof AuthenticatedFinanzasRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
     '/_authenticated/huespedes': {
       id: '/_authenticated/huespedes'
       path: '/huespedes'
@@ -208,6 +227,7 @@ declare module '@tanstack/react-router' {
 
 interface AuthenticatedRouteRouteChildren {
   AuthenticatedCalendarioRoute: typeof AuthenticatedCalendarioRoute
+  AuthenticatedFinanzasRoute: typeof AuthenticatedFinanzasRoute
   AuthenticatedHuespedesRoute: typeof AuthenticatedHuespedesRoute
   AuthenticatedOperacionesRoute: typeof AuthenticatedOperacionesRoute
   AuthenticatedPanelRoute: typeof AuthenticatedPanelRoute
@@ -217,6 +237,7 @@ interface AuthenticatedRouteRouteChildren {
 
 const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedCalendarioRoute: AuthenticatedCalendarioRoute,
+  AuthenticatedFinanzasRoute: AuthenticatedFinanzasRoute,
   AuthenticatedHuespedesRoute: AuthenticatedHuespedesRoute,
   AuthenticatedOperacionesRoute: AuthenticatedOperacionesRoute,
   AuthenticatedPanelRoute: AuthenticatedPanelRoute,
