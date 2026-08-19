@@ -34,6 +34,7 @@ import { Route as ControlEmpresasRouteImport } from './routes/control/empresas'
 import { Route as ControlLicenciasRouteImport } from './routes/control/licencias'
 import { Route as ControlSistemaRouteImport } from './routes/control/sistema'
 import { Route as ControlUsuariosRouteImport } from './routes/control/usuarios'
+import { Route as InviteTokenRouteImport } from './routes/invite.$token'
 import { Route as ApiPublicEmailAlertsRouteImport } from './routes/api/public/email-alerts'
 
 const IndexRoute = IndexRouteImport.update({
@@ -164,6 +165,11 @@ const ControlUsuariosRoute = ControlUsuariosRouteImport.update({
   path: '/usuarios',
   getParentRoute: () => ControlRouteRoute,
 } as any)
+const InviteTokenRoute = InviteTokenRouteImport.update({
+  id: '/invite/$token',
+  path: '/invite/$token',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ApiPublicEmailAlertsRoute = ApiPublicEmailAlertsRouteImport.update({
   id: '/api/public/email-alerts',
   path: '/api/public/email-alerts',
@@ -194,6 +200,7 @@ export interface FileRoutesByFullPath {
   '/control/licencias': typeof ControlLicenciasRoute
   '/control/sistema': typeof ControlSistemaRoute
   '/control/usuarios': typeof ControlUsuariosRoute
+  '/invite/$token': typeof InviteTokenRoute
   '/control/': typeof ControlIndexRoute
   '/api/public/email-alerts': typeof ApiPublicEmailAlertsRoute
 }
@@ -220,6 +227,7 @@ export interface FileRoutesByTo {
   '/control/licencias': typeof ControlLicenciasRoute
   '/control/sistema': typeof ControlSistemaRoute
   '/control/usuarios': typeof ControlUsuariosRoute
+  '/invite/$token': typeof InviteTokenRoute
   '/control': typeof ControlIndexRoute
   '/api/public/email-alerts': typeof ApiPublicEmailAlertsRoute
 }
@@ -249,6 +257,7 @@ export interface FileRoutesById {
   '/control/licencias': typeof ControlLicenciasRoute
   '/control/sistema': typeof ControlSistemaRoute
   '/control/usuarios': typeof ControlUsuariosRoute
+  '/invite/$token': typeof InviteTokenRoute
   '/control/': typeof ControlIndexRoute
   '/api/public/email-alerts': typeof ApiPublicEmailAlertsRoute
 }
@@ -278,6 +287,7 @@ export interface FileRouteTypes {
     | '/control/licencias'
     | '/control/sistema'
     | '/control/usuarios'
+    | '/invite/$token'
     | '/control/'
     | '/api/public/email-alerts'
   fileRoutesByTo: FileRoutesByTo
@@ -304,6 +314,7 @@ export interface FileRouteTypes {
     | '/control/licencias'
     | '/control/sistema'
     | '/control/usuarios'
+    | '/invite/$token'
     | '/control'
     | '/api/public/email-alerts'
   id:
@@ -332,6 +343,7 @@ export interface FileRouteTypes {
     | '/control/licencias'
     | '/control/sistema'
     | '/control/usuarios'
+    | '/invite/$token'
     | '/control/'
     | '/api/public/email-alerts'
   fileRoutesById: FileRoutesById
@@ -342,6 +354,7 @@ export interface RootRouteChildren {
   ControlRouteRoute: typeof ControlRouteRouteWithChildren
   AuthRoute: typeof AuthRoute
   PendienteRoute: typeof PendienteRoute
+  InviteTokenRoute: typeof InviteTokenRoute
   ApiPublicEmailAlertsRoute: typeof ApiPublicEmailAlertsRoute
 }
 
@@ -522,6 +535,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ControlUsuariosRouteImport
       parentRoute: typeof ControlRouteRoute
     }
+    '/invite/$token': {
+      id: '/invite/$token'
+      path: '/invite/$token'
+      fullPath: '/invite/$token'
+      preLoaderRoute: typeof InviteTokenRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/api/public/email-alerts': {
       id: '/api/public/email-alerts'
       path: '/api/public/email-alerts'
@@ -597,6 +617,7 @@ const rootRouteChildren: RootRouteChildren = {
   ControlRouteRoute: ControlRouteRouteWithChildren,
   AuthRoute: AuthRoute,
   PendienteRoute: PendienteRoute,
+  InviteTokenRoute: InviteTokenRoute,
   ApiPublicEmailAlertsRoute: ApiPublicEmailAlertsRoute,
 }
 export const routeTree = rootRouteImport
