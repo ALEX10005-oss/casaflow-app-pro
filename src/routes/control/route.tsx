@@ -1,8 +1,17 @@
 import { createFileRoute, Link, Outlet, redirect, useNavigate, useRouterState } from "@tanstack/react-router";
 import { useQueryClient } from "@tanstack/react-query";
+import { Bell } from "lucide-react";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { supabase } from "@/integrations/supabase/client";
 import { checkPlatformAdmin } from "@/lib/platform";
+import {
+  monitorDateTime,
+  useHealthSummary,
+  useMarkNotificationsRead,
+  useNotifications,
+} from "@/lib/monitor";
 import { cn } from "@/lib/utils";
+
 
 const NAV = [
   { to: "/control/dashboard", label: "Dashboard" },
