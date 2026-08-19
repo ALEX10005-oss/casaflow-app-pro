@@ -10,33 +10,218 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as AuthenticatedRouteRouteImport } from './routes/_authenticated/route'
+import { Route as AuthRouteImport } from './routes/auth'
+import { Route as AuthenticatedAlertasRouteImport } from './routes/_authenticated/alertas'
+import { Route as AuthenticatedCalendarioRouteImport } from './routes/_authenticated/calendario'
+import { Route as AuthenticatedConfiguracionRouteImport } from './routes/_authenticated/configuracion'
+import { Route as AuthenticatedEquipoRouteImport } from './routes/_authenticated/equipo'
+import { Route as AuthenticatedFinanzasRouteImport } from './routes/_authenticated/finanzas'
+import { Route as AuthenticatedHuespedesRouteImport } from './routes/_authenticated/huespedes'
+import { Route as AuthenticatedIntegracionesRouteImport } from './routes/_authenticated/integraciones'
+import { Route as AuthenticatedOperacionesRouteImport } from './routes/_authenticated/operaciones'
+import { Route as AuthenticatedPanelRouteImport } from './routes/_authenticated/panel'
+import { Route as AuthenticatedPropiedadesRouteImport } from './routes/_authenticated/propiedades'
+import { Route as AuthenticatedReportesRouteImport } from './routes/_authenticated/reportes'
+import { Route as AuthenticatedReservasRouteImport } from './routes/_authenticated/reservas'
+import { Route as AuthenticatedWhatsappRouteImport } from './routes/_authenticated/whatsapp'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AuthenticatedRouteRoute = AuthenticatedRouteRouteImport.update({
+  id: '/_authenticated',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AuthRoute = AuthRouteImport.update({
+  id: '/auth',
+  path: '/auth',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AuthenticatedAlertasRoute = AuthenticatedAlertasRouteImport.update({
+  id: '/alertas',
+  path: '/alertas',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
+const AuthenticatedCalendarioRoute = AuthenticatedCalendarioRouteImport.update({
+  id: '/calendario',
+  path: '/calendario',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
+const AuthenticatedConfiguracionRoute =
+  AuthenticatedConfiguracionRouteImport.update({
+    id: '/configuracion',
+    path: '/configuracion',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
+const AuthenticatedEquipoRoute = AuthenticatedEquipoRouteImport.update({
+  id: '/equipo',
+  path: '/equipo',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
+const AuthenticatedFinanzasRoute = AuthenticatedFinanzasRouteImport.update({
+  id: '/finanzas',
+  path: '/finanzas',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
+const AuthenticatedHuespedesRoute = AuthenticatedHuespedesRouteImport.update({
+  id: '/huespedes',
+  path: '/huespedes',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
+const AuthenticatedIntegracionesRoute =
+  AuthenticatedIntegracionesRouteImport.update({
+    id: '/integraciones',
+    path: '/integraciones',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
+const AuthenticatedOperacionesRoute =
+  AuthenticatedOperacionesRouteImport.update({
+    id: '/operaciones',
+    path: '/operaciones',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
+const AuthenticatedPanelRoute = AuthenticatedPanelRouteImport.update({
+  id: '/panel',
+  path: '/panel',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
+const AuthenticatedPropiedadesRoute =
+  AuthenticatedPropiedadesRouteImport.update({
+    id: '/propiedades',
+    path: '/propiedades',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
+const AuthenticatedReportesRoute = AuthenticatedReportesRouteImport.update({
+  id: '/reportes',
+  path: '/reportes',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
+const AuthenticatedReservasRoute = AuthenticatedReservasRouteImport.update({
+  id: '/reservas',
+  path: '/reservas',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
+const AuthenticatedWhatsappRoute = AuthenticatedWhatsappRouteImport.update({
+  id: '/whatsapp',
+  path: '/whatsapp',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/auth': typeof AuthRoute
+  '/alertas': typeof AuthenticatedAlertasRoute
+  '/calendario': typeof AuthenticatedCalendarioRoute
+  '/configuracion': typeof AuthenticatedConfiguracionRoute
+  '/equipo': typeof AuthenticatedEquipoRoute
+  '/finanzas': typeof AuthenticatedFinanzasRoute
+  '/huespedes': typeof AuthenticatedHuespedesRoute
+  '/integraciones': typeof AuthenticatedIntegracionesRoute
+  '/operaciones': typeof AuthenticatedOperacionesRoute
+  '/panel': typeof AuthenticatedPanelRoute
+  '/propiedades': typeof AuthenticatedPropiedadesRoute
+  '/reportes': typeof AuthenticatedReportesRoute
+  '/reservas': typeof AuthenticatedReservasRoute
+  '/whatsapp': typeof AuthenticatedWhatsappRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/auth': typeof AuthRoute
+  '/alertas': typeof AuthenticatedAlertasRoute
+  '/calendario': typeof AuthenticatedCalendarioRoute
+  '/configuracion': typeof AuthenticatedConfiguracionRoute
+  '/equipo': typeof AuthenticatedEquipoRoute
+  '/finanzas': typeof AuthenticatedFinanzasRoute
+  '/huespedes': typeof AuthenticatedHuespedesRoute
+  '/integraciones': typeof AuthenticatedIntegracionesRoute
+  '/operaciones': typeof AuthenticatedOperacionesRoute
+  '/panel': typeof AuthenticatedPanelRoute
+  '/propiedades': typeof AuthenticatedPropiedadesRoute
+  '/reportes': typeof AuthenticatedReportesRoute
+  '/reservas': typeof AuthenticatedReservasRoute
+  '/whatsapp': typeof AuthenticatedWhatsappRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/_authenticated': typeof AuthenticatedRouteRouteWithChildren
+  '/auth': typeof AuthRoute
+  '/_authenticated/alertas': typeof AuthenticatedAlertasRoute
+  '/_authenticated/calendario': typeof AuthenticatedCalendarioRoute
+  '/_authenticated/configuracion': typeof AuthenticatedConfiguracionRoute
+  '/_authenticated/equipo': typeof AuthenticatedEquipoRoute
+  '/_authenticated/finanzas': typeof AuthenticatedFinanzasRoute
+  '/_authenticated/huespedes': typeof AuthenticatedHuespedesRoute
+  '/_authenticated/integraciones': typeof AuthenticatedIntegracionesRoute
+  '/_authenticated/operaciones': typeof AuthenticatedOperacionesRoute
+  '/_authenticated/panel': typeof AuthenticatedPanelRoute
+  '/_authenticated/propiedades': typeof AuthenticatedPropiedadesRoute
+  '/_authenticated/reportes': typeof AuthenticatedReportesRoute
+  '/_authenticated/reservas': typeof AuthenticatedReservasRoute
+  '/_authenticated/whatsapp': typeof AuthenticatedWhatsappRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/'
+  fullPaths:
+    | '/'
+    | '/auth'
+    | '/alertas'
+    | '/calendario'
+    | '/configuracion'
+    | '/equipo'
+    | '/finanzas'
+    | '/huespedes'
+    | '/integraciones'
+    | '/operaciones'
+    | '/panel'
+    | '/propiedades'
+    | '/reportes'
+    | '/reservas'
+    | '/whatsapp'
   fileRoutesByTo: FileRoutesByTo
-  to: '/'
-  id: '__root__' | '/'
+  to:
+    | '/'
+    | '/auth'
+    | '/alertas'
+    | '/calendario'
+    | '/configuracion'
+    | '/equipo'
+    | '/finanzas'
+    | '/huespedes'
+    | '/integraciones'
+    | '/operaciones'
+    | '/panel'
+    | '/propiedades'
+    | '/reportes'
+    | '/reservas'
+    | '/whatsapp'
+  id:
+    | '__root__'
+    | '/'
+    | '/_authenticated'
+    | '/auth'
+    | '/_authenticated/alertas'
+    | '/_authenticated/calendario'
+    | '/_authenticated/configuracion'
+    | '/_authenticated/equipo'
+    | '/_authenticated/finanzas'
+    | '/_authenticated/huespedes'
+    | '/_authenticated/integraciones'
+    | '/_authenticated/operaciones'
+    | '/_authenticated/panel'
+    | '/_authenticated/propiedades'
+    | '/_authenticated/reportes'
+    | '/_authenticated/reservas'
+    | '/_authenticated/whatsapp'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  AuthenticatedRouteRoute: typeof AuthenticatedRouteRouteWithChildren
+  AuthRoute: typeof AuthRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -48,11 +233,153 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/_authenticated': {
+      id: '/_authenticated'
+      path: ''
+      fullPath: '/'
+      preLoaderRoute: typeof AuthenticatedRouteRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/auth': {
+      id: '/auth'
+      path: '/auth'
+      fullPath: '/auth'
+      preLoaderRoute: typeof AuthRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/_authenticated/alertas': {
+      id: '/_authenticated/alertas'
+      path: '/alertas'
+      fullPath: '/alertas'
+      preLoaderRoute: typeof AuthenticatedAlertasRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/calendario': {
+      id: '/_authenticated/calendario'
+      path: '/calendario'
+      fullPath: '/calendario'
+      preLoaderRoute: typeof AuthenticatedCalendarioRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/configuracion': {
+      id: '/_authenticated/configuracion'
+      path: '/configuracion'
+      fullPath: '/configuracion'
+      preLoaderRoute: typeof AuthenticatedConfiguracionRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/equipo': {
+      id: '/_authenticated/equipo'
+      path: '/equipo'
+      fullPath: '/equipo'
+      preLoaderRoute: typeof AuthenticatedEquipoRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/finanzas': {
+      id: '/_authenticated/finanzas'
+      path: '/finanzas'
+      fullPath: '/finanzas'
+      preLoaderRoute: typeof AuthenticatedFinanzasRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/huespedes': {
+      id: '/_authenticated/huespedes'
+      path: '/huespedes'
+      fullPath: '/huespedes'
+      preLoaderRoute: typeof AuthenticatedHuespedesRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/integraciones': {
+      id: '/_authenticated/integraciones'
+      path: '/integraciones'
+      fullPath: '/integraciones'
+      preLoaderRoute: typeof AuthenticatedIntegracionesRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/operaciones': {
+      id: '/_authenticated/operaciones'
+      path: '/operaciones'
+      fullPath: '/operaciones'
+      preLoaderRoute: typeof AuthenticatedOperacionesRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/panel': {
+      id: '/_authenticated/panel'
+      path: '/panel'
+      fullPath: '/panel'
+      preLoaderRoute: typeof AuthenticatedPanelRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/propiedades': {
+      id: '/_authenticated/propiedades'
+      path: '/propiedades'
+      fullPath: '/propiedades'
+      preLoaderRoute: typeof AuthenticatedPropiedadesRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/reportes': {
+      id: '/_authenticated/reportes'
+      path: '/reportes'
+      fullPath: '/reportes'
+      preLoaderRoute: typeof AuthenticatedReportesRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/reservas': {
+      id: '/_authenticated/reservas'
+      path: '/reservas'
+      fullPath: '/reservas'
+      preLoaderRoute: typeof AuthenticatedReservasRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/whatsapp': {
+      id: '/_authenticated/whatsapp'
+      path: '/whatsapp'
+      fullPath: '/whatsapp'
+      preLoaderRoute: typeof AuthenticatedWhatsappRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
   }
 }
 
+interface AuthenticatedRouteRouteChildren {
+  AuthenticatedAlertasRoute: typeof AuthenticatedAlertasRoute
+  AuthenticatedCalendarioRoute: typeof AuthenticatedCalendarioRoute
+  AuthenticatedConfiguracionRoute: typeof AuthenticatedConfiguracionRoute
+  AuthenticatedEquipoRoute: typeof AuthenticatedEquipoRoute
+  AuthenticatedFinanzasRoute: typeof AuthenticatedFinanzasRoute
+  AuthenticatedHuespedesRoute: typeof AuthenticatedHuespedesRoute
+  AuthenticatedIntegracionesRoute: typeof AuthenticatedIntegracionesRoute
+  AuthenticatedOperacionesRoute: typeof AuthenticatedOperacionesRoute
+  AuthenticatedPanelRoute: typeof AuthenticatedPanelRoute
+  AuthenticatedPropiedadesRoute: typeof AuthenticatedPropiedadesRoute
+  AuthenticatedReportesRoute: typeof AuthenticatedReportesRoute
+  AuthenticatedReservasRoute: typeof AuthenticatedReservasRoute
+  AuthenticatedWhatsappRoute: typeof AuthenticatedWhatsappRoute
+}
+
+const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
+  AuthenticatedAlertasRoute: AuthenticatedAlertasRoute,
+  AuthenticatedCalendarioRoute: AuthenticatedCalendarioRoute,
+  AuthenticatedConfiguracionRoute: AuthenticatedConfiguracionRoute,
+  AuthenticatedEquipoRoute: AuthenticatedEquipoRoute,
+  AuthenticatedFinanzasRoute: AuthenticatedFinanzasRoute,
+  AuthenticatedHuespedesRoute: AuthenticatedHuespedesRoute,
+  AuthenticatedIntegracionesRoute: AuthenticatedIntegracionesRoute,
+  AuthenticatedOperacionesRoute: AuthenticatedOperacionesRoute,
+  AuthenticatedPanelRoute: AuthenticatedPanelRoute,
+  AuthenticatedPropiedadesRoute: AuthenticatedPropiedadesRoute,
+  AuthenticatedReportesRoute: AuthenticatedReportesRoute,
+  AuthenticatedReservasRoute: AuthenticatedReservasRoute,
+  AuthenticatedWhatsappRoute: AuthenticatedWhatsappRoute,
+}
+
+const AuthenticatedRouteRouteWithChildren =
+  AuthenticatedRouteRoute._addFileChildren(AuthenticatedRouteRouteChildren)
+
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  AuthenticatedRouteRoute: AuthenticatedRouteRouteWithChildren,
+  AuthRoute: AuthRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
