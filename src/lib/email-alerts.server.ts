@@ -18,10 +18,13 @@ export type PendingAlert = {
   org_name: string;
 };
 
+/** Dominio remitente verificado del proyecto. */
+export const SENDER_DOMAIN = "notify.casaflowpro.app";
+
 /** Configuración del envío por correo (infraestructura de email de Lovable). */
 export function emailConfig() {
   const apiKey = process.env["LOVABLE_API_KEY"];
-  const senderDomain = process.env["EMAIL_SENDER_DOMAIN"];
+  const senderDomain = process.env["EMAIL_SENDER_DOMAIN"] ?? SENDER_DOMAIN;
   return {
     apiKey,
     senderDomain,
