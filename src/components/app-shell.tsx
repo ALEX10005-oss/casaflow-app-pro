@@ -110,7 +110,7 @@ export function AppShell({
         )}
       >
         <div>
-          <Link to="/panel" className="mb-6 flex items-center gap-2 px-2">
+          <Link to={homeForRole(role)} className="mb-6 flex items-center gap-2 px-2">
             <span className="grid size-8 place-items-center rounded-md bg-sidebar-primary font-display text-sm font-bold text-sidebar-primary-foreground">
               CF
             </span>
