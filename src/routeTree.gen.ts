@@ -27,6 +27,7 @@ import { Route as AuthenticatedPropiedadesRouteImport } from './routes/_authenti
 import { Route as AuthenticatedReportesRouteImport } from './routes/_authenticated/reportes'
 import { Route as AuthenticatedReservasRouteImport } from './routes/_authenticated/reservas'
 import { Route as AuthenticatedWhatsappRouteImport } from './routes/_authenticated/whatsapp'
+import { Route as ControlIndexRouteImport } from './routes/control/index'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
@@ -121,10 +122,15 @@ const AuthenticatedWhatsappRoute = AuthenticatedWhatsappRouteImport.update({
   path: '/whatsapp',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
+const ControlIndexRoute = ControlIndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => ControlRouteRoute,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
-  '/control': typeof ControlRouteRoute
+  '/control': typeof ControlRouteRouteWithChildren
   '/auth': typeof AuthRoute
   '/alertas': typeof AuthenticatedAlertasRoute
   '/calendario': typeof AuthenticatedCalendarioRoute
@@ -140,10 +146,10 @@ export interface FileRoutesByFullPath {
   '/reportes': typeof AuthenticatedReportesRoute
   '/reservas': typeof AuthenticatedReservasRoute
   '/whatsapp': typeof AuthenticatedWhatsappRoute
+  '/control/': typeof ControlIndexRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
-  '/control': typeof ControlRouteRoute
   '/auth': typeof AuthRoute
   '/alertas': typeof AuthenticatedAlertasRoute
   '/calendario': typeof AuthenticatedCalendarioRoute
@@ -159,12 +165,13 @@ export interface FileRoutesByTo {
   '/reportes': typeof AuthenticatedReportesRoute
   '/reservas': typeof AuthenticatedReservasRoute
   '/whatsapp': typeof AuthenticatedWhatsappRoute
+  '/control': typeof ControlIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/_authenticated': typeof AuthenticatedRouteRouteWithChildren
-  '/control': typeof ControlRouteRoute
+  '/control': typeof ControlRouteRouteWithChildren
   '/auth': typeof AuthRoute
   '/_authenticated/alertas': typeof AuthenticatedAlertasRoute
   '/_authenticated/calendario': typeof AuthenticatedCalendarioRoute
@@ -180,6 +187,7 @@ export interface FileRoutesById {
   '/_authenticated/reportes': typeof AuthenticatedReportesRoute
   '/_authenticated/reservas': typeof AuthenticatedReservasRoute
   '/_authenticated/whatsapp': typeof AuthenticatedWhatsappRoute
+  '/control/': typeof ControlIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -201,10 +209,10 @@ export interface FileRouteTypes {
     | '/reportes'
     | '/reservas'
     | '/whatsapp'
+    | '/control/'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
-    | '/control'
     | '/auth'
     | '/alertas'
     | '/calendario'
@@ -220,6 +228,7 @@ export interface FileRouteTypes {
     | '/reportes'
     | '/reservas'
     | '/whatsapp'
+    | '/control'
   id:
     | '__root__'
     | '/'
@@ -240,12 +249,13 @@ export interface FileRouteTypes {
     | '/_authenticated/reportes'
     | '/_authenticated/reservas'
     | '/_authenticated/whatsapp'
+    | '/control/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   AuthenticatedRouteRoute: typeof AuthenticatedRouteRouteWithChildren
-  ControlRouteRoute: typeof ControlRouteRoute
+  ControlRouteRoute: typeof ControlRouteRouteWithChildren
   AuthRoute: typeof AuthRoute
 }
 
@@ -377,6 +387,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedWhatsappRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/control/': {
+      id: '/control/'
+      path: '/'
+      fullPath: '/control/'
+      preLoaderRoute: typeof ControlIndexRouteImport
+      parentRoute: typeof ControlRouteRoute
+    }
   }
 }
 
@@ -417,10 +434,22 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
 const AuthenticatedRouteRouteWithChildren =
   AuthenticatedRouteRoute._addFileChildren(AuthenticatedRouteRouteChildren)
 
+interface ControlRouteRouteChildren {
+  ControlIndexRoute: typeof ControlIndexRoute
+}
+
+const ControlRouteRouteChildren: ControlRouteRouteChildren = {
+  ControlIndexRoute: ControlIndexRoute,
+}
+
+const ControlRouteRouteWithChildren = ControlRouteRoute._addFileChildren(
+  ControlRouteRouteChildren,
+)
+
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AuthenticatedRouteRoute: AuthenticatedRouteRouteWithChildren,
-  ControlRouteRoute: ControlRouteRoute,
+  ControlRouteRoute: ControlRouteRouteWithChildren,
   AuthRoute: AuthRoute,
 }
 export const routeTree = rootRouteImport
