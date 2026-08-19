@@ -363,6 +363,47 @@ export type Database = {
         }
         Relationships: []
       }
+      platform_notifications: {
+        Row: {
+          body: string | null
+          created_at: string
+          id: string
+          incident_id: string | null
+          platform_admin_user_id: string
+          read_at: string | null
+          title: string
+          type: string
+        }
+        Insert: {
+          body?: string | null
+          created_at?: string
+          id?: string
+          incident_id?: string | null
+          platform_admin_user_id: string
+          read_at?: string | null
+          title: string
+          type?: string
+        }
+        Update: {
+          body?: string | null
+          created_at?: string
+          id?: string
+          incident_id?: string | null
+          platform_admin_user_id?: string
+          read_at?: string | null
+          title?: string
+          type?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "platform_notifications_incident_id_fkey"
+            columns: ["incident_id"]
+            isOneToOne: false
+            referencedRelation: "system_incidents"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       profiles: {
         Row: {
           access_status: string
@@ -598,6 +639,108 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      system_health_checks: {
+        Row: {
+          check_key: string
+          check_name: string
+          consecutive_failures: number
+          created_at: string
+          details: Json
+          first_failed_at: string | null
+          id: string
+          last_checked_at: string
+          org_id: string | null
+          severity: string
+          status: string
+          updated_at: string
+        }
+        Insert: {
+          check_key: string
+          check_name: string
+          consecutive_failures?: number
+          created_at?: string
+          details?: Json
+          first_failed_at?: string | null
+          id?: string
+          last_checked_at?: string
+          org_id?: string | null
+          severity?: string
+          status?: string
+          updated_at?: string
+        }
+        Update: {
+          check_key?: string
+          check_name?: string
+          consecutive_failures?: number
+          created_at?: string
+          details?: Json
+          first_failed_at?: string | null
+          id?: string
+          last_checked_at?: string
+          org_id?: string | null
+          severity?: string
+          status?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      system_incidents: {
+        Row: {
+          acknowledged_at: string | null
+          check_key: string
+          created_at: string
+          description: string | null
+          detected_at: string
+          fingerprint: string
+          id: string
+          metadata: Json
+          org_id: string | null
+          recommended_action: string | null
+          resolved_at: string | null
+          severity: string
+          source: string
+          status: string
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          acknowledged_at?: string | null
+          check_key: string
+          created_at?: string
+          description?: string | null
+          detected_at?: string
+          fingerprint: string
+          id?: string
+          metadata?: Json
+          org_id?: string | null
+          recommended_action?: string | null
+          resolved_at?: string | null
+          severity?: string
+          source?: string
+          status?: string
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          acknowledged_at?: string | null
+          check_key?: string
+          created_at?: string
+          description?: string | null
+          detected_at?: string
+          fingerprint?: string
+          id?: string
+          metadata?: Json
+          org_id?: string | null
+          recommended_action?: string | null
+          resolved_at?: string | null
+          severity?: string
+          source?: string
+          status?: string
+          title?: string
+          updated_at?: string
+        }
+        Relationships: []
       }
       team_members: {
         Row: {
@@ -878,6 +1021,34 @@ export type Database = {
         Returns: boolean
       }
       is_platform_admin: { Args: never; Returns: boolean }
+      platform_acknowledge_incident: {
+        Args: { _incident_id: string }
+        Returns: {
+          acknowledged_at: string | null
+          check_key: string
+          created_at: string
+          description: string | null
+          detected_at: string
+          fingerprint: string
+          id: string
+          metadata: Json
+          org_id: string | null
+          recommended_action: string | null
+          resolved_at: string | null
+          severity: string
+          source: string
+          status: string
+          title: string
+          updated_at: string
+        }
+        SetofOptions: {
+          from: "*"
+          to: "system_incidents"
+          isOneToOne: true
+          isSetofReturn: false
+        }
+      }
+      platform_health_summary: { Args: never; Returns: Json }
       platform_list_organizations: {
         Args: never
         Returns: {
@@ -909,6 +1080,10 @@ export type Database = {
           org_name: string
         }[]
       }
+      platform_mark_notifications_read: {
+        Args: { _ids?: string[] }
+        Returns: number
+      }
       platform_stats: { Args: never; Returns: Json }
       platform_update_license: {
         Args: {
@@ -934,6 +1109,21 @@ export type Database = {
           isSetofReturn: false
         }
       }
+      record_health_check: {
+        Args: {
+          _action: string
+          _description: string
+          _details: Json
+          _key: string
+          _name: string
+          _org_id: string
+          _severity: string
+          _status: string
+          _title: string
+        }
+        Returns: undefined
+      }
+      run_platform_health_check: { Args: never; Returns: Json }
     }
     Enums: {
       app_role:
