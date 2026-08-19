@@ -7,7 +7,15 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { supabase } from "@/integrations/supabase/client";
-import { longDate, todayISO, useCleaningTasks, useMaintenance, useProperties } from "@/lib/casaflow";
+import {
+  longDate,
+  todayISO,
+  useAssignTask,
+  useCleaningTasks,
+  useMaintenance,
+  useOrgMembers,
+  useProperties,
+} from "@/lib/casaflow";
 
 export const Route = createFileRoute("/_authenticated/operaciones")({
   head: () => ({
@@ -29,6 +37,46 @@ function Operaciones() {
   const { data: cleaning = [] } = useCleaningTasks();
   const { data: issues = [] } = useMaintenance();
   const { data: properties = [] } = useProperties();
+  const { data: members = [] } = useOrgMembers();
+  const assign = useAssignTask();
+  const assignable = members.filter((m) => m.access_status === "active");
+
+  function AssigneeSelect({
+    kind,
+    taskId,
+    value,
+    roles,
+  }: {
+    kind: "cleaning" | "maintenance";
+    taskId: string;
+    value: string | null;
+    roles: string[];
+  }) {
+    const options = assignable.filter((m) => m.role && roles.includes(m.role));
+    return (
+      <select
+        aria-label="Responsable"
+        className="h-8 rounded-md border bg-background px-2 text-xs"
+        value={value ?? ""}
+        onChange={(e) =>
+          assign.mutate(
+            { kind, taskId, userId: e.target.value || null },
+            {
+              onSuccess: () => toast.success("Responsable actualizado"),
+              onError: (err: Error) => toast.error(err.message),
+            },
+          )
+        }
+      >
+        <option value="">Sin asignar</option>
+        {options.map((m) => (
+          <option key={m.user_id} value={m.user_id}>
+            {[m.first_name, m.last_name].filter(Boolean).join(" ") || m.email}
+          </option>
+        ))}
+      </select>
+    );
+  }
   const propById = Object.fromEntries(properties.map((p) => [p.id, p]));
   const today = todayISO();
 
@@ -90,6 +138,7 @@ function Operaciones() {
                         </p>
                       </div>
                       <div className="flex flex-wrap items-center gap-2">
+                        <AssigneeSelect kind="cleaning" taskId={t.id} value={t.assignee_user_id} roles={["cleaning", "manager"]} />
                         <StatusPill value={t.priority} />
                         <StatusPill value={t.status} />
                         {t.status !== "completada" && (
@@ -130,6 +179,7 @@ function Operaciones() {
                   {i.description && <p className="mt-1 text-sm text-muted-foreground">{i.description}</p>}
                 </div>
                 <div className="flex items-center gap-2">
+                  <AssigneeSelect kind="maintenance" taskId={i.id} value={i.assignee_user_id} roles={["maintenance", "manager"]} />
                   <StatusPill value={i.status} />
                   {i.status !== "resuelta" && (
                     <Button

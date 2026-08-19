@@ -50,6 +50,9 @@ const REASON: Record<string, string> = {
 const ACCEPT_ERROR: Record<string, string> = {
   email_mismatch: "Tu sesión usa otro correo. Cierra sesión y entra con el correo invitado.",
   expired_invitation: "El enlace caducó. Pide a tu administrador que te lo reenvíe.",
+  account_already_belongs_to_another_org:
+    "Esta cuenta ya pertenece a otra empresa. Usa un correo distinto para unirte a este equipo.",
+
   revoked_invitation: "La invitación fue cancelada.",
   already_used: "Esta invitación ya fue utilizada por otra cuenta.",
   invalid_invitation: "Este enlace de invitación no es válido.",

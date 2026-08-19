@@ -345,7 +345,38 @@ export function useTeamMutations() {
   return { setProperties, setStatus, revoke, refresh };
 }
 
+/* ---------- Asignación de tareas a personas reales (owner/manager) ---------- */
+
+export function useAssignTask() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: async ({
+      kind,
+      taskId,
+      userId,
+    }: {
+      kind: "cleaning" | "maintenance";
+      taskId: string;
+      userId: string | null;
+    }) => {
+      const { error } = await supabase.rpc("org_assign_task", {
+        _kind: kind,
+        _task_id: taskId,
+        _user_id: userId as unknown as string,
+      });
+
+      if (error) throw error;
+    },
+    onSuccess: (_d, v) => {
+      qc.invalidateQueries({
+        queryKey: [v.kind === "cleaning" ? "cleaning_tasks" : "maintenance_issues"],
+      });
+    },
+  });
+}
+
 /* ---------- Operación del trabajador ---------- */
+
 
 export function useUpdateCleaningStatus() {
   const qc = useQueryClient();
