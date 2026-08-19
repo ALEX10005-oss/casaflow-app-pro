@@ -27,6 +27,7 @@ import { Route as AuthenticatedPanelRouteImport } from './routes/_authenticated/
 import { Route as AuthenticatedPropiedadesRouteImport } from './routes/_authenticated/propiedades'
 import { Route as AuthenticatedReportesRouteImport } from './routes/_authenticated/reportes'
 import { Route as AuthenticatedReservasRouteImport } from './routes/_authenticated/reservas'
+import { Route as AuthenticatedTrabajoRouteRouteImport } from './routes/_authenticated/trabajo/route'
 import { Route as AuthenticatedWhatsappRouteImport } from './routes/_authenticated/whatsapp'
 import { Route as ControlIndexRouteImport } from './routes/control/index'
 import { Route as ControlDashboardRouteImport } from './routes/control/dashboard'
@@ -130,6 +131,12 @@ const AuthenticatedReservasRoute = AuthenticatedReservasRouteImport.update({
   path: '/reservas',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
+const AuthenticatedTrabajoRouteRoute =
+  AuthenticatedTrabajoRouteRouteImport.update({
+    id: '/trabajo',
+    path: '/trabajo',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
 const AuthenticatedWhatsappRoute = AuthenticatedWhatsappRouteImport.update({
   id: '/whatsapp',
   path: '/whatsapp',
@@ -181,6 +188,7 @@ export interface FileRoutesByFullPath {
   '/control': typeof ControlRouteRouteWithChildren
   '/auth': typeof AuthRoute
   '/pendiente': typeof PendienteRoute
+  '/trabajo': typeof AuthenticatedTrabajoRouteRoute
   '/alertas': typeof AuthenticatedAlertasRoute
   '/calendario': typeof AuthenticatedCalendarioRoute
   '/configuracion': typeof AuthenticatedConfiguracionRoute
@@ -208,6 +216,7 @@ export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/auth': typeof AuthRoute
   '/pendiente': typeof PendienteRoute
+  '/trabajo': typeof AuthenticatedTrabajoRouteRoute
   '/alertas': typeof AuthenticatedAlertasRoute
   '/calendario': typeof AuthenticatedCalendarioRoute
   '/configuracion': typeof AuthenticatedConfiguracionRoute
@@ -238,6 +247,7 @@ export interface FileRoutesById {
   '/control': typeof ControlRouteRouteWithChildren
   '/auth': typeof AuthRoute
   '/pendiente': typeof PendienteRoute
+  '/_authenticated/trabajo': typeof AuthenticatedTrabajoRouteRoute
   '/_authenticated/alertas': typeof AuthenticatedAlertasRoute
   '/_authenticated/calendario': typeof AuthenticatedCalendarioRoute
   '/_authenticated/configuracion': typeof AuthenticatedConfiguracionRoute
@@ -268,6 +278,7 @@ export interface FileRouteTypes {
     | '/control'
     | '/auth'
     | '/pendiente'
+    | '/trabajo'
     | '/alertas'
     | '/calendario'
     | '/configuracion'
@@ -295,6 +306,7 @@ export interface FileRouteTypes {
     | '/'
     | '/auth'
     | '/pendiente'
+    | '/trabajo'
     | '/alertas'
     | '/calendario'
     | '/configuracion'
@@ -324,6 +336,7 @@ export interface FileRouteTypes {
     | '/control'
     | '/auth'
     | '/pendiente'
+    | '/_authenticated/trabajo'
     | '/_authenticated/alertas'
     | '/_authenticated/calendario'
     | '/_authenticated/configuracion'
@@ -486,6 +499,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedReservasRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/_authenticated/trabajo': {
+      id: '/_authenticated/trabajo'
+      path: '/trabajo'
+      fullPath: '/trabajo'
+      preLoaderRoute: typeof AuthenticatedTrabajoRouteRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
     '/_authenticated/whatsapp': {
       id: '/_authenticated/whatsapp'
       path: '/whatsapp'
@@ -553,6 +573,7 @@ declare module '@tanstack/react-router' {
 }
 
 interface AuthenticatedRouteRouteChildren {
+  AuthenticatedTrabajoRouteRoute: typeof AuthenticatedTrabajoRouteRoute
   AuthenticatedAlertasRoute: typeof AuthenticatedAlertasRoute
   AuthenticatedCalendarioRoute: typeof AuthenticatedCalendarioRoute
   AuthenticatedConfiguracionRoute: typeof AuthenticatedConfiguracionRoute
@@ -570,6 +591,7 @@ interface AuthenticatedRouteRouteChildren {
 }
 
 const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
+  AuthenticatedTrabajoRouteRoute: AuthenticatedTrabajoRouteRoute,
   AuthenticatedAlertasRoute: AuthenticatedAlertasRoute,
   AuthenticatedCalendarioRoute: AuthenticatedCalendarioRoute,
   AuthenticatedConfiguracionRoute: AuthenticatedConfiguracionRoute,
