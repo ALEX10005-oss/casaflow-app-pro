@@ -174,3 +174,117 @@ export function statusTone(status: string) {
     return "destructive";
   return "muted";
 }
+
+/* ---------- Roles, invitaciones y vista de trabajadores ---------- */
+
+export type AppRole = Database["public"]["Enums"]["app_role"];
+export type Invitation = Tables["invitations"]["Row"];
+
+export const ROLE_LABEL: Record<string, string> = {
+  owner: "Propietario",
+  manager: "Administrador",
+  reception: "Recepción",
+  cleaning: "Limpieza",
+  maintenance: "Mantenimiento",
+  accounting: "Contabilidad",
+};
+
+/** Roles que solo ven su lista de tareas en móvil. */
+export const FIELD_ROLES: AppRole[] = ["cleaning", "maintenance"];
+
+export async function fetchMyRole(): Promise<AppRole | null> {
+  const { data: auth } = await supabase.auth.getUser();
+  if (!auth.user) return null;
+  const { data, error } = await supabase
+    .from("user_roles")
+    .select("role")
+    .eq("user_id", auth.user.id)
+    .limit(1)
+    .maybeSingle();
+  if (error) throw error;
+  return (data?.role as AppRole | undefined) ?? null;
+}
+
+export function useMyRole() {
+  return useQuery({ queryKey: ["my-role"], queryFn: fetchMyRole, staleTime: 60_000 });
+}
+
+export function useInvitations() {
+  return useQuery({
+    queryKey: ["invitations"],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("invitations")
+        .select("*")
+        .order("created_at", { ascending: false });
+      if (error) throw error;
+      return (data ?? []) as Invitation[];
+    },
+  });
+}
+
+export function useInviteMember() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: async (input: { email: string; full_name: string; role: AppRole }) => {
+      const email = input.email.trim().toLowerCase();
+      const org_id = await currentOrgId();
+      const { data: auth } = await supabase.auth.getUser();
+
+      await supabase.from("invitations").delete().eq("email", email).eq("status", "pending");
+
+      const { error: insErr } = await supabase.from("invitations").insert({
+        org_id,
+        email,
+        full_name: input.full_name || null,
+        role: input.role,
+        invited_by: auth.user?.id ?? null,
+      });
+      if (insErr) throw insErr;
+
+      const { error: otpErr } = await supabase.auth.signInWithOtp({
+        email,
+        options: {
+          shouldCreateUser: true,
+          emailRedirectTo: `${window.location.origin}/panel`,
+          data: { first_name: input.full_name, company: "" },
+        },
+      });
+      if (otpErr) throw otpErr;
+    },
+    onSuccess: () => qc.invalidateQueries({ queryKey: ["invitations"] }),
+  });
+}
+
+export function useCancelInvitation() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: async (id: string) => {
+      const { error } = await supabase.from("invitations").delete().eq("id", id);
+      if (error) throw error;
+    },
+    onSuccess: () => qc.invalidateQueries({ queryKey: ["invitations"] }),
+  });
+}
+
+export function useUpdateCleaningStatus() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: async ({ id, status }: { id: string; status: string }) => {
+      const { error } = await supabase.from("cleaning_tasks").update({ status }).eq("id", id);
+      if (error) throw error;
+    },
+    onSuccess: () => qc.invalidateQueries({ queryKey: ["cleaning_tasks"] }),
+  });
+}
+
+export function useUpdateMaintenanceStatus() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: async ({ id, status }: { id: string; status: string }) => {
+      const { error } = await supabase.from("maintenance_issues").update({ status }).eq("id", id);
+      if (error) throw error;
+    },
+    onSuccess: () => qc.invalidateQueries({ queryKey: ["maintenance_issues"] }),
+  });
+}
