@@ -28,6 +28,7 @@ import { Route as AuthenticatedReportesRouteImport } from './routes/_authenticat
 import { Route as AuthenticatedReservasRouteImport } from './routes/_authenticated/reservas'
 import { Route as AuthenticatedWhatsappRouteImport } from './routes/_authenticated/whatsapp'
 import { Route as ControlIndexRouteImport } from './routes/control/index'
+import { Route as ControlDashboardRouteImport } from './routes/control/dashboard'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
@@ -127,6 +128,11 @@ const ControlIndexRoute = ControlIndexRouteImport.update({
   path: '/',
   getParentRoute: () => ControlRouteRoute,
 } as any)
+const ControlDashboardRoute = ControlDashboardRouteImport.update({
+  id: '/dashboard',
+  path: '/dashboard',
+  getParentRoute: () => ControlRouteRoute,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -146,6 +152,7 @@ export interface FileRoutesByFullPath {
   '/reportes': typeof AuthenticatedReportesRoute
   '/reservas': typeof AuthenticatedReservasRoute
   '/whatsapp': typeof AuthenticatedWhatsappRoute
+  '/control/dashboard': typeof ControlDashboardRoute
   '/control/': typeof ControlIndexRoute
 }
 export interface FileRoutesByTo {
@@ -165,6 +172,7 @@ export interface FileRoutesByTo {
   '/reportes': typeof AuthenticatedReportesRoute
   '/reservas': typeof AuthenticatedReservasRoute
   '/whatsapp': typeof AuthenticatedWhatsappRoute
+  '/control/dashboard': typeof ControlDashboardRoute
   '/control': typeof ControlIndexRoute
 }
 export interface FileRoutesById {
@@ -187,6 +195,7 @@ export interface FileRoutesById {
   '/_authenticated/reportes': typeof AuthenticatedReportesRoute
   '/_authenticated/reservas': typeof AuthenticatedReservasRoute
   '/_authenticated/whatsapp': typeof AuthenticatedWhatsappRoute
+  '/control/dashboard': typeof ControlDashboardRoute
   '/control/': typeof ControlIndexRoute
 }
 export interface FileRouteTypes {
@@ -209,6 +218,7 @@ export interface FileRouteTypes {
     | '/reportes'
     | '/reservas'
     | '/whatsapp'
+    | '/control/dashboard'
     | '/control/'
   fileRoutesByTo: FileRoutesByTo
   to:
@@ -228,6 +238,7 @@ export interface FileRouteTypes {
     | '/reportes'
     | '/reservas'
     | '/whatsapp'
+    | '/control/dashboard'
     | '/control'
   id:
     | '__root__'
@@ -249,6 +260,7 @@ export interface FileRouteTypes {
     | '/_authenticated/reportes'
     | '/_authenticated/reservas'
     | '/_authenticated/whatsapp'
+    | '/control/dashboard'
     | '/control/'
   fileRoutesById: FileRoutesById
 }
@@ -394,6 +406,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ControlIndexRouteImport
       parentRoute: typeof ControlRouteRoute
     }
+    '/control/dashboard': {
+      id: '/control/dashboard'
+      path: '/dashboard'
+      fullPath: '/control/dashboard'
+      preLoaderRoute: typeof ControlDashboardRouteImport
+      parentRoute: typeof ControlRouteRoute
+    }
   }
 }
 
@@ -435,10 +454,12 @@ const AuthenticatedRouteRouteWithChildren =
   AuthenticatedRouteRoute._addFileChildren(AuthenticatedRouteRouteChildren)
 
 interface ControlRouteRouteChildren {
+  ControlDashboardRoute: typeof ControlDashboardRoute
   ControlIndexRoute: typeof ControlIndexRoute
 }
 
 const ControlRouteRouteChildren: ControlRouteRouteChildren = {
+  ControlDashboardRoute: ControlDashboardRoute,
   ControlIndexRoute: ControlIndexRoute,
 }
 
