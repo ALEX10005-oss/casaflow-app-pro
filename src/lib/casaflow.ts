@@ -1,4 +1,4 @@
-import { useQuery } from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import type { Database } from "@/integrations/supabase/types";
 
@@ -71,6 +71,57 @@ export function useProfile() {
       if (error) throw error;
       return data as Profile | null;
     },
+  });
+}
+
+export type PropertyInput = Omit<Partial<Tables["properties"]["Insert"]>, "id"> & {
+  id?: string | undefined;
+};
+
+async function currentOrgId() {
+  const { data: auth } = await supabase.auth.getUser();
+  if (!auth.user) throw new Error("Sesión no válida.");
+  const { data, error } = await supabase
+    .from("profiles")
+    .select("org_id")
+    .eq("id", auth.user.id)
+    .maybeSingle();
+  if (error) throw error;
+  if (!data?.org_id) throw new Error("Tu usuario no tiene organización asignada.");
+  return data.org_id;
+}
+
+export function useSaveProperty() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: async (input: PropertyInput) => {
+      const { id, ...values } = input;
+      if (id) {
+        const { error } = await supabase.from("properties").update(values).eq("id", id);
+        if (error) throw error;
+        return id;
+      }
+      const org_id = await currentOrgId();
+      const { data, error } = await supabase
+        .from("properties")
+        .insert({ ...values, org_id } as Tables["properties"]["Insert"])
+        .select("id")
+        .single();
+      if (error) throw error;
+      return data.id;
+    },
+    onSuccess: () => qc.invalidateQueries({ queryKey: ["properties"] }),
+  });
+}
+
+export function useDeleteProperty() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: async (id: string) => {
+      const { error } = await supabase.from("properties").delete().eq("id", id);
+      if (error) throw error;
+    },
+    onSuccess: () => qc.invalidateQueries({ queryKey: ["properties"] }),
   });
 }
 
