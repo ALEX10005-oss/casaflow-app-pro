@@ -68,6 +68,7 @@ export type Database = {
       cleaning_tasks: {
         Row: {
           assignee: string | null
+          assignee_user_id: string | null
           checkout_time: string | null
           created_at: string
           id: string
@@ -81,6 +82,7 @@ export type Database = {
         }
         Insert: {
           assignee?: string | null
+          assignee_user_id?: string | null
           checkout_time?: string | null
           created_at?: string
           id?: string
@@ -94,6 +96,7 @@ export type Database = {
         }
         Update: {
           assignee?: string | null
+          assignee_user_id?: string | null
           checkout_time?: string | null
           created_at?: string
           id?: string
@@ -270,6 +273,7 @@ export type Database = {
       maintenance_issues: {
         Row: {
           assignee: string | null
+          assignee_user_id: string | null
           blocks_guests: boolean
           created_at: string
           created_by: string | null
@@ -284,6 +288,7 @@ export type Database = {
         }
         Insert: {
           assignee?: string | null
+          assignee_user_id?: string | null
           blocks_guests?: boolean
           created_at?: string
           created_by?: string | null
@@ -298,6 +303,7 @@ export type Database = {
         }
         Update: {
           assignee?: string | null
+          assignee_user_id?: string | null
           blocks_guests?: boolean
           created_at?: string
           created_by?: string | null
@@ -1169,10 +1175,18 @@ export type Database = {
         Returns: boolean
       }
       invitation_preview: { Args: { _token: string }; Returns: Json }
+      is_my_task: {
+        Args: { _assignee: string; _property: string }
+        Returns: boolean
+      }
       is_org_admin: { Args: never; Returns: boolean }
       is_platform_admin: { Args: never; Returns: boolean }
       my_context: { Args: never; Returns: Json }
       my_role: { Args: never; Returns: Database["public"]["Enums"]["app_role"] }
+      org_assign_task: {
+        Args: { _kind: string; _task_id: string; _user_id: string }
+        Returns: undefined
+      }
       org_invite_member: {
         Args: {
           _email: string
