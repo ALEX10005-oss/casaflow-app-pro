@@ -37,6 +37,7 @@ import { Route as ControlSistemaRouteImport } from './routes/control/sistema'
 import { Route as ControlUsuariosRouteImport } from './routes/control/usuarios'
 import { Route as InviteTokenRouteImport } from './routes/invite.$token'
 import { Route as AuthenticatedTrabajoIndexRouteImport } from './routes/_authenticated/trabajo/index'
+import { Route as AuthenticatedTrabajoCalendarioRouteImport } from './routes/_authenticated/trabajo/calendario'
 import { Route as AuthenticatedTrabajoTareasRouteImport } from './routes/_authenticated/trabajo/tareas'
 import { Route as ApiPublicEmailAlertsRouteImport } from './routes/api/public/email-alerts'
 
@@ -185,6 +186,12 @@ const AuthenticatedTrabajoIndexRoute =
     path: '/',
     getParentRoute: () => AuthenticatedTrabajoRouteRoute,
   } as any)
+const AuthenticatedTrabajoCalendarioRoute =
+  AuthenticatedTrabajoCalendarioRouteImport.update({
+    id: '/calendario',
+    path: '/calendario',
+    getParentRoute: () => AuthenticatedTrabajoRouteRoute,
+  } as any)
 const AuthenticatedTrabajoTareasRoute =
   AuthenticatedTrabajoTareasRouteImport.update({
     id: '/tareas',
@@ -224,6 +231,7 @@ export interface FileRoutesByFullPath {
   '/control/usuarios': typeof ControlUsuariosRoute
   '/invite/$token': typeof InviteTokenRoute
   '/control/': typeof ControlIndexRoute
+  '/trabajo/calendario': typeof AuthenticatedTrabajoCalendarioRoute
   '/trabajo/tareas': typeof AuthenticatedTrabajoTareasRoute
   '/api/public/email-alerts': typeof ApiPublicEmailAlertsRoute
   '/trabajo/': typeof AuthenticatedTrabajoIndexRoute
@@ -253,6 +261,7 @@ export interface FileRoutesByTo {
   '/control/usuarios': typeof ControlUsuariosRoute
   '/invite/$token': typeof InviteTokenRoute
   '/control': typeof ControlIndexRoute
+  '/trabajo/calendario': typeof AuthenticatedTrabajoCalendarioRoute
   '/trabajo/tareas': typeof AuthenticatedTrabajoTareasRoute
   '/api/public/email-alerts': typeof ApiPublicEmailAlertsRoute
   '/trabajo': typeof AuthenticatedTrabajoIndexRoute
@@ -286,6 +295,7 @@ export interface FileRoutesById {
   '/control/usuarios': typeof ControlUsuariosRoute
   '/invite/$token': typeof InviteTokenRoute
   '/control/': typeof ControlIndexRoute
+  '/_authenticated/trabajo/calendario': typeof AuthenticatedTrabajoCalendarioRoute
   '/_authenticated/trabajo/tareas': typeof AuthenticatedTrabajoTareasRoute
   '/api/public/email-alerts': typeof ApiPublicEmailAlertsRoute
   '/_authenticated/trabajo/': typeof AuthenticatedTrabajoIndexRoute
@@ -319,6 +329,7 @@ export interface FileRouteTypes {
     | '/control/usuarios'
     | '/invite/$token'
     | '/control/'
+    | '/trabajo/calendario'
     | '/trabajo/tareas'
     | '/api/public/email-alerts'
     | '/trabajo/'
@@ -348,6 +359,7 @@ export interface FileRouteTypes {
     | '/control/usuarios'
     | '/invite/$token'
     | '/control'
+    | '/trabajo/calendario'
     | '/trabajo/tareas'
     | '/api/public/email-alerts'
     | '/trabajo'
@@ -380,6 +392,7 @@ export interface FileRouteTypes {
     | '/control/usuarios'
     | '/invite/$token'
     | '/control/'
+    | '/_authenticated/trabajo/calendario'
     | '/_authenticated/trabajo/tareas'
     | '/api/public/email-alerts'
     | '/_authenticated/trabajo/'
@@ -593,6 +606,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedTrabajoIndexRouteImport
       parentRoute: typeof AuthenticatedTrabajoRouteRoute
     }
+    '/_authenticated/trabajo/calendario': {
+      id: '/_authenticated/trabajo/calendario'
+      path: '/calendario'
+      fullPath: '/trabajo/calendario'
+      preLoaderRoute: typeof AuthenticatedTrabajoCalendarioRouteImport
+      parentRoute: typeof AuthenticatedTrabajoRouteRoute
+    }
     '/_authenticated/trabajo/tareas': {
       id: '/_authenticated/trabajo/tareas'
       path: '/tareas'
@@ -611,12 +631,14 @@ declare module '@tanstack/react-router' {
 }
 
 interface AuthenticatedTrabajoRouteRouteChildren {
+  AuthenticatedTrabajoCalendarioRoute: typeof AuthenticatedTrabajoCalendarioRoute
   AuthenticatedTrabajoTareasRoute: typeof AuthenticatedTrabajoTareasRoute
   AuthenticatedTrabajoIndexRoute: typeof AuthenticatedTrabajoIndexRoute
 }
 
 const AuthenticatedTrabajoRouteRouteChildren: AuthenticatedTrabajoRouteRouteChildren =
   {
+    AuthenticatedTrabajoCalendarioRoute: AuthenticatedTrabajoCalendarioRoute,
     AuthenticatedTrabajoTareasRoute: AuthenticatedTrabajoTareasRoute,
     AuthenticatedTrabajoIndexRoute: AuthenticatedTrabajoIndexRoute,
   }
