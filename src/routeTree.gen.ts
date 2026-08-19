@@ -30,6 +30,7 @@ import { Route as AuthenticatedWhatsappRouteImport } from './routes/_authenticat
 import { Route as ControlIndexRouteImport } from './routes/control/index'
 import { Route as ControlDashboardRouteImport } from './routes/control/dashboard'
 import { Route as ControlEmpresasRouteImport } from './routes/control/empresas'
+import { Route as ControlLicenciasRouteImport } from './routes/control/licencias'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
@@ -139,6 +140,11 @@ const ControlEmpresasRoute = ControlEmpresasRouteImport.update({
   path: '/empresas',
   getParentRoute: () => ControlRouteRoute,
 } as any)
+const ControlLicenciasRoute = ControlLicenciasRouteImport.update({
+  id: '/licencias',
+  path: '/licencias',
+  getParentRoute: () => ControlRouteRoute,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -160,6 +166,7 @@ export interface FileRoutesByFullPath {
   '/whatsapp': typeof AuthenticatedWhatsappRoute
   '/control/dashboard': typeof ControlDashboardRoute
   '/control/empresas': typeof ControlEmpresasRoute
+  '/control/licencias': typeof ControlLicenciasRoute
   '/control/': typeof ControlIndexRoute
 }
 export interface FileRoutesByTo {
@@ -181,6 +188,7 @@ export interface FileRoutesByTo {
   '/whatsapp': typeof AuthenticatedWhatsappRoute
   '/control/dashboard': typeof ControlDashboardRoute
   '/control/empresas': typeof ControlEmpresasRoute
+  '/control/licencias': typeof ControlLicenciasRoute
   '/control': typeof ControlIndexRoute
 }
 export interface FileRoutesById {
@@ -205,6 +213,7 @@ export interface FileRoutesById {
   '/_authenticated/whatsapp': typeof AuthenticatedWhatsappRoute
   '/control/dashboard': typeof ControlDashboardRoute
   '/control/empresas': typeof ControlEmpresasRoute
+  '/control/licencias': typeof ControlLicenciasRoute
   '/control/': typeof ControlIndexRoute
 }
 export interface FileRouteTypes {
@@ -229,6 +238,7 @@ export interface FileRouteTypes {
     | '/whatsapp'
     | '/control/dashboard'
     | '/control/empresas'
+    | '/control/licencias'
     | '/control/'
   fileRoutesByTo: FileRoutesByTo
   to:
@@ -250,6 +260,7 @@ export interface FileRouteTypes {
     | '/whatsapp'
     | '/control/dashboard'
     | '/control/empresas'
+    | '/control/licencias'
     | '/control'
   id:
     | '__root__'
@@ -273,6 +284,7 @@ export interface FileRouteTypes {
     | '/_authenticated/whatsapp'
     | '/control/dashboard'
     | '/control/empresas'
+    | '/control/licencias'
     | '/control/'
   fileRoutesById: FileRoutesById
 }
@@ -432,6 +444,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ControlEmpresasRouteImport
       parentRoute: typeof ControlRouteRoute
     }
+    '/control/licencias': {
+      id: '/control/licencias'
+      path: '/licencias'
+      fullPath: '/control/licencias'
+      preLoaderRoute: typeof ControlLicenciasRouteImport
+      parentRoute: typeof ControlRouteRoute
+    }
   }
 }
 
@@ -475,12 +494,14 @@ const AuthenticatedRouteRouteWithChildren =
 interface ControlRouteRouteChildren {
   ControlDashboardRoute: typeof ControlDashboardRoute
   ControlEmpresasRoute: typeof ControlEmpresasRoute
+  ControlLicenciasRoute: typeof ControlLicenciasRoute
   ControlIndexRoute: typeof ControlIndexRoute
 }
 
 const ControlRouteRouteChildren: ControlRouteRouteChildren = {
   ControlDashboardRoute: ControlDashboardRoute,
   ControlEmpresasRoute: ControlEmpresasRoute,
+  ControlLicenciasRoute: ControlLicenciasRoute,
   ControlIndexRoute: ControlIndexRoute,
 }
 
