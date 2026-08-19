@@ -31,6 +31,7 @@ import { Route as ControlIndexRouteImport } from './routes/control/index'
 import { Route as ControlDashboardRouteImport } from './routes/control/dashboard'
 import { Route as ControlEmpresasRouteImport } from './routes/control/empresas'
 import { Route as ControlLicenciasRouteImport } from './routes/control/licencias'
+import { Route as ControlUsuariosRouteImport } from './routes/control/usuarios'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
@@ -145,6 +146,11 @@ const ControlLicenciasRoute = ControlLicenciasRouteImport.update({
   path: '/licencias',
   getParentRoute: () => ControlRouteRoute,
 } as any)
+const ControlUsuariosRoute = ControlUsuariosRouteImport.update({
+  id: '/usuarios',
+  path: '/usuarios',
+  getParentRoute: () => ControlRouteRoute,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -167,6 +173,7 @@ export interface FileRoutesByFullPath {
   '/control/dashboard': typeof ControlDashboardRoute
   '/control/empresas': typeof ControlEmpresasRoute
   '/control/licencias': typeof ControlLicenciasRoute
+  '/control/usuarios': typeof ControlUsuariosRoute
   '/control/': typeof ControlIndexRoute
 }
 export interface FileRoutesByTo {
@@ -189,6 +196,7 @@ export interface FileRoutesByTo {
   '/control/dashboard': typeof ControlDashboardRoute
   '/control/empresas': typeof ControlEmpresasRoute
   '/control/licencias': typeof ControlLicenciasRoute
+  '/control/usuarios': typeof ControlUsuariosRoute
   '/control': typeof ControlIndexRoute
 }
 export interface FileRoutesById {
@@ -214,6 +222,7 @@ export interface FileRoutesById {
   '/control/dashboard': typeof ControlDashboardRoute
   '/control/empresas': typeof ControlEmpresasRoute
   '/control/licencias': typeof ControlLicenciasRoute
+  '/control/usuarios': typeof ControlUsuariosRoute
   '/control/': typeof ControlIndexRoute
 }
 export interface FileRouteTypes {
@@ -239,6 +248,7 @@ export interface FileRouteTypes {
     | '/control/dashboard'
     | '/control/empresas'
     | '/control/licencias'
+    | '/control/usuarios'
     | '/control/'
   fileRoutesByTo: FileRoutesByTo
   to:
@@ -261,6 +271,7 @@ export interface FileRouteTypes {
     | '/control/dashboard'
     | '/control/empresas'
     | '/control/licencias'
+    | '/control/usuarios'
     | '/control'
   id:
     | '__root__'
@@ -285,6 +296,7 @@ export interface FileRouteTypes {
     | '/control/dashboard'
     | '/control/empresas'
     | '/control/licencias'
+    | '/control/usuarios'
     | '/control/'
   fileRoutesById: FileRoutesById
 }
@@ -451,6 +463,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ControlLicenciasRouteImport
       parentRoute: typeof ControlRouteRoute
     }
+    '/control/usuarios': {
+      id: '/control/usuarios'
+      path: '/usuarios'
+      fullPath: '/control/usuarios'
+      preLoaderRoute: typeof ControlUsuariosRouteImport
+      parentRoute: typeof ControlRouteRoute
+    }
   }
 }
 
@@ -495,6 +514,7 @@ interface ControlRouteRouteChildren {
   ControlDashboardRoute: typeof ControlDashboardRoute
   ControlEmpresasRoute: typeof ControlEmpresasRoute
   ControlLicenciasRoute: typeof ControlLicenciasRoute
+  ControlUsuariosRoute: typeof ControlUsuariosRoute
   ControlIndexRoute: typeof ControlIndexRoute
 }
 
@@ -502,6 +522,7 @@ const ControlRouteRouteChildren: ControlRouteRouteChildren = {
   ControlDashboardRoute: ControlDashboardRoute,
   ControlEmpresasRoute: ControlEmpresasRoute,
   ControlLicenciasRoute: ControlLicenciasRoute,
+  ControlUsuariosRoute: ControlUsuariosRoute,
   ControlIndexRoute: ControlIndexRoute,
 }
 
