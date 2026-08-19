@@ -36,7 +36,7 @@ export const createInvitation = createServerFn({ method: "POST" })
       _full_name: data.full_name,
       _role: data.role as never,
       _property_ids: data.property_ids,
-      _message: data.message ?? null,
+      _message: data.message ?? undefined,
     });
     if (error) throw new Error(error.message);
 
