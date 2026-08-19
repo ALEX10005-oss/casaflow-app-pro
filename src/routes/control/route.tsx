@@ -38,7 +38,89 @@ function NotAvailable() {
   );
 }
 
+function HealthBadge() {
+  const { data } = useHealthSummary();
+  const status = data?.global_status ?? "UNKNOWN";
+  const styles: Record<string, string> = {
+    HEALTHY: "border-emerald-500/40 bg-emerald-500/10 text-emerald-300",
+    WARNING: "border-amber-500/40 bg-amber-500/10 text-amber-300",
+    CRITICAL: "border-red-500/40 bg-red-500/10 text-red-300",
+    UNKNOWN: "border-neutral-700 bg-neutral-800 text-neutral-400",
+  };
+  const labels: Record<string, string> = {
+    HEALTHY: "Sistema OK",
+    WARNING: `${data?.warning ?? 0} avisos`,
+    CRITICAL: `${data?.critical ?? 0} críticos`,
+    UNKNOWN: "Sin datos",
+  };
+  return (
+    <Link
+      to="/control/sistema"
+      className={cn(
+        "rounded-full border px-3 py-1 text-xs font-semibold",
+        styles[status] ?? styles["UNKNOWN"],
+      )}
+    >
+      {labels[status] ?? labels["UNKNOWN"]}
+    </Link>
+  );
+}
+
+function NotificationBell() {
+  const { data: notifications = [] } = useNotifications();
+  const markRead = useMarkNotificationsRead();
+  const unread = notifications.filter((n) => !n.read_at).length;
+
+  return (
+    <Popover>
+      <PopoverTrigger className="relative rounded-md p-1.5 text-neutral-400 hover:text-neutral-100">
+        <Bell className="h-4 w-4" />
+        {unread > 0 && (
+          <span className="absolute -right-1 -top-1 grid h-4 min-w-4 place-items-center rounded-full bg-red-500 px-1 text-[10px] font-bold text-white">
+            {unread}
+          </span>
+        )}
+      </PopoverTrigger>
+      <PopoverContent
+        align="end"
+        className="w-80 border-neutral-800 bg-neutral-900 p-0 text-neutral-100"
+      >
+        <div className="flex items-center justify-between border-b border-neutral-800 px-3 py-2">
+          <span className="text-sm font-semibold">Notificaciones</span>
+          {unread > 0 && (
+            <button
+              onClick={() => markRead.mutate()}
+              className="text-xs text-amber-400 hover:underline"
+            >
+              Marcar leídas
+            </button>
+          )}
+        </div>
+        <div className="max-h-80 overflow-y-auto">
+          {notifications.length === 0 && (
+            <p className="px-3 py-6 text-center text-xs text-neutral-500">Sin notificaciones.</p>
+          )}
+          {notifications.map((n) => (
+            <div
+              key={n.id}
+              className={cn(
+                "border-b border-neutral-800/60 px-3 py-2 last:border-0",
+                !n.read_at && "bg-neutral-800/40",
+              )}
+            >
+              <p className="text-xs font-medium">{n.title}</p>
+              {n.body && <p className="mt-0.5 text-[11px] text-neutral-400">{n.body}</p>}
+              <p className="mt-0.5 text-[10px] text-neutral-600">{monitorDateTime(n.created_at)}</p>
+            </div>
+          ))}
+        </div>
+      </PopoverContent>
+    </Popover>
+  );
+}
+
 function ControlLayout() {
+
   const { isAdmin } = Route.useRouteContext();
   const pathname = useRouterState({ select: (s) => s.location.pathname });
   const navigate = useNavigate();
