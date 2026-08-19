@@ -2,7 +2,6 @@ import { createFileRoute, useNavigate, Link } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
-import { lovable } from "@/integrations/lovable";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -45,7 +44,10 @@ function AuthPage() {
     setLoading(true);
     const { error } = await supabase.auth.signInWithPassword({ email, password });
     setLoading(false);
-    if (error) return toast.error(error.message);
+    if (error) {
+      toast.error(error.message);
+      return;
+    }
     navigate({ to: "/panel", replace: true });
   }
 
@@ -61,13 +63,12 @@ function AuthPage() {
       },
     });
     setLoading(false);
-    if (error) return toast.error(error.message);
+    if (error) {
+      toast.error(error.message);
+      return;
+    }
     toast.success("Cuenta creada. Ya puedes entrar al panel.");
     navigate({ to: "/panel", replace: true });
-  }
-
-  async function google() {
-    await lovable.auth.signInWithOAuth("google", { redirect_uri: window.location.origin });
   }
 
   return (
@@ -129,12 +130,9 @@ function AuthPage() {
               </TabsContent>
             </Tabs>
 
-            <div className="my-5 flex items-center gap-3 text-xs text-muted-foreground">
-              <span className="h-px flex-1 bg-border" /> o <span className="h-px flex-1 bg-border" />
-            </div>
-            <Button variant="outline" className="w-full" onClick={google}>
-              Continuar con Google
-            </Button>
+            <p className="mt-5 text-xs text-muted-foreground">
+              El acceso se otorga por empresa. Los roles y permisos se administran desde Equipo y roles.
+            </p>
           </CardContent>
         </Card>
       </div>
