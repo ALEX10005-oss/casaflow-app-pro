@@ -14,6 +14,7 @@ import { Route as AuthenticatedRouteRouteImport } from './routes/_authenticated/
 import { Route as AuthRouteImport } from './routes/auth'
 import { Route as AuthenticatedAlertasRouteImport } from './routes/_authenticated/alertas'
 import { Route as AuthenticatedCalendarioRouteImport } from './routes/_authenticated/calendario'
+import { Route as AuthenticatedEquipoRouteImport } from './routes/_authenticated/equipo'
 import { Route as AuthenticatedFinanzasRouteImport } from './routes/_authenticated/finanzas'
 import { Route as AuthenticatedHuespedesRouteImport } from './routes/_authenticated/huespedes'
 import { Route as AuthenticatedIntegracionesRouteImport } from './routes/_authenticated/integraciones'
@@ -45,6 +46,11 @@ const AuthenticatedAlertasRoute = AuthenticatedAlertasRouteImport.update({
 const AuthenticatedCalendarioRoute = AuthenticatedCalendarioRouteImport.update({
   id: '/calendario',
   path: '/calendario',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
+const AuthenticatedEquipoRoute = AuthenticatedEquipoRouteImport.update({
+  id: '/equipo',
+  path: '/equipo',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
 const AuthenticatedFinanzasRoute = AuthenticatedFinanzasRouteImport.update({
@@ -96,6 +102,7 @@ export interface FileRoutesByFullPath {
   '/auth': typeof AuthRoute
   '/alertas': typeof AuthenticatedAlertasRoute
   '/calendario': typeof AuthenticatedCalendarioRoute
+  '/equipo': typeof AuthenticatedEquipoRoute
   '/finanzas': typeof AuthenticatedFinanzasRoute
   '/huespedes': typeof AuthenticatedHuespedesRoute
   '/integraciones': typeof AuthenticatedIntegracionesRoute
@@ -110,6 +117,7 @@ export interface FileRoutesByTo {
   '/auth': typeof AuthRoute
   '/alertas': typeof AuthenticatedAlertasRoute
   '/calendario': typeof AuthenticatedCalendarioRoute
+  '/equipo': typeof AuthenticatedEquipoRoute
   '/finanzas': typeof AuthenticatedFinanzasRoute
   '/huespedes': typeof AuthenticatedHuespedesRoute
   '/integraciones': typeof AuthenticatedIntegracionesRoute
@@ -126,6 +134,7 @@ export interface FileRoutesById {
   '/auth': typeof AuthRoute
   '/_authenticated/alertas': typeof AuthenticatedAlertasRoute
   '/_authenticated/calendario': typeof AuthenticatedCalendarioRoute
+  '/_authenticated/equipo': typeof AuthenticatedEquipoRoute
   '/_authenticated/finanzas': typeof AuthenticatedFinanzasRoute
   '/_authenticated/huespedes': typeof AuthenticatedHuespedesRoute
   '/_authenticated/integraciones': typeof AuthenticatedIntegracionesRoute
@@ -142,6 +151,7 @@ export interface FileRouteTypes {
     | '/auth'
     | '/alertas'
     | '/calendario'
+    | '/equipo'
     | '/finanzas'
     | '/huespedes'
     | '/integraciones'
@@ -156,6 +166,7 @@ export interface FileRouteTypes {
     | '/auth'
     | '/alertas'
     | '/calendario'
+    | '/equipo'
     | '/finanzas'
     | '/huespedes'
     | '/integraciones'
@@ -171,6 +182,7 @@ export interface FileRouteTypes {
     | '/auth'
     | '/_authenticated/alertas'
     | '/_authenticated/calendario'
+    | '/_authenticated/equipo'
     | '/_authenticated/finanzas'
     | '/_authenticated/huespedes'
     | '/_authenticated/integraciones'
@@ -222,6 +234,13 @@ declare module '@tanstack/react-router' {
       path: '/calendario'
       fullPath: '/calendario'
       preLoaderRoute: typeof AuthenticatedCalendarioRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/equipo': {
+      id: '/_authenticated/equipo'
+      path: '/equipo'
+      fullPath: '/equipo'
+      preLoaderRoute: typeof AuthenticatedEquipoRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
     '/_authenticated/finanzas': {
@@ -286,6 +305,7 @@ declare module '@tanstack/react-router' {
 interface AuthenticatedRouteRouteChildren {
   AuthenticatedAlertasRoute: typeof AuthenticatedAlertasRoute
   AuthenticatedCalendarioRoute: typeof AuthenticatedCalendarioRoute
+  AuthenticatedEquipoRoute: typeof AuthenticatedEquipoRoute
   AuthenticatedFinanzasRoute: typeof AuthenticatedFinanzasRoute
   AuthenticatedHuespedesRoute: typeof AuthenticatedHuespedesRoute
   AuthenticatedIntegracionesRoute: typeof AuthenticatedIntegracionesRoute
@@ -299,6 +319,7 @@ interface AuthenticatedRouteRouteChildren {
 const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedAlertasRoute: AuthenticatedAlertasRoute,
   AuthenticatedCalendarioRoute: AuthenticatedCalendarioRoute,
+  AuthenticatedEquipoRoute: AuthenticatedEquipoRoute,
   AuthenticatedFinanzasRoute: AuthenticatedFinanzasRoute,
   AuthenticatedHuespedesRoute: AuthenticatedHuespedesRoute,
   AuthenticatedIntegracionesRoute: AuthenticatedIntegracionesRoute,
