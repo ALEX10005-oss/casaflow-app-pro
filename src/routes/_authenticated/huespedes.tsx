@@ -1,5 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { useState } from "react";
+import { Fragment, useState } from "react";
 import { AppShell } from "@/components/app-shell";
 import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -62,10 +62,10 @@ function Huespedes() {
             </thead>
             <tbody>
               {rows.map((g) => (
-                <>
+                <Fragment key={g.id}>
                   <tr
-                    key={g.id}
                     onClick={() => setOpenId(openId === g.id ? null : g.id)}
+
                     className="cursor-pointer border-b hover:bg-muted/30"
                   >
                     <td className="px-4 py-3 font-medium">{g.full_name}</td>
@@ -96,7 +96,7 @@ function Huespedes() {
                       </td>
                     </tr>
                   )}
-                </>
+                </Fragment>
               ))}
             </tbody>
           </table>
