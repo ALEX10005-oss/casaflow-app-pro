@@ -12,6 +12,7 @@ import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as AuthenticatedRouteRouteImport } from './routes/_authenticated/route'
 import { Route as AuthRouteImport } from './routes/auth'
+import { Route as ControlRouteRouteImport } from './routes/control/route'
 import { Route as AuthenticatedAlertasRouteImport } from './routes/_authenticated/alertas'
 import { Route as AuthenticatedCalendarioRouteImport } from './routes/_authenticated/calendario'
 import { Route as AuthenticatedConfiguracionRouteImport } from './routes/_authenticated/configuracion'
@@ -39,6 +40,11 @@ const AuthenticatedRouteRoute = AuthenticatedRouteRouteImport.update({
 const AuthRoute = AuthRouteImport.update({
   id: '/auth',
   path: '/auth',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ControlRouteRoute = ControlRouteRouteImport.update({
+  id: '/control',
+  path: '/control',
   getParentRoute: () => rootRouteImport,
 } as any)
 const AuthenticatedAlertasRoute = AuthenticatedAlertasRouteImport.update({
@@ -118,6 +124,7 @@ const AuthenticatedWhatsappRoute = AuthenticatedWhatsappRouteImport.update({
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/control': typeof ControlRouteRoute
   '/auth': typeof AuthRoute
   '/alertas': typeof AuthenticatedAlertasRoute
   '/calendario': typeof AuthenticatedCalendarioRoute
@@ -136,6 +143,7 @@ export interface FileRoutesByFullPath {
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/control': typeof ControlRouteRoute
   '/auth': typeof AuthRoute
   '/alertas': typeof AuthenticatedAlertasRoute
   '/calendario': typeof AuthenticatedCalendarioRoute
@@ -156,6 +164,7 @@ export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/_authenticated': typeof AuthenticatedRouteRouteWithChildren
+  '/control': typeof ControlRouteRoute
   '/auth': typeof AuthRoute
   '/_authenticated/alertas': typeof AuthenticatedAlertasRoute
   '/_authenticated/calendario': typeof AuthenticatedCalendarioRoute
@@ -176,6 +185,7 @@ export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
     | '/'
+    | '/control'
     | '/auth'
     | '/alertas'
     | '/calendario'
@@ -194,6 +204,7 @@ export interface FileRouteTypes {
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
+    | '/control'
     | '/auth'
     | '/alertas'
     | '/calendario'
@@ -213,6 +224,7 @@ export interface FileRouteTypes {
     | '__root__'
     | '/'
     | '/_authenticated'
+    | '/control'
     | '/auth'
     | '/_authenticated/alertas'
     | '/_authenticated/calendario'
@@ -233,6 +245,7 @@ export interface FileRouteTypes {
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   AuthenticatedRouteRoute: typeof AuthenticatedRouteRouteWithChildren
+  ControlRouteRoute: typeof ControlRouteRoute
   AuthRoute: typeof AuthRoute
 }
 
@@ -257,6 +270,13 @@ declare module '@tanstack/react-router' {
       path: '/auth'
       fullPath: '/auth'
       preLoaderRoute: typeof AuthRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/control': {
+      id: '/control'
+      path: '/control'
+      fullPath: '/control'
+      preLoaderRoute: typeof ControlRouteRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/_authenticated/alertas': {
@@ -400,6 +420,7 @@ const AuthenticatedRouteRouteWithChildren =
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AuthenticatedRouteRoute: AuthenticatedRouteRouteWithChildren,
+  ControlRouteRoute: ControlRouteRoute,
   AuthRoute: AuthRoute,
 }
 export const routeTree = rootRouteImport
