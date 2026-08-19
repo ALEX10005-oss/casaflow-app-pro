@@ -362,8 +362,9 @@ export function useAssignTask() {
       const { error } = await supabase.rpc("org_assign_task", {
         _kind: kind,
         _task_id: taskId,
-        _user_id: userId,
+        _user_id: userId as unknown as string,
       });
+
       if (error) throw error;
     },
     onSuccess: (_d, v) => {
