@@ -12,6 +12,7 @@ import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as AuthenticatedRouteRouteImport } from './routes/_authenticated/route'
 import { Route as AuthRouteImport } from './routes/auth'
+import { Route as ControlRouteRouteImport } from './routes/control/route'
 import { Route as AuthenticatedAlertasRouteImport } from './routes/_authenticated/alertas'
 import { Route as AuthenticatedCalendarioRouteImport } from './routes/_authenticated/calendario'
 import { Route as AuthenticatedConfiguracionRouteImport } from './routes/_authenticated/configuracion'
@@ -26,6 +27,12 @@ import { Route as AuthenticatedPropiedadesRouteImport } from './routes/_authenti
 import { Route as AuthenticatedReportesRouteImport } from './routes/_authenticated/reportes'
 import { Route as AuthenticatedReservasRouteImport } from './routes/_authenticated/reservas'
 import { Route as AuthenticatedWhatsappRouteImport } from './routes/_authenticated/whatsapp'
+import { Route as ControlIndexRouteImport } from './routes/control/index'
+import { Route as ControlDashboardRouteImport } from './routes/control/dashboard'
+import { Route as ControlEmpresasRouteImport } from './routes/control/empresas'
+import { Route as ControlLicenciasRouteImport } from './routes/control/licencias'
+import { Route as ControlSistemaRouteImport } from './routes/control/sistema'
+import { Route as ControlUsuariosRouteImport } from './routes/control/usuarios'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
@@ -39,6 +46,11 @@ const AuthenticatedRouteRoute = AuthenticatedRouteRouteImport.update({
 const AuthRoute = AuthRouteImport.update({
   id: '/auth',
   path: '/auth',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ControlRouteRoute = ControlRouteRouteImport.update({
+  id: '/control',
+  path: '/control',
   getParentRoute: () => rootRouteImport,
 } as any)
 const AuthenticatedAlertasRoute = AuthenticatedAlertasRouteImport.update({
@@ -115,9 +127,40 @@ const AuthenticatedWhatsappRoute = AuthenticatedWhatsappRouteImport.update({
   path: '/whatsapp',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
+const ControlIndexRoute = ControlIndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => ControlRouteRoute,
+} as any)
+const ControlDashboardRoute = ControlDashboardRouteImport.update({
+  id: '/dashboard',
+  path: '/dashboard',
+  getParentRoute: () => ControlRouteRoute,
+} as any)
+const ControlEmpresasRoute = ControlEmpresasRouteImport.update({
+  id: '/empresas',
+  path: '/empresas',
+  getParentRoute: () => ControlRouteRoute,
+} as any)
+const ControlLicenciasRoute = ControlLicenciasRouteImport.update({
+  id: '/licencias',
+  path: '/licencias',
+  getParentRoute: () => ControlRouteRoute,
+} as any)
+const ControlSistemaRoute = ControlSistemaRouteImport.update({
+  id: '/sistema',
+  path: '/sistema',
+  getParentRoute: () => ControlRouteRoute,
+} as any)
+const ControlUsuariosRoute = ControlUsuariosRouteImport.update({
+  id: '/usuarios',
+  path: '/usuarios',
+  getParentRoute: () => ControlRouteRoute,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/control': typeof ControlRouteRouteWithChildren
   '/auth': typeof AuthRoute
   '/alertas': typeof AuthenticatedAlertasRoute
   '/calendario': typeof AuthenticatedCalendarioRoute
@@ -133,6 +176,12 @@ export interface FileRoutesByFullPath {
   '/reportes': typeof AuthenticatedReportesRoute
   '/reservas': typeof AuthenticatedReservasRoute
   '/whatsapp': typeof AuthenticatedWhatsappRoute
+  '/control/dashboard': typeof ControlDashboardRoute
+  '/control/empresas': typeof ControlEmpresasRoute
+  '/control/licencias': typeof ControlLicenciasRoute
+  '/control/sistema': typeof ControlSistemaRoute
+  '/control/usuarios': typeof ControlUsuariosRoute
+  '/control/': typeof ControlIndexRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -151,11 +200,18 @@ export interface FileRoutesByTo {
   '/reportes': typeof AuthenticatedReportesRoute
   '/reservas': typeof AuthenticatedReservasRoute
   '/whatsapp': typeof AuthenticatedWhatsappRoute
+  '/control/dashboard': typeof ControlDashboardRoute
+  '/control/empresas': typeof ControlEmpresasRoute
+  '/control/licencias': typeof ControlLicenciasRoute
+  '/control/sistema': typeof ControlSistemaRoute
+  '/control/usuarios': typeof ControlUsuariosRoute
+  '/control': typeof ControlIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/_authenticated': typeof AuthenticatedRouteRouteWithChildren
+  '/control': typeof ControlRouteRouteWithChildren
   '/auth': typeof AuthRoute
   '/_authenticated/alertas': typeof AuthenticatedAlertasRoute
   '/_authenticated/calendario': typeof AuthenticatedCalendarioRoute
@@ -171,11 +227,18 @@ export interface FileRoutesById {
   '/_authenticated/reportes': typeof AuthenticatedReportesRoute
   '/_authenticated/reservas': typeof AuthenticatedReservasRoute
   '/_authenticated/whatsapp': typeof AuthenticatedWhatsappRoute
+  '/control/dashboard': typeof ControlDashboardRoute
+  '/control/empresas': typeof ControlEmpresasRoute
+  '/control/licencias': typeof ControlLicenciasRoute
+  '/control/sistema': typeof ControlSistemaRoute
+  '/control/usuarios': typeof ControlUsuariosRoute
+  '/control/': typeof ControlIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
     | '/'
+    | '/control'
     | '/auth'
     | '/alertas'
     | '/calendario'
@@ -191,6 +254,12 @@ export interface FileRouteTypes {
     | '/reportes'
     | '/reservas'
     | '/whatsapp'
+    | '/control/dashboard'
+    | '/control/empresas'
+    | '/control/licencias'
+    | '/control/sistema'
+    | '/control/usuarios'
+    | '/control/'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -209,10 +278,17 @@ export interface FileRouteTypes {
     | '/reportes'
     | '/reservas'
     | '/whatsapp'
+    | '/control/dashboard'
+    | '/control/empresas'
+    | '/control/licencias'
+    | '/control/sistema'
+    | '/control/usuarios'
+    | '/control'
   id:
     | '__root__'
     | '/'
     | '/_authenticated'
+    | '/control'
     | '/auth'
     | '/_authenticated/alertas'
     | '/_authenticated/calendario'
@@ -228,11 +304,18 @@ export interface FileRouteTypes {
     | '/_authenticated/reportes'
     | '/_authenticated/reservas'
     | '/_authenticated/whatsapp'
+    | '/control/dashboard'
+    | '/control/empresas'
+    | '/control/licencias'
+    | '/control/sistema'
+    | '/control/usuarios'
+    | '/control/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   AuthenticatedRouteRoute: typeof AuthenticatedRouteRouteWithChildren
+  ControlRouteRoute: typeof ControlRouteRouteWithChildren
   AuthRoute: typeof AuthRoute
 }
 
@@ -257,6 +340,13 @@ declare module '@tanstack/react-router' {
       path: '/auth'
       fullPath: '/auth'
       preLoaderRoute: typeof AuthRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/control': {
+      id: '/control'
+      path: '/control'
+      fullPath: '/control'
+      preLoaderRoute: typeof ControlRouteRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/_authenticated/alertas': {
@@ -357,6 +447,48 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedWhatsappRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/control/': {
+      id: '/control/'
+      path: '/'
+      fullPath: '/control/'
+      preLoaderRoute: typeof ControlIndexRouteImport
+      parentRoute: typeof ControlRouteRoute
+    }
+    '/control/dashboard': {
+      id: '/control/dashboard'
+      path: '/dashboard'
+      fullPath: '/control/dashboard'
+      preLoaderRoute: typeof ControlDashboardRouteImport
+      parentRoute: typeof ControlRouteRoute
+    }
+    '/control/empresas': {
+      id: '/control/empresas'
+      path: '/empresas'
+      fullPath: '/control/empresas'
+      preLoaderRoute: typeof ControlEmpresasRouteImport
+      parentRoute: typeof ControlRouteRoute
+    }
+    '/control/licencias': {
+      id: '/control/licencias'
+      path: '/licencias'
+      fullPath: '/control/licencias'
+      preLoaderRoute: typeof ControlLicenciasRouteImport
+      parentRoute: typeof ControlRouteRoute
+    }
+    '/control/sistema': {
+      id: '/control/sistema'
+      path: '/sistema'
+      fullPath: '/control/sistema'
+      preLoaderRoute: typeof ControlSistemaRouteImport
+      parentRoute: typeof ControlRouteRoute
+    }
+    '/control/usuarios': {
+      id: '/control/usuarios'
+      path: '/usuarios'
+      fullPath: '/control/usuarios'
+      preLoaderRoute: typeof ControlUsuariosRouteImport
+      parentRoute: typeof ControlRouteRoute
+    }
   }
 }
 
@@ -397,9 +529,32 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
 const AuthenticatedRouteRouteWithChildren =
   AuthenticatedRouteRoute._addFileChildren(AuthenticatedRouteRouteChildren)
 
+interface ControlRouteRouteChildren {
+  ControlDashboardRoute: typeof ControlDashboardRoute
+  ControlEmpresasRoute: typeof ControlEmpresasRoute
+  ControlLicenciasRoute: typeof ControlLicenciasRoute
+  ControlSistemaRoute: typeof ControlSistemaRoute
+  ControlUsuariosRoute: typeof ControlUsuariosRoute
+  ControlIndexRoute: typeof ControlIndexRoute
+}
+
+const ControlRouteRouteChildren: ControlRouteRouteChildren = {
+  ControlDashboardRoute: ControlDashboardRoute,
+  ControlEmpresasRoute: ControlEmpresasRoute,
+  ControlLicenciasRoute: ControlLicenciasRoute,
+  ControlSistemaRoute: ControlSistemaRoute,
+  ControlUsuariosRoute: ControlUsuariosRoute,
+  ControlIndexRoute: ControlIndexRoute,
+}
+
+const ControlRouteRouteWithChildren = ControlRouteRoute._addFileChildren(
+  ControlRouteRouteChildren,
+)
+
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AuthenticatedRouteRoute: AuthenticatedRouteRouteWithChildren,
+  ControlRouteRoute: ControlRouteRouteWithChildren,
   AuthRoute: AuthRoute,
 }
 export const routeTree = rootRouteImport

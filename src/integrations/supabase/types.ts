@@ -336,6 +336,33 @@ export type Database = {
         }
         Relationships: []
       }
+      platform_admins: {
+        Row: {
+          created_at: string
+          id: string
+          role: string
+          status: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          role?: string
+          status?: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          role?: string
+          status?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       profiles: {
         Row: {
           access_status: string
@@ -849,6 +876,63 @@ export type Database = {
           _user_id: string
         }
         Returns: boolean
+      }
+      is_platform_admin: { Args: never; Returns: boolean }
+      platform_list_organizations: {
+        Args: never
+        Returns: {
+          created_at: string
+          id: string
+          license_status: string
+          license_type: string
+          max_properties: number
+          max_users: number
+          name: string
+        }[]
+        SetofOptions: {
+          from: "*"
+          to: "organizations"
+          isOneToOne: false
+          isSetofReturn: true
+        }
+      }
+      platform_list_users: {
+        Args: never
+        Returns: {
+          access_status: string
+          created_at: string
+          email: string
+          first_name: string
+          id: string
+          last_name: string
+          org_id: string
+          org_name: string
+        }[]
+      }
+      platform_stats: { Args: never; Returns: Json }
+      platform_update_license: {
+        Args: {
+          _license_status?: string
+          _license_type?: string
+          _max_properties?: number
+          _max_users?: number
+          _org_id: string
+        }
+        Returns: {
+          created_at: string
+          id: string
+          license_status: string
+          license_type: string
+          max_properties: number
+          max_users: number
+          name: string
+        }
+        SetofOptions: {
+          from: "*"
+          to: "organizations"
+          isOneToOne: true
+          isSetofReturn: false
+        }
       }
     }
     Enums: {
