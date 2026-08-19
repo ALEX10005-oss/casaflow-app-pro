@@ -158,9 +158,12 @@ function ControlLayout() {
               </Link>
             ))}
           </nav>
+          <HealthBadge />
+          <NotificationBell />
           <button onClick={signOut} className="text-xs text-neutral-400 hover:text-neutral-100">
             Salir
           </button>
+
         </div>
       </header>
       <main className="mx-auto max-w-6xl px-5 py-6">
