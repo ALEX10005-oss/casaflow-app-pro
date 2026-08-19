@@ -37,6 +37,7 @@ import { Route as ControlSistemaRouteImport } from './routes/control/sistema'
 import { Route as ControlUsuariosRouteImport } from './routes/control/usuarios'
 import { Route as InviteTokenRouteImport } from './routes/invite.$token'
 import { Route as AuthenticatedTrabajoIndexRouteImport } from './routes/_authenticated/trabajo/index'
+import { Route as AuthenticatedTrabajoTareasRouteImport } from './routes/_authenticated/trabajo/tareas'
 import { Route as ApiPublicEmailAlertsRouteImport } from './routes/api/public/email-alerts'
 
 const IndexRoute = IndexRouteImport.update({
@@ -184,6 +185,12 @@ const AuthenticatedTrabajoIndexRoute =
     path: '/',
     getParentRoute: () => AuthenticatedTrabajoRouteRoute,
   } as any)
+const AuthenticatedTrabajoTareasRoute =
+  AuthenticatedTrabajoTareasRouteImport.update({
+    id: '/tareas',
+    path: '/tareas',
+    getParentRoute: () => AuthenticatedTrabajoRouteRoute,
+  } as any)
 const ApiPublicEmailAlertsRoute = ApiPublicEmailAlertsRouteImport.update({
   id: '/api/public/email-alerts',
   path: '/api/public/email-alerts',
@@ -217,6 +224,7 @@ export interface FileRoutesByFullPath {
   '/control/usuarios': typeof ControlUsuariosRoute
   '/invite/$token': typeof InviteTokenRoute
   '/control/': typeof ControlIndexRoute
+  '/trabajo/tareas': typeof AuthenticatedTrabajoTareasRoute
   '/api/public/email-alerts': typeof ApiPublicEmailAlertsRoute
   '/trabajo/': typeof AuthenticatedTrabajoIndexRoute
 }
@@ -245,6 +253,7 @@ export interface FileRoutesByTo {
   '/control/usuarios': typeof ControlUsuariosRoute
   '/invite/$token': typeof InviteTokenRoute
   '/control': typeof ControlIndexRoute
+  '/trabajo/tareas': typeof AuthenticatedTrabajoTareasRoute
   '/api/public/email-alerts': typeof ApiPublicEmailAlertsRoute
   '/trabajo': typeof AuthenticatedTrabajoIndexRoute
 }
@@ -277,6 +286,7 @@ export interface FileRoutesById {
   '/control/usuarios': typeof ControlUsuariosRoute
   '/invite/$token': typeof InviteTokenRoute
   '/control/': typeof ControlIndexRoute
+  '/_authenticated/trabajo/tareas': typeof AuthenticatedTrabajoTareasRoute
   '/api/public/email-alerts': typeof ApiPublicEmailAlertsRoute
   '/_authenticated/trabajo/': typeof AuthenticatedTrabajoIndexRoute
 }
@@ -309,6 +319,7 @@ export interface FileRouteTypes {
     | '/control/usuarios'
     | '/invite/$token'
     | '/control/'
+    | '/trabajo/tareas'
     | '/api/public/email-alerts'
     | '/trabajo/'
   fileRoutesByTo: FileRoutesByTo
@@ -337,6 +348,7 @@ export interface FileRouteTypes {
     | '/control/usuarios'
     | '/invite/$token'
     | '/control'
+    | '/trabajo/tareas'
     | '/api/public/email-alerts'
     | '/trabajo'
   id:
@@ -368,6 +380,7 @@ export interface FileRouteTypes {
     | '/control/usuarios'
     | '/invite/$token'
     | '/control/'
+    | '/_authenticated/trabajo/tareas'
     | '/api/public/email-alerts'
     | '/_authenticated/trabajo/'
   fileRoutesById: FileRoutesById
@@ -580,6 +593,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedTrabajoIndexRouteImport
       parentRoute: typeof AuthenticatedTrabajoRouteRoute
     }
+    '/_authenticated/trabajo/tareas': {
+      id: '/_authenticated/trabajo/tareas'
+      path: '/tareas'
+      fullPath: '/trabajo/tareas'
+      preLoaderRoute: typeof AuthenticatedTrabajoTareasRouteImport
+      parentRoute: typeof AuthenticatedTrabajoRouteRoute
+    }
     '/api/public/email-alerts': {
       id: '/api/public/email-alerts'
       path: '/api/public/email-alerts'
@@ -591,11 +611,13 @@ declare module '@tanstack/react-router' {
 }
 
 interface AuthenticatedTrabajoRouteRouteChildren {
+  AuthenticatedTrabajoTareasRoute: typeof AuthenticatedTrabajoTareasRoute
   AuthenticatedTrabajoIndexRoute: typeof AuthenticatedTrabajoIndexRoute
 }
 
 const AuthenticatedTrabajoRouteRouteChildren: AuthenticatedTrabajoRouteRouteChildren =
   {
+    AuthenticatedTrabajoTareasRoute: AuthenticatedTrabajoTareasRoute,
     AuthenticatedTrabajoIndexRoute: AuthenticatedTrabajoIndexRoute,
   }
 
