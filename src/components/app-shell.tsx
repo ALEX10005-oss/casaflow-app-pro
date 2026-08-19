@@ -18,18 +18,19 @@ import {
   UserCog,
 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
-import { useAlerts, useMyRole, useOrganization, useProfile } from "@/lib/casaflow";
+import { homeForRole, useAlerts, useMyRole, useOrganization, useProfile } from "@/lib/casaflow";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 
 const ROLE_ACCESS: Record<string, string[] | "all"> = {
   owner: "all",
-  manager: "all",
-  reception: ["/panel", "/calendario", "/reservas", "/propiedades", "/huespedes", "/whatsapp", "/alertas"],
-  accounting: ["/panel", "/finanzas", "/reportes", "/configuracion"],
-  cleaning: ["/mis-tareas"],
-  maintenance: ["/mis-tareas"],
+  manager: ["/panel", "/calendario", "/reservas", "/propiedades", "/huespedes", "/operaciones", "/whatsapp", "/finanzas", "/reportes", "/integraciones", "/equipo", "/alertas"],
+  accounting: ["/finanzas", "/reportes"],
+  reception: [],
+  cleaning: [],
+  maintenance: [],
 };
+
 
 const GROUPS: { label: string; items: { to: string; label: string; icon: typeof Building2 }[] }[] = [
   {
@@ -109,7 +110,7 @@ export function AppShell({
         )}
       >
         <div>
-          <Link to="/panel" className="mb-6 flex items-center gap-2 px-2">
+          <Link to={homeForRole(role)} className="mb-6 flex items-center gap-2 px-2">
             <span className="grid size-8 place-items-center rounded-md bg-sidebar-primary font-display text-sm font-bold text-sidebar-primary-foreground">
               CF
             </span>

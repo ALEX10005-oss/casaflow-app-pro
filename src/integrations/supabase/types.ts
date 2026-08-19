@@ -208,36 +208,54 @@ export type Database = {
       invitations: {
         Row: {
           accepted_at: string | null
+          accepted_by: string | null
           created_at: string
           email: string
+          expires_at: string | null
           full_name: string | null
           id: string
           invited_by: string | null
+          message: string | null
           org_id: string
+          property_ids: string[]
+          revoked_at: string | null
           role: Database["public"]["Enums"]["app_role"]
           status: string
+          token_hash: string | null
         }
         Insert: {
           accepted_at?: string | null
+          accepted_by?: string | null
           created_at?: string
           email: string
+          expires_at?: string | null
           full_name?: string | null
           id?: string
           invited_by?: string | null
+          message?: string | null
           org_id: string
+          property_ids?: string[]
+          revoked_at?: string | null
           role?: Database["public"]["Enums"]["app_role"]
           status?: string
+          token_hash?: string | null
         }
         Update: {
           accepted_at?: string | null
+          accepted_by?: string | null
           created_at?: string
           email?: string
+          expires_at?: string | null
           full_name?: string | null
           id?: string
           invited_by?: string | null
+          message?: string | null
           org_id?: string
+          property_ids?: string[]
+          revoked_at?: string | null
           role?: Database["public"]["Enums"]["app_role"]
           status?: string
+          token_hash?: string | null
         }
         Relationships: [
           {
@@ -254,6 +272,7 @@ export type Database = {
           assignee: string | null
           blocks_guests: boolean
           created_at: string
+          created_by: string | null
           description: string | null
           id: string
           org_id: string
@@ -267,6 +286,7 @@ export type Database = {
           assignee?: string | null
           blocks_guests?: boolean
           created_at?: string
+          created_by?: string | null
           description?: string | null
           id?: string
           org_id: string
@@ -280,6 +300,7 @@ export type Database = {
           assignee?: string | null
           blocks_guests?: boolean
           created_at?: string
+          created_by?: string | null
           description?: string | null
           id?: string
           org_id?: string
@@ -299,6 +320,45 @@ export type Database = {
           },
           {
             foreignKeyName: "maintenance_issues_property_id_fkey"
+            columns: ["property_id"]
+            isOneToOne: false
+            referencedRelation: "properties"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      member_property_access: {
+        Row: {
+          created_at: string
+          id: string
+          org_id: string
+          property_id: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          org_id: string
+          property_id: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          org_id?: string
+          property_id?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "member_property_access_org_id_fkey"
+            columns: ["org_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "member_property_access_property_id_fkey"
             columns: ["property_id"]
             isOneToOne: false
             referencedRelation: "properties"
@@ -1098,6 +1158,8 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      accept_invitation: { Args: { _token: string }; Returns: Json }
+      can_access_property: { Args: { _p: string }; Returns: boolean }
       current_org_id: { Args: never; Returns: string }
       has_role: {
         Args: {
@@ -1106,7 +1168,44 @@ export type Database = {
         }
         Returns: boolean
       }
+      invitation_preview: { Args: { _token: string }; Returns: Json }
+      is_org_admin: { Args: never; Returns: boolean }
       is_platform_admin: { Args: never; Returns: boolean }
+      my_context: { Args: never; Returns: Json }
+      my_role: { Args: never; Returns: Database["public"]["Enums"]["app_role"] }
+      org_invite_member: {
+        Args: {
+          _email: string
+          _full_name: string
+          _message?: string
+          _property_ids?: string[]
+          _role: Database["public"]["Enums"]["app_role"]
+        }
+        Returns: Json
+      }
+      org_list_members: {
+        Args: never
+        Returns: {
+          access_status: string
+          created_at: string
+          email: string
+          first_name: string
+          last_name: string
+          property_ids: string[]
+          role: Database["public"]["Enums"]["app_role"]
+          user_id: string
+        }[]
+      }
+      org_resend_invitation: { Args: { _id: string }; Returns: Json }
+      org_revoke_invitation: { Args: { _id: string }; Returns: undefined }
+      org_set_member_properties: {
+        Args: { _property_ids: string[]; _user_id: string }
+        Returns: undefined
+      }
+      org_set_member_status: {
+        Args: { _status: string; _user_id: string }
+        Returns: undefined
+      }
       platform_acknowledge_incident: {
         Args: { _incident_id: string }
         Returns: {
@@ -1234,6 +1333,10 @@ export type Database = {
           _title: string
         }
         Returns: undefined
+      }
+      role_of: {
+        Args: { _uid: string }
+        Returns: Database["public"]["Enums"]["app_role"]
       }
       run_platform_health_check: { Args: never; Returns: Json }
     }

@@ -13,6 +13,7 @@ import { Route as IndexRouteImport } from './routes/index'
 import { Route as AuthenticatedRouteRouteImport } from './routes/_authenticated/route'
 import { Route as AuthRouteImport } from './routes/auth'
 import { Route as ControlRouteRouteImport } from './routes/control/route'
+import { Route as PendienteRouteImport } from './routes/pendiente'
 import { Route as AuthenticatedAlertasRouteImport } from './routes/_authenticated/alertas'
 import { Route as AuthenticatedCalendarioRouteImport } from './routes/_authenticated/calendario'
 import { Route as AuthenticatedConfiguracionRouteImport } from './routes/_authenticated/configuracion'
@@ -20,12 +21,12 @@ import { Route as AuthenticatedEquipoRouteImport } from './routes/_authenticated
 import { Route as AuthenticatedFinanzasRouteImport } from './routes/_authenticated/finanzas'
 import { Route as AuthenticatedHuespedesRouteImport } from './routes/_authenticated/huespedes'
 import { Route as AuthenticatedIntegracionesRouteImport } from './routes/_authenticated/integraciones'
-import { Route as AuthenticatedMisTareasRouteImport } from './routes/_authenticated/mis-tareas'
 import { Route as AuthenticatedOperacionesRouteImport } from './routes/_authenticated/operaciones'
 import { Route as AuthenticatedPanelRouteImport } from './routes/_authenticated/panel'
 import { Route as AuthenticatedPropiedadesRouteImport } from './routes/_authenticated/propiedades'
 import { Route as AuthenticatedReportesRouteImport } from './routes/_authenticated/reportes'
 import { Route as AuthenticatedReservasRouteImport } from './routes/_authenticated/reservas'
+import { Route as AuthenticatedTrabajoRouteRouteImport } from './routes/_authenticated/trabajo/route'
 import { Route as AuthenticatedWhatsappRouteImport } from './routes/_authenticated/whatsapp'
 import { Route as ControlIndexRouteImport } from './routes/control/index'
 import { Route as ControlDashboardRouteImport } from './routes/control/dashboard'
@@ -33,6 +34,12 @@ import { Route as ControlEmpresasRouteImport } from './routes/control/empresas'
 import { Route as ControlLicenciasRouteImport } from './routes/control/licencias'
 import { Route as ControlSistemaRouteImport } from './routes/control/sistema'
 import { Route as ControlUsuariosRouteImport } from './routes/control/usuarios'
+import { Route as InviteTokenRouteImport } from './routes/invite.$token'
+import { Route as AuthenticatedTrabajoIndexRouteImport } from './routes/_authenticated/trabajo/index'
+import { Route as AuthenticatedTrabajoCalendarioRouteImport } from './routes/_authenticated/trabajo/calendario'
+import { Route as AuthenticatedTrabajoIncidenciasRouteImport } from './routes/_authenticated/trabajo/incidencias'
+import { Route as AuthenticatedTrabajoPerfilRouteImport } from './routes/_authenticated/trabajo/perfil'
+import { Route as AuthenticatedTrabajoTareasRouteImport } from './routes/_authenticated/trabajo/tareas'
 import { Route as ApiPublicEmailAlertsRouteImport } from './routes/api/public/email-alerts'
 
 const IndexRoute = IndexRouteImport.update({
@@ -52,6 +59,11 @@ const AuthRoute = AuthRouteImport.update({
 const ControlRouteRoute = ControlRouteRouteImport.update({
   id: '/control',
   path: '/control',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const PendienteRoute = PendienteRouteImport.update({
+  id: '/pendiente',
+  path: '/pendiente',
   getParentRoute: () => rootRouteImport,
 } as any)
 const AuthenticatedAlertasRoute = AuthenticatedAlertasRouteImport.update({
@@ -91,11 +103,6 @@ const AuthenticatedIntegracionesRoute =
     path: '/integraciones',
     getParentRoute: () => AuthenticatedRouteRoute,
   } as any)
-const AuthenticatedMisTareasRoute = AuthenticatedMisTareasRouteImport.update({
-  id: '/mis-tareas',
-  path: '/mis-tareas',
-  getParentRoute: () => AuthenticatedRouteRoute,
-} as any)
 const AuthenticatedOperacionesRoute =
   AuthenticatedOperacionesRouteImport.update({
     id: '/operaciones',
@@ -123,6 +130,12 @@ const AuthenticatedReservasRoute = AuthenticatedReservasRouteImport.update({
   path: '/reservas',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
+const AuthenticatedTrabajoRouteRoute =
+  AuthenticatedTrabajoRouteRouteImport.update({
+    id: '/trabajo',
+    path: '/trabajo',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
 const AuthenticatedWhatsappRoute = AuthenticatedWhatsappRouteImport.update({
   id: '/whatsapp',
   path: '/whatsapp',
@@ -158,6 +171,41 @@ const ControlUsuariosRoute = ControlUsuariosRouteImport.update({
   path: '/usuarios',
   getParentRoute: () => ControlRouteRoute,
 } as any)
+const InviteTokenRoute = InviteTokenRouteImport.update({
+  id: '/invite/$token',
+  path: '/invite/$token',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AuthenticatedTrabajoIndexRoute =
+  AuthenticatedTrabajoIndexRouteImport.update({
+    id: '/',
+    path: '/',
+    getParentRoute: () => AuthenticatedTrabajoRouteRoute,
+  } as any)
+const AuthenticatedTrabajoCalendarioRoute =
+  AuthenticatedTrabajoCalendarioRouteImport.update({
+    id: '/calendario',
+    path: '/calendario',
+    getParentRoute: () => AuthenticatedTrabajoRouteRoute,
+  } as any)
+const AuthenticatedTrabajoIncidenciasRoute =
+  AuthenticatedTrabajoIncidenciasRouteImport.update({
+    id: '/incidencias',
+    path: '/incidencias',
+    getParentRoute: () => AuthenticatedTrabajoRouteRoute,
+  } as any)
+const AuthenticatedTrabajoPerfilRoute =
+  AuthenticatedTrabajoPerfilRouteImport.update({
+    id: '/perfil',
+    path: '/perfil',
+    getParentRoute: () => AuthenticatedTrabajoRouteRoute,
+  } as any)
+const AuthenticatedTrabajoTareasRoute =
+  AuthenticatedTrabajoTareasRouteImport.update({
+    id: '/tareas',
+    path: '/tareas',
+    getParentRoute: () => AuthenticatedTrabajoRouteRoute,
+  } as any)
 const ApiPublicEmailAlertsRoute = ApiPublicEmailAlertsRouteImport.update({
   id: '/api/public/email-alerts',
   path: '/api/public/email-alerts',
@@ -168,6 +216,8 @@ export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/control': typeof ControlRouteRouteWithChildren
   '/auth': typeof AuthRoute
+  '/pendiente': typeof PendienteRoute
+  '/trabajo': typeof AuthenticatedTrabajoRouteRouteWithChildren
   '/alertas': typeof AuthenticatedAlertasRoute
   '/calendario': typeof AuthenticatedCalendarioRoute
   '/configuracion': typeof AuthenticatedConfiguracionRoute
@@ -175,7 +225,6 @@ export interface FileRoutesByFullPath {
   '/finanzas': typeof AuthenticatedFinanzasRoute
   '/huespedes': typeof AuthenticatedHuespedesRoute
   '/integraciones': typeof AuthenticatedIntegracionesRoute
-  '/mis-tareas': typeof AuthenticatedMisTareasRoute
   '/operaciones': typeof AuthenticatedOperacionesRoute
   '/panel': typeof AuthenticatedPanelRoute
   '/propiedades': typeof AuthenticatedPropiedadesRoute
@@ -187,12 +236,19 @@ export interface FileRoutesByFullPath {
   '/control/licencias': typeof ControlLicenciasRoute
   '/control/sistema': typeof ControlSistemaRoute
   '/control/usuarios': typeof ControlUsuariosRoute
+  '/invite/$token': typeof InviteTokenRoute
   '/control/': typeof ControlIndexRoute
+  '/trabajo/calendario': typeof AuthenticatedTrabajoCalendarioRoute
+  '/trabajo/incidencias': typeof AuthenticatedTrabajoIncidenciasRoute
+  '/trabajo/perfil': typeof AuthenticatedTrabajoPerfilRoute
+  '/trabajo/tareas': typeof AuthenticatedTrabajoTareasRoute
   '/api/public/email-alerts': typeof ApiPublicEmailAlertsRoute
+  '/trabajo/': typeof AuthenticatedTrabajoIndexRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/auth': typeof AuthRoute
+  '/pendiente': typeof PendienteRoute
   '/alertas': typeof AuthenticatedAlertasRoute
   '/calendario': typeof AuthenticatedCalendarioRoute
   '/configuracion': typeof AuthenticatedConfiguracionRoute
@@ -200,7 +256,6 @@ export interface FileRoutesByTo {
   '/finanzas': typeof AuthenticatedFinanzasRoute
   '/huespedes': typeof AuthenticatedHuespedesRoute
   '/integraciones': typeof AuthenticatedIntegracionesRoute
-  '/mis-tareas': typeof AuthenticatedMisTareasRoute
   '/operaciones': typeof AuthenticatedOperacionesRoute
   '/panel': typeof AuthenticatedPanelRoute
   '/propiedades': typeof AuthenticatedPropiedadesRoute
@@ -212,8 +267,14 @@ export interface FileRoutesByTo {
   '/control/licencias': typeof ControlLicenciasRoute
   '/control/sistema': typeof ControlSistemaRoute
   '/control/usuarios': typeof ControlUsuariosRoute
+  '/invite/$token': typeof InviteTokenRoute
   '/control': typeof ControlIndexRoute
+  '/trabajo/calendario': typeof AuthenticatedTrabajoCalendarioRoute
+  '/trabajo/incidencias': typeof AuthenticatedTrabajoIncidenciasRoute
+  '/trabajo/perfil': typeof AuthenticatedTrabajoPerfilRoute
+  '/trabajo/tareas': typeof AuthenticatedTrabajoTareasRoute
   '/api/public/email-alerts': typeof ApiPublicEmailAlertsRoute
+  '/trabajo': typeof AuthenticatedTrabajoIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -221,6 +282,8 @@ export interface FileRoutesById {
   '/_authenticated': typeof AuthenticatedRouteRouteWithChildren
   '/control': typeof ControlRouteRouteWithChildren
   '/auth': typeof AuthRoute
+  '/pendiente': typeof PendienteRoute
+  '/_authenticated/trabajo': typeof AuthenticatedTrabajoRouteRouteWithChildren
   '/_authenticated/alertas': typeof AuthenticatedAlertasRoute
   '/_authenticated/calendario': typeof AuthenticatedCalendarioRoute
   '/_authenticated/configuracion': typeof AuthenticatedConfiguracionRoute
@@ -228,7 +291,6 @@ export interface FileRoutesById {
   '/_authenticated/finanzas': typeof AuthenticatedFinanzasRoute
   '/_authenticated/huespedes': typeof AuthenticatedHuespedesRoute
   '/_authenticated/integraciones': typeof AuthenticatedIntegracionesRoute
-  '/_authenticated/mis-tareas': typeof AuthenticatedMisTareasRoute
   '/_authenticated/operaciones': typeof AuthenticatedOperacionesRoute
   '/_authenticated/panel': typeof AuthenticatedPanelRoute
   '/_authenticated/propiedades': typeof AuthenticatedPropiedadesRoute
@@ -240,8 +302,14 @@ export interface FileRoutesById {
   '/control/licencias': typeof ControlLicenciasRoute
   '/control/sistema': typeof ControlSistemaRoute
   '/control/usuarios': typeof ControlUsuariosRoute
+  '/invite/$token': typeof InviteTokenRoute
   '/control/': typeof ControlIndexRoute
+  '/_authenticated/trabajo/calendario': typeof AuthenticatedTrabajoCalendarioRoute
+  '/_authenticated/trabajo/incidencias': typeof AuthenticatedTrabajoIncidenciasRoute
+  '/_authenticated/trabajo/perfil': typeof AuthenticatedTrabajoPerfilRoute
+  '/_authenticated/trabajo/tareas': typeof AuthenticatedTrabajoTareasRoute
   '/api/public/email-alerts': typeof ApiPublicEmailAlertsRoute
+  '/_authenticated/trabajo/': typeof AuthenticatedTrabajoIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -249,6 +317,8 @@ export interface FileRouteTypes {
     | '/'
     | '/control'
     | '/auth'
+    | '/pendiente'
+    | '/trabajo'
     | '/alertas'
     | '/calendario'
     | '/configuracion'
@@ -256,7 +326,6 @@ export interface FileRouteTypes {
     | '/finanzas'
     | '/huespedes'
     | '/integraciones'
-    | '/mis-tareas'
     | '/operaciones'
     | '/panel'
     | '/propiedades'
@@ -268,12 +337,19 @@ export interface FileRouteTypes {
     | '/control/licencias'
     | '/control/sistema'
     | '/control/usuarios'
+    | '/invite/$token'
     | '/control/'
+    | '/trabajo/calendario'
+    | '/trabajo/incidencias'
+    | '/trabajo/perfil'
+    | '/trabajo/tareas'
     | '/api/public/email-alerts'
+    | '/trabajo/'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
     | '/auth'
+    | '/pendiente'
     | '/alertas'
     | '/calendario'
     | '/configuracion'
@@ -281,7 +357,6 @@ export interface FileRouteTypes {
     | '/finanzas'
     | '/huespedes'
     | '/integraciones'
-    | '/mis-tareas'
     | '/operaciones'
     | '/panel'
     | '/propiedades'
@@ -293,14 +368,22 @@ export interface FileRouteTypes {
     | '/control/licencias'
     | '/control/sistema'
     | '/control/usuarios'
+    | '/invite/$token'
     | '/control'
+    | '/trabajo/calendario'
+    | '/trabajo/incidencias'
+    | '/trabajo/perfil'
+    | '/trabajo/tareas'
     | '/api/public/email-alerts'
+    | '/trabajo'
   id:
     | '__root__'
     | '/'
     | '/_authenticated'
     | '/control'
     | '/auth'
+    | '/pendiente'
+    | '/_authenticated/trabajo'
     | '/_authenticated/alertas'
     | '/_authenticated/calendario'
     | '/_authenticated/configuracion'
@@ -308,7 +391,6 @@ export interface FileRouteTypes {
     | '/_authenticated/finanzas'
     | '/_authenticated/huespedes'
     | '/_authenticated/integraciones'
-    | '/_authenticated/mis-tareas'
     | '/_authenticated/operaciones'
     | '/_authenticated/panel'
     | '/_authenticated/propiedades'
@@ -320,8 +402,14 @@ export interface FileRouteTypes {
     | '/control/licencias'
     | '/control/sistema'
     | '/control/usuarios'
+    | '/invite/$token'
     | '/control/'
+    | '/_authenticated/trabajo/calendario'
+    | '/_authenticated/trabajo/incidencias'
+    | '/_authenticated/trabajo/perfil'
+    | '/_authenticated/trabajo/tareas'
     | '/api/public/email-alerts'
+    | '/_authenticated/trabajo/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -329,6 +417,8 @@ export interface RootRouteChildren {
   AuthenticatedRouteRoute: typeof AuthenticatedRouteRouteWithChildren
   ControlRouteRoute: typeof ControlRouteRouteWithChildren
   AuthRoute: typeof AuthRoute
+  PendienteRoute: typeof PendienteRoute
+  InviteTokenRoute: typeof InviteTokenRoute
   ApiPublicEmailAlertsRoute: typeof ApiPublicEmailAlertsRoute
 }
 
@@ -360,6 +450,13 @@ declare module '@tanstack/react-router' {
       path: '/control'
       fullPath: '/control'
       preLoaderRoute: typeof ControlRouteRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/pendiente': {
+      id: '/pendiente'
+      path: '/pendiente'
+      fullPath: '/pendiente'
+      preLoaderRoute: typeof PendienteRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/_authenticated/alertas': {
@@ -411,13 +508,6 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedIntegracionesRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
-    '/_authenticated/mis-tareas': {
-      id: '/_authenticated/mis-tareas'
-      path: '/mis-tareas'
-      fullPath: '/mis-tareas'
-      preLoaderRoute: typeof AuthenticatedMisTareasRouteImport
-      parentRoute: typeof AuthenticatedRouteRoute
-    }
     '/_authenticated/operaciones': {
       id: '/_authenticated/operaciones'
       path: '/operaciones'
@@ -451,6 +541,13 @@ declare module '@tanstack/react-router' {
       path: '/reservas'
       fullPath: '/reservas'
       preLoaderRoute: typeof AuthenticatedReservasRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/trabajo': {
+      id: '/_authenticated/trabajo'
+      path: '/trabajo'
+      fullPath: '/trabajo'
+      preLoaderRoute: typeof AuthenticatedTrabajoRouteRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
     '/_authenticated/whatsapp': {
@@ -502,6 +599,48 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ControlUsuariosRouteImport
       parentRoute: typeof ControlRouteRoute
     }
+    '/invite/$token': {
+      id: '/invite/$token'
+      path: '/invite/$token'
+      fullPath: '/invite/$token'
+      preLoaderRoute: typeof InviteTokenRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/_authenticated/trabajo/': {
+      id: '/_authenticated/trabajo/'
+      path: '/'
+      fullPath: '/trabajo/'
+      preLoaderRoute: typeof AuthenticatedTrabajoIndexRouteImport
+      parentRoute: typeof AuthenticatedTrabajoRouteRoute
+    }
+    '/_authenticated/trabajo/calendario': {
+      id: '/_authenticated/trabajo/calendario'
+      path: '/calendario'
+      fullPath: '/trabajo/calendario'
+      preLoaderRoute: typeof AuthenticatedTrabajoCalendarioRouteImport
+      parentRoute: typeof AuthenticatedTrabajoRouteRoute
+    }
+    '/_authenticated/trabajo/incidencias': {
+      id: '/_authenticated/trabajo/incidencias'
+      path: '/incidencias'
+      fullPath: '/trabajo/incidencias'
+      preLoaderRoute: typeof AuthenticatedTrabajoIncidenciasRouteImport
+      parentRoute: typeof AuthenticatedTrabajoRouteRoute
+    }
+    '/_authenticated/trabajo/perfil': {
+      id: '/_authenticated/trabajo/perfil'
+      path: '/perfil'
+      fullPath: '/trabajo/perfil'
+      preLoaderRoute: typeof AuthenticatedTrabajoPerfilRouteImport
+      parentRoute: typeof AuthenticatedTrabajoRouteRoute
+    }
+    '/_authenticated/trabajo/tareas': {
+      id: '/_authenticated/trabajo/tareas'
+      path: '/tareas'
+      fullPath: '/trabajo/tareas'
+      preLoaderRoute: typeof AuthenticatedTrabajoTareasRouteImport
+      parentRoute: typeof AuthenticatedTrabajoRouteRoute
+    }
     '/api/public/email-alerts': {
       id: '/api/public/email-alerts'
       path: '/api/public/email-alerts'
@@ -512,7 +651,30 @@ declare module '@tanstack/react-router' {
   }
 }
 
+interface AuthenticatedTrabajoRouteRouteChildren {
+  AuthenticatedTrabajoCalendarioRoute: typeof AuthenticatedTrabajoCalendarioRoute
+  AuthenticatedTrabajoIncidenciasRoute: typeof AuthenticatedTrabajoIncidenciasRoute
+  AuthenticatedTrabajoPerfilRoute: typeof AuthenticatedTrabajoPerfilRoute
+  AuthenticatedTrabajoTareasRoute: typeof AuthenticatedTrabajoTareasRoute
+  AuthenticatedTrabajoIndexRoute: typeof AuthenticatedTrabajoIndexRoute
+}
+
+const AuthenticatedTrabajoRouteRouteChildren: AuthenticatedTrabajoRouteRouteChildren =
+  {
+    AuthenticatedTrabajoCalendarioRoute: AuthenticatedTrabajoCalendarioRoute,
+    AuthenticatedTrabajoIncidenciasRoute: AuthenticatedTrabajoIncidenciasRoute,
+    AuthenticatedTrabajoPerfilRoute: AuthenticatedTrabajoPerfilRoute,
+    AuthenticatedTrabajoTareasRoute: AuthenticatedTrabajoTareasRoute,
+    AuthenticatedTrabajoIndexRoute: AuthenticatedTrabajoIndexRoute,
+  }
+
+const AuthenticatedTrabajoRouteRouteWithChildren =
+  AuthenticatedTrabajoRouteRoute._addFileChildren(
+    AuthenticatedTrabajoRouteRouteChildren,
+  )
+
 interface AuthenticatedRouteRouteChildren {
+  AuthenticatedTrabajoRouteRoute: typeof AuthenticatedTrabajoRouteRouteWithChildren
   AuthenticatedAlertasRoute: typeof AuthenticatedAlertasRoute
   AuthenticatedCalendarioRoute: typeof AuthenticatedCalendarioRoute
   AuthenticatedConfiguracionRoute: typeof AuthenticatedConfiguracionRoute
@@ -520,7 +682,6 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedFinanzasRoute: typeof AuthenticatedFinanzasRoute
   AuthenticatedHuespedesRoute: typeof AuthenticatedHuespedesRoute
   AuthenticatedIntegracionesRoute: typeof AuthenticatedIntegracionesRoute
-  AuthenticatedMisTareasRoute: typeof AuthenticatedMisTareasRoute
   AuthenticatedOperacionesRoute: typeof AuthenticatedOperacionesRoute
   AuthenticatedPanelRoute: typeof AuthenticatedPanelRoute
   AuthenticatedPropiedadesRoute: typeof AuthenticatedPropiedadesRoute
@@ -530,6 +691,7 @@ interface AuthenticatedRouteRouteChildren {
 }
 
 const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
+  AuthenticatedTrabajoRouteRoute: AuthenticatedTrabajoRouteRouteWithChildren,
   AuthenticatedAlertasRoute: AuthenticatedAlertasRoute,
   AuthenticatedCalendarioRoute: AuthenticatedCalendarioRoute,
   AuthenticatedConfiguracionRoute: AuthenticatedConfiguracionRoute,
@@ -537,7 +699,6 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedFinanzasRoute: AuthenticatedFinanzasRoute,
   AuthenticatedHuespedesRoute: AuthenticatedHuespedesRoute,
   AuthenticatedIntegracionesRoute: AuthenticatedIntegracionesRoute,
-  AuthenticatedMisTareasRoute: AuthenticatedMisTareasRoute,
   AuthenticatedOperacionesRoute: AuthenticatedOperacionesRoute,
   AuthenticatedPanelRoute: AuthenticatedPanelRoute,
   AuthenticatedPropiedadesRoute: AuthenticatedPropiedadesRoute,
@@ -576,6 +737,8 @@ const rootRouteChildren: RootRouteChildren = {
   AuthenticatedRouteRoute: AuthenticatedRouteRouteWithChildren,
   ControlRouteRoute: ControlRouteRouteWithChildren,
   AuthRoute: AuthRoute,
+  PendienteRoute: PendienteRoute,
+  InviteTokenRoute: InviteTokenRoute,
   ApiPublicEmailAlertsRoute: ApiPublicEmailAlertsRoute,
 }
 export const routeTree = rootRouteImport

@@ -7,6 +7,8 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { fetchMyRole, homeForRole } from "@/lib/casaflow";
+
 
 export const Route = createFileRoute("/auth")({
   head: () => ({
@@ -34,10 +36,11 @@ function AuthPage() {
   const [company, setCompany] = useState("");
 
   useEffect(() => {
-    supabase.auth.getSession().then(({ data }) => {
-      if (data.session) navigate({ to: "/panel", replace: true });
+    supabase.auth.getSession().then(async ({ data }) => {
+      if (data.session) navigate({ to: homeForRole(await fetchMyRole()), replace: true });
     });
   }, [navigate]);
+
 
   function traducirError(msg: string) {
     if (/weak_password|known to be weak/i.test(msg)) return "Esa contraseña es demasiado común. Usa una más larga y única.";
@@ -78,7 +81,7 @@ function AuthPage() {
       toast.error(traducirError(error.message));
       return;
     }
-    navigate({ to: "/panel", replace: true });
+    navigate({ to: homeForRole(await fetchMyRole()), replace: true });
   }
 
   async function signUp(e: React.FormEvent) {
@@ -102,7 +105,7 @@ function AuthPage() {
     }
     setLoading(false);
     toast.success("Cuenta creada. Ya puedes entrar al panel.");
-    navigate({ to: "/panel", replace: true });
+    navigate({ to: homeForRole(await fetchMyRole()), replace: true });
   }
 
 
