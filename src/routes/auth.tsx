@@ -34,10 +34,11 @@ function AuthPage() {
   const [company, setCompany] = useState("");
 
   useEffect(() => {
-    supabase.auth.getSession().then(({ data }) => {
+    supabase.auth.getSession().then(async ({ data }) => {
       if (data.session) navigate({ to: homeForRole(await fetchMyRole()), replace: true });
     });
   }, [navigate]);
+
 
   function traducirError(msg: string) {
     if (/weak_password|known to be weak/i.test(msg)) return "Esa contraseña es demasiado común. Usa una más larga y única.";
