@@ -153,3 +153,78 @@ export const monitorDateTime = (iso: string | null) =>
   iso
     ? new Date(iso).toLocaleString("es-MX", { dateStyle: "short", timeStyle: "short" })
     : "Nunca";
+
+/* ---------------- Alertas por WhatsApp (solo platform admin) ---------------- */
+
+export type WhatsAppSettings = {
+  id: string;
+  platform_admin_user_id: string;
+  whatsapp_enabled: boolean;
+  whatsapp_recipient: string | null;
+  notify_critical: boolean;
+  notify_warning: boolean;
+  warning_repeat_threshold: number;
+};
+
+export type WhatsAppDelivery = {
+  id: string;
+  incident_id: string | null;
+  severity: string | null;
+  recipient: string | null;
+  status: string;
+  error_message: string | null;
+  sent_at: string | null;
+  created_at: string;
+};
+
+export function useWhatsAppSettings() {
+  return useQuery({
+    queryKey: ["platform", "health", "wa-settings"],
+    queryFn: async () => {
+      const { data: userData } = await supabase.auth.getUser();
+      const uid = userData.user?.id;
+      if (!uid) return null;
+      const { data, error } = await supabase
+        .from("platform_notification_settings" as never)
+        .select("*")
+        .eq("platform_admin_user_id", uid)
+        .maybeSingle();
+      if (error) throw error;
+      return (data ?? null) as unknown as WhatsAppSettings | null;
+    },
+  });
+}
+
+export function useSaveWhatsAppSettings() {
+  const invalidate = useInvalidateMonitor();
+  return useMutation({
+    mutationFn: async (values: Partial<WhatsAppSettings>) => {
+      const { data: userData } = await supabase.auth.getUser();
+      const uid = userData.user?.id;
+      if (!uid) throw new Error("Sesión no válida");
+      const { error } = await supabase
+        .from("platform_notification_settings" as never)
+        .upsert(
+          { platform_admin_user_id: uid, ...values } as never,
+          { onConflict: "platform_admin_user_id" },
+        );
+      if (error) throw error;
+    },
+    onSuccess: invalidate,
+  });
+}
+
+export function useWhatsAppDeliveries() {
+  return useQuery({
+    queryKey: ["platform", "health", "wa-deliveries"],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("platform_notification_deliveries" as never)
+        .select("*")
+        .order("created_at", { ascending: false })
+        .limit(25);
+      if (error) throw error;
+      return (data ?? []) as unknown as WhatsAppDelivery[];
+    },
+  });
+}

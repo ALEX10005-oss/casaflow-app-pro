@@ -1,6 +1,9 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { toast } from "sonner";
+import { useServerFn } from "@tanstack/react-start";
 import { cn } from "@/lib/utils";
+import { WhatsAppAlertsCard } from "@/components/whatsapp-alerts-card";
+import { dispatchWhatsAppAlerts } from "@/lib/whatsapp-alerts.functions";
 import { usePlatformOrganizations, usePlatformStats } from "@/lib/platform";
 import {
   monitorDateTime,
@@ -57,6 +60,7 @@ function ControlSistema() {
   const { data: orgs = [] } = usePlatformOrganizations();
   const run = useRunHealthCheck();
   const ack = useAcknowledgeIncident();
+  const dispatchAlerts = useServerFn(dispatchWhatsAppAlerts);
 
   const orgName = (id: string | null) =>
     id ? (orgs.find((o) => o.id === id)?.name ?? "Empresa desconocida") : "Global";
@@ -77,7 +81,10 @@ function ControlSistema() {
         <button
           onClick={() =>
             run.mutate(undefined, {
-              onSuccess: () => toast.success("Diagnóstico ejecutado"),
+              onSuccess: () => {
+                toast.success("Diagnóstico ejecutado");
+                void dispatchAlerts({}).catch(() => undefined);
+              },
               onError: (e: Error) => toast.error(e.message),
             })
           }
@@ -240,6 +247,8 @@ function ControlSistema() {
           ))}
         </div>
       </section>
+
+      <WhatsAppAlertsCard />
     </div>
   );
 }
