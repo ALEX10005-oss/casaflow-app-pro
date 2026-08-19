@@ -154,19 +154,19 @@ export const monitorDateTime = (iso: string | null) =>
     ? new Date(iso).toLocaleString("es-MX", { dateStyle: "short", timeStyle: "short" })
     : "Nunca";
 
-/* ---------------- Alertas por WhatsApp (solo platform admin) ---------------- */
+/* ---------------- Alertas por correo (solo platform admin) ---------------- */
 
-export type WhatsAppSettings = {
+export type EmailAlertSettings = {
   id: string;
   platform_admin_user_id: string;
-  whatsapp_enabled: boolean;
-  whatsapp_recipient: string | null;
+  email_enabled: boolean;
+  email_recipient: string | null;
   notify_critical: boolean;
   notify_warning: boolean;
   warning_repeat_threshold: number;
 };
 
-export type WhatsAppDelivery = {
+export type EmailDelivery = {
   id: string;
   incident_id: string | null;
   severity: string | null;
@@ -177,9 +177,9 @@ export type WhatsAppDelivery = {
   created_at: string;
 };
 
-export function useWhatsAppSettings() {
+export function useEmailSettings() {
   return useQuery({
-    queryKey: ["platform", "health", "wa-settings"],
+    queryKey: ["platform", "health", "email-settings"],
     queryFn: async () => {
       const { data: userData } = await supabase.auth.getUser();
       const uid = userData.user?.id;
@@ -190,15 +190,15 @@ export function useWhatsAppSettings() {
         .eq("platform_admin_user_id", uid)
         .maybeSingle();
       if (error) throw error;
-      return (data ?? null) as unknown as WhatsAppSettings | null;
+      return (data ?? null) as unknown as EmailAlertSettings | null;
     },
   });
 }
 
-export function useSaveWhatsAppSettings() {
+export function useSaveEmailSettings() {
   const invalidate = useInvalidateMonitor();
   return useMutation({
-    mutationFn: async (values: Partial<WhatsAppSettings>) => {
+    mutationFn: async (values: Partial<EmailAlertSettings>) => {
       const { data: userData } = await supabase.auth.getUser();
       const uid = userData.user?.id;
       if (!uid) throw new Error("Sesión no válida");
@@ -214,9 +214,9 @@ export function useSaveWhatsAppSettings() {
   });
 }
 
-export function useWhatsAppDeliveries() {
+export function useEmailDeliveries() {
   return useQuery({
-    queryKey: ["platform", "health", "wa-deliveries"],
+    queryKey: ["platform", "health", "email-deliveries"],
     queryFn: async () => {
       const { data, error } = await supabase
         .from("platform_notification_deliveries" as never)
@@ -224,7 +224,7 @@ export function useWhatsAppDeliveries() {
         .order("created_at", { ascending: false })
         .limit(25);
       if (error) throw error;
-      return (data ?? []) as unknown as WhatsAppDelivery[];
+      return (data ?? []) as unknown as EmailDelivery[];
     },
   });
 }

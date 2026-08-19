@@ -2,8 +2,8 @@ import { createFileRoute } from "@tanstack/react-router";
 import { toast } from "sonner";
 import { useServerFn } from "@tanstack/react-start";
 import { cn } from "@/lib/utils";
-import { WhatsAppAlertsCard } from "@/components/whatsapp-alerts-card";
-import { dispatchWhatsAppAlerts } from "@/lib/whatsapp-alerts.functions";
+import { EmailAlertsCard } from "@/components/email-alerts-card";
+import { dispatchEmailAlerts } from "@/lib/email-alerts.functions";
 import { usePlatformOrganizations, usePlatformStats } from "@/lib/platform";
 import {
   monitorDateTime,
