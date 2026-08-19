@@ -18,9 +18,18 @@ import {
   UserCog,
 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
-import { useAlerts, useOrganization, useProfile } from "@/lib/casaflow";
+import { useAlerts, useMyRole, useOrganization, useProfile } from "@/lib/casaflow";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
+
+const ROLE_ACCESS: Record<string, string[] | "all"> = {
+  owner: "all",
+  manager: "all",
+  reception: ["/panel", "/calendario", "/reservas", "/propiedades", "/huespedes", "/whatsapp", "/alertas"],
+  accounting: ["/panel", "/finanzas", "/reportes", "/configuracion"],
+  cleaning: ["/mis-tareas"],
+  maintenance: ["/mis-tareas"],
+};
 
 const GROUPS: { label: string; items: { to: string; label: string; icon: typeof Building2 }[] }[] = [
   {
@@ -76,6 +85,12 @@ export function AppShell({
   const { data: org } = useOrganization();
   const { data: profile } = useProfile();
   const { data: alerts } = useAlerts();
+  const { data: role } = useMyRole();
+  const allowed = ROLE_ACCESS[role ?? "owner"] ?? "all";
+  const groups = GROUPS.map((g) => ({
+    ...g,
+    items: allowed === "all" ? g.items : g.items.filter((i) => allowed.includes(i.to)),
+  })).filter((g) => g.items.length > 0);
   const unread = (alerts ?? []).filter((a) => !a.is_read).length;
 
   async function signOut() {
@@ -103,7 +118,7 @@ export function AppShell({
             </span>
           </Link>
           <nav className="space-y-5">
-            {GROUPS.map((group) => (
+            {groups.map((group) => (
               <div key={group.label}>
                 <p className="px-2 pb-1 text-[10px] font-semibold uppercase tracking-widest text-sidebar-foreground/50">
                   {group.label}
