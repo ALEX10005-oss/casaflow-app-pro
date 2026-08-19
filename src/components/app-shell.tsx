@@ -18,7 +18,7 @@ import {
   UserCog,
 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
-import { useAlerts, useMyRole, useOrganization, useProfile } from "@/lib/casaflow";
+import { homeForRole, useAlerts, useMyRole, useOrganization, useProfile } from "@/lib/casaflow";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 
