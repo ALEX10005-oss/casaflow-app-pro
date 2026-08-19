@@ -39,13 +39,21 @@ function AuthPage() {
     });
   }, [navigate]);
 
+  function traducirError(msg: string) {
+    if (/weak_password|known to be weak/i.test(msg)) return "Esa contraseña es demasiado común. Usa una más larga y única.";
+    if (/Invalid login credentials/i.test(msg)) return "Correo o contraseña incorrectos.";
+    if (/already registered/i.test(msg)) return "Ese correo ya está registrado. Inicia sesión.";
+    if (/at least 6 characters/i.test(msg)) return "La contraseña debe tener al menos 6 caracteres.";
+    return msg;
+  }
+
   async function signIn(e: React.FormEvent) {
     e.preventDefault();
     setLoading(true);
     const { error } = await supabase.auth.signInWithPassword({ email, password });
     setLoading(false);
     if (error) {
-      toast.error(error.message);
+      toast.error(traducirError(error.message));
       return;
     }
     navigate({ to: "/panel", replace: true });
@@ -54,7 +62,7 @@ function AuthPage() {
   async function signUp(e: React.FormEvent) {
     e.preventDefault();
     setLoading(true);
-    const { error } = await supabase.auth.signUp({
+    const { data, error } = await supabase.auth.signUp({
       email,
       password,
       options: {
@@ -62,14 +70,19 @@ function AuthPage() {
         data: { first_name: firstName, last_name: lastName, company },
       },
     });
-    setLoading(false);
     if (error) {
-      toast.error(error.message);
+      setLoading(false);
+      toast.error(traducirError(error.message));
       return;
     }
+    if (!data.session) {
+      await supabase.auth.signInWithPassword({ email, password });
+    }
+    setLoading(false);
     toast.success("Cuenta creada. Ya puedes entrar al panel.");
     navigate({ to: "/panel", replace: true });
   }
+
 
   return (
     <div className="grid min-h-screen lg:grid-cols-2">
