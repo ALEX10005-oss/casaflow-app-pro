@@ -13,6 +13,7 @@ import { Route as IndexRouteImport } from './routes/index'
 import { Route as AuthenticatedRouteRouteImport } from './routes/_authenticated/route'
 import { Route as AuthRouteImport } from './routes/auth'
 import { Route as AuthenticatedCalendarioRouteImport } from './routes/_authenticated/calendario'
+import { Route as AuthenticatedHuespedesRouteImport } from './routes/_authenticated/huespedes'
 import { Route as AuthenticatedPanelRouteImport } from './routes/_authenticated/panel'
 import { Route as AuthenticatedPropiedadesRouteImport } from './routes/_authenticated/propiedades'
 import { Route as AuthenticatedReservasRouteImport } from './routes/_authenticated/reservas'
@@ -36,6 +37,11 @@ const AuthenticatedCalendarioRoute = AuthenticatedCalendarioRouteImport.update({
   path: '/calendario',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
+const AuthenticatedHuespedesRoute = AuthenticatedHuespedesRouteImport.update({
+  id: '/huespedes',
+  path: '/huespedes',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
 const AuthenticatedPanelRoute = AuthenticatedPanelRouteImport.update({
   id: '/panel',
   path: '/panel',
@@ -57,6 +63,7 @@ export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/auth': typeof AuthRoute
   '/calendario': typeof AuthenticatedCalendarioRoute
+  '/huespedes': typeof AuthenticatedHuespedesRoute
   '/panel': typeof AuthenticatedPanelRoute
   '/propiedades': typeof AuthenticatedPropiedadesRoute
   '/reservas': typeof AuthenticatedReservasRoute
@@ -65,6 +72,7 @@ export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/auth': typeof AuthRoute
   '/calendario': typeof AuthenticatedCalendarioRoute
+  '/huespedes': typeof AuthenticatedHuespedesRoute
   '/panel': typeof AuthenticatedPanelRoute
   '/propiedades': typeof AuthenticatedPropiedadesRoute
   '/reservas': typeof AuthenticatedReservasRoute
@@ -75,6 +83,7 @@ export interface FileRoutesById {
   '/_authenticated': typeof AuthenticatedRouteRouteWithChildren
   '/auth': typeof AuthRoute
   '/_authenticated/calendario': typeof AuthenticatedCalendarioRoute
+  '/_authenticated/huespedes': typeof AuthenticatedHuespedesRoute
   '/_authenticated/panel': typeof AuthenticatedPanelRoute
   '/_authenticated/propiedades': typeof AuthenticatedPropiedadesRoute
   '/_authenticated/reservas': typeof AuthenticatedReservasRoute
@@ -82,15 +91,29 @@ export interface FileRoutesById {
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
-    '/' | '/auth' | '/calendario' | '/panel' | '/propiedades' | '/reservas'
+    | '/'
+    | '/auth'
+    | '/calendario'
+    | '/huespedes'
+    | '/panel'
+    | '/propiedades'
+    | '/reservas'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/auth' | '/calendario' | '/panel' | '/propiedades' | '/reservas'
+  to:
+    | '/'
+    | '/auth'
+    | '/calendario'
+    | '/huespedes'
+    | '/panel'
+    | '/propiedades'
+    | '/reservas'
   id:
     | '__root__'
     | '/'
     | '/_authenticated'
     | '/auth'
     | '/_authenticated/calendario'
+    | '/_authenticated/huespedes'
     | '/_authenticated/panel'
     | '/_authenticated/propiedades'
     | '/_authenticated/reservas'
@@ -132,6 +155,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedCalendarioRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/_authenticated/huespedes': {
+      id: '/_authenticated/huespedes'
+      path: '/huespedes'
+      fullPath: '/huespedes'
+      preLoaderRoute: typeof AuthenticatedHuespedesRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
     '/_authenticated/panel': {
       id: '/_authenticated/panel'
       path: '/panel'
@@ -158,6 +188,7 @@ declare module '@tanstack/react-router' {
 
 interface AuthenticatedRouteRouteChildren {
   AuthenticatedCalendarioRoute: typeof AuthenticatedCalendarioRoute
+  AuthenticatedHuespedesRoute: typeof AuthenticatedHuespedesRoute
   AuthenticatedPanelRoute: typeof AuthenticatedPanelRoute
   AuthenticatedPropiedadesRoute: typeof AuthenticatedPropiedadesRoute
   AuthenticatedReservasRoute: typeof AuthenticatedReservasRoute
@@ -165,6 +196,7 @@ interface AuthenticatedRouteRouteChildren {
 
 const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedCalendarioRoute: AuthenticatedCalendarioRoute,
+  AuthenticatedHuespedesRoute: AuthenticatedHuespedesRoute,
   AuthenticatedPanelRoute: AuthenticatedPanelRoute,
   AuthenticatedPropiedadesRoute: AuthenticatedPropiedadesRoute,
   AuthenticatedReservasRoute: AuthenticatedReservasRoute,
