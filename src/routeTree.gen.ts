@@ -33,7 +33,7 @@ import { Route as ControlEmpresasRouteImport } from './routes/control/empresas'
 import { Route as ControlLicenciasRouteImport } from './routes/control/licencias'
 import { Route as ControlSistemaRouteImport } from './routes/control/sistema'
 import { Route as ControlUsuariosRouteImport } from './routes/control/usuarios'
-import { Route as ApiPublicWhatsappAlertsRouteImport } from './routes/api/public/whatsapp-alerts'
+import { Route as ApiPublicEmailAlertsRouteImport } from './routes/api/public/email-alerts'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
@@ -158,9 +158,9 @@ const ControlUsuariosRoute = ControlUsuariosRouteImport.update({
   path: '/usuarios',
   getParentRoute: () => ControlRouteRoute,
 } as any)
-const ApiPublicWhatsappAlertsRoute = ApiPublicWhatsappAlertsRouteImport.update({
-  id: '/api/public/whatsapp-alerts',
-  path: '/api/public/whatsapp-alerts',
+const ApiPublicEmailAlertsRoute = ApiPublicEmailAlertsRouteImport.update({
+  id: '/api/public/email-alerts',
+  path: '/api/public/email-alerts',
   getParentRoute: () => rootRouteImport,
 } as any)
 
@@ -188,7 +188,7 @@ export interface FileRoutesByFullPath {
   '/control/sistema': typeof ControlSistemaRoute
   '/control/usuarios': typeof ControlUsuariosRoute
   '/control/': typeof ControlIndexRoute
-  '/api/public/whatsapp-alerts': typeof ApiPublicWhatsappAlertsRoute
+  '/api/public/email-alerts': typeof ApiPublicEmailAlertsRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -213,7 +213,7 @@ export interface FileRoutesByTo {
   '/control/sistema': typeof ControlSistemaRoute
   '/control/usuarios': typeof ControlUsuariosRoute
   '/control': typeof ControlIndexRoute
-  '/api/public/whatsapp-alerts': typeof ApiPublicWhatsappAlertsRoute
+  '/api/public/email-alerts': typeof ApiPublicEmailAlertsRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -241,7 +241,7 @@ export interface FileRoutesById {
   '/control/sistema': typeof ControlSistemaRoute
   '/control/usuarios': typeof ControlUsuariosRoute
   '/control/': typeof ControlIndexRoute
-  '/api/public/whatsapp-alerts': typeof ApiPublicWhatsappAlertsRoute
+  '/api/public/email-alerts': typeof ApiPublicEmailAlertsRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -269,7 +269,7 @@ export interface FileRouteTypes {
     | '/control/sistema'
     | '/control/usuarios'
     | '/control/'
-    | '/api/public/whatsapp-alerts'
+    | '/api/public/email-alerts'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -294,7 +294,7 @@ export interface FileRouteTypes {
     | '/control/sistema'
     | '/control/usuarios'
     | '/control'
-    | '/api/public/whatsapp-alerts'
+    | '/api/public/email-alerts'
   id:
     | '__root__'
     | '/'
@@ -321,7 +321,7 @@ export interface FileRouteTypes {
     | '/control/sistema'
     | '/control/usuarios'
     | '/control/'
-    | '/api/public/whatsapp-alerts'
+    | '/api/public/email-alerts'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -329,7 +329,7 @@ export interface RootRouteChildren {
   AuthenticatedRouteRoute: typeof AuthenticatedRouteRouteWithChildren
   ControlRouteRoute: typeof ControlRouteRouteWithChildren
   AuthRoute: typeof AuthRoute
-  ApiPublicWhatsappAlertsRoute: typeof ApiPublicWhatsappAlertsRoute
+  ApiPublicEmailAlertsRoute: typeof ApiPublicEmailAlertsRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -502,11 +502,11 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ControlUsuariosRouteImport
       parentRoute: typeof ControlRouteRoute
     }
-    '/api/public/whatsapp-alerts': {
-      id: '/api/public/whatsapp-alerts'
-      path: '/api/public/whatsapp-alerts'
-      fullPath: '/api/public/whatsapp-alerts'
-      preLoaderRoute: typeof ApiPublicWhatsappAlertsRouteImport
+    '/api/public/email-alerts': {
+      id: '/api/public/email-alerts'
+      path: '/api/public/email-alerts'
+      fullPath: '/api/public/email-alerts'
+      preLoaderRoute: typeof ApiPublicEmailAlertsRouteImport
       parentRoute: typeof rootRouteImport
     }
   }
@@ -576,7 +576,7 @@ const rootRouteChildren: RootRouteChildren = {
   AuthenticatedRouteRoute: AuthenticatedRouteRouteWithChildren,
   ControlRouteRoute: ControlRouteRouteWithChildren,
   AuthRoute: AuthRoute,
-  ApiPublicWhatsappAlertsRoute: ApiPublicWhatsappAlertsRoute,
+  ApiPublicEmailAlertsRoute: ApiPublicEmailAlertsRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

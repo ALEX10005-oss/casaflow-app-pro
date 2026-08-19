@@ -416,36 +416,36 @@ export type Database = {
       platform_notification_settings: {
         Row: {
           created_at: string
+          email_enabled: boolean
+          email_recipient: string | null
           id: string
           notify_critical: boolean
           notify_warning: boolean
           platform_admin_user_id: string
           updated_at: string
           warning_repeat_threshold: number
-          whatsapp_enabled: boolean
-          whatsapp_recipient: string | null
         }
         Insert: {
           created_at?: string
+          email_enabled?: boolean
+          email_recipient?: string | null
           id?: string
           notify_critical?: boolean
           notify_warning?: boolean
           platform_admin_user_id: string
           updated_at?: string
           warning_repeat_threshold?: number
-          whatsapp_enabled?: boolean
-          whatsapp_recipient?: string | null
         }
         Update: {
           created_at?: string
+          email_enabled?: boolean
+          email_recipient?: string | null
           id?: string
           notify_critical?: boolean
           notify_warning?: boolean
           platform_admin_user_id?: string
           updated_at?: string
           warning_repeat_threshold?: number
-          whatsapp_enabled?: boolean
-          whatsapp_recipient?: string | null
         }
         Relationships: []
       }
@@ -1170,7 +1170,7 @@ export type Database = {
         Args: { _ids?: string[] }
         Returns: number
       }
-      platform_pending_whatsapp_alerts: {
+      platform_pending_email_alerts: {
         Args: never
         Returns: {
           description: string
@@ -1184,7 +1184,7 @@ export type Database = {
           title: string
         }[]
       }
-      platform_record_whatsapp_delivery: {
+      platform_record_email_delivery: {
         Args: {
           _error_message?: string
           _incident_id: string

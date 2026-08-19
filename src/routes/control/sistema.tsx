@@ -2,8 +2,8 @@ import { createFileRoute } from "@tanstack/react-router";
 import { toast } from "sonner";
 import { useServerFn } from "@tanstack/react-start";
 import { cn } from "@/lib/utils";
-import { WhatsAppAlertsCard } from "@/components/whatsapp-alerts-card";
-import { dispatchWhatsAppAlerts } from "@/lib/whatsapp-alerts.functions";
+import { EmailAlertsCard } from "@/components/email-alerts-card";
+import { dispatchEmailAlerts } from "@/lib/email-alerts.functions";
 import { usePlatformOrganizations, usePlatformStats } from "@/lib/platform";
 import {
   monitorDateTime,
@@ -60,7 +60,7 @@ function ControlSistema() {
   const { data: orgs = [] } = usePlatformOrganizations();
   const run = useRunHealthCheck();
   const ack = useAcknowledgeIncident();
-  const dispatchAlerts = useServerFn(dispatchWhatsAppAlerts);
+  const dispatchAlerts = useServerFn(dispatchEmailAlerts);
 
   const orgName = (id: string | null) =>
     id ? (orgs.find((o) => o.id === id)?.name ?? "Empresa desconocida") : "Global";
@@ -248,7 +248,7 @@ function ControlSistema() {
         </div>
       </section>
 
-      <WhatsAppAlertsCard />
+      <EmailAlertsCard />
     </div>
   );
 }

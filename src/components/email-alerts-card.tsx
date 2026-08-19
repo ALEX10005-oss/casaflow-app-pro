@@ -4,14 +4,11 @@ import { toast } from "sonner";
 import { cn } from "@/lib/utils";
 import {
   monitorDateTime,
-  useSaveWhatsAppSettings,
-  useWhatsAppDeliveries,
-  useWhatsAppSettings,
+  useEmailDeliveries,
+  useEmailSettings,
+  useSaveEmailSettings,
 } from "@/lib/monitor";
-import {
-  getWhatsAppConfigStatus,
-  sendWhatsAppTest,
-} from "@/lib/whatsapp-alerts.functions";
+import { getEmailConfigStatus, sendEmailAlertTest } from "@/lib/email-alerts.functions";
 import { useQuery } from "@tanstack/react-query";
 
 const STATUS_LABEL: Record<string, { text: string; tone: string }> = {
@@ -42,14 +39,14 @@ function Toggle({
   );
 }
 
-export function WhatsAppAlertsCard() {
-  const { data: settings } = useWhatsAppSettings();
-  const { data: deliveries = [] } = useWhatsAppDeliveries();
-  const save = useSaveWhatsAppSettings();
-  const configStatus = useServerFn(getWhatsAppConfigStatus);
-  const sendTest = useServerFn(sendWhatsAppTest);
+export function EmailAlertsCard() {
+  const { data: settings } = useEmailSettings();
+  const { data: deliveries = [] } = useEmailDeliveries();
+  const save = useSaveEmailSettings();
+  const configStatus = useServerFn(getEmailConfigStatus);
+  const sendTest = useServerFn(sendEmailAlertTest);
   const { data: config } = useQuery({
-    queryKey: ["platform", "wa-config"],
+    queryKey: ["platform", "email-config"],
     queryFn: () => configStatus({}),
   });
 
@@ -62,8 +59,8 @@ export function WhatsAppAlertsCard() {
 
   useEffect(() => {
     if (!settings) return;
-    setEnabled(settings.whatsapp_enabled);
-    setRecipient(settings.whatsapp_recipient ?? "");
+    setEnabled(settings.email_enabled);
+    setRecipient(settings.email_recipient ?? "");
     setCritical(settings.notify_critical);
     setWarning(settings.notify_warning);
     setThreshold(settings.warning_repeat_threshold);
@@ -72,8 +69,8 @@ export function WhatsAppAlertsCard() {
   const onSave = () =>
     save.mutate(
       {
-        whatsapp_enabled: enabled,
-        whatsapp_recipient: recipient.trim() || null,
+        email_enabled: enabled,
+        email_recipient: recipient.trim() || null,
         notify_critical: critical,
         notify_warning: warning,
         warning_repeat_threshold: Number.isFinite(threshold) ? threshold : 3,
@@ -85,15 +82,15 @@ export function WhatsAppAlertsCard() {
     );
 
   const onTest = async () => {
-    if (!recipient.trim()) {
-      toast.error("Escribe un número destino en formato internacional");
+    if (!recipient.includes("@")) {
+      toast.error("Escribe un correo destino válido");
       return;
     }
     setTesting(true);
     try {
       const res = await sendTest({ data: { recipient: recipient.trim() } });
-      if (res.status === "sent") toast.success("Mensaje de prueba enviado");
-      else toast.error(res.error ?? "No se pudo enviar el mensaje de prueba");
+      if (res.status === "sent") toast.success("Correo de prueba enviado");
+      else toast.error(res.error ?? "No se pudo enviar el correo de prueba");
     } catch (e) {
       toast.error(e instanceof Error ? e.message : "Error al enviar");
     } finally {
@@ -103,7 +100,7 @@ export function WhatsAppAlertsCard() {
 
   return (
     <section className="space-y-3">
-      <h2 className="font-display text-base font-semibold">Alertas por WhatsApp</h2>
+      <h2 className="font-display text-base font-semibold">Alertas por correo</h2>
       <div className="space-y-4 rounded-lg border border-neutral-800 bg-neutral-900 p-4 text-sm">
         <div
           className={cn(
@@ -114,25 +111,26 @@ export function WhatsAppAlertsCard() {
           )}
         >
           {config?.configured
-            ? "Credenciales de WhatsApp Business detectadas en el servidor."
-            : "Faltan los secretos WHATSAPP_ACCESS_TOKEN y WHATSAPP_PHONE_NUMBER_ID. Las alertas se registran como omitidas hasta configurarlos."}
+            ? `Envío de correo activo desde ${config.senderDomain}.`
+            : "Falta configurar el dominio de correo del proyecto. Hasta entonces las alertas se registran como omitidas; el diagnóstico y la campana interna siguen funcionando."}
         </div>
 
         <div className="grid gap-4 sm:grid-cols-2">
           <div className="space-y-2">
-            <Toggle label="Activar alertas por WhatsApp" checked={enabled} onChange={setEnabled} />
+            <Toggle label="Activar alertas por correo" checked={enabled} onChange={setEnabled} />
             <Toggle label="Avisar incidentes críticos" checked={critical} onChange={setCritical} />
             <Toggle label="Avisar advertencias repetidas" checked={warning} onChange={setWarning} />
           </div>
           <div className="space-y-3">
             <label className="block">
               <span className="text-xs uppercase tracking-wide text-neutral-500">
-                Número destino (formato internacional)
+                Correo destino
               </span>
               <input
+                type="email"
                 value={recipient}
                 onChange={(e) => setRecipient(e.target.value)}
-                placeholder="+52 55 0000 0000"
+                placeholder="tucorreo@dominio.com"
                 className="mt-1 w-full rounded-md border border-neutral-700 bg-neutral-950 px-3 py-2 text-white outline-none focus:border-amber-500"
               />
             </label>
@@ -164,7 +162,7 @@ export function WhatsAppAlertsCard() {
             disabled={testing}
             className="rounded-md border border-neutral-700 px-4 py-2 text-sm font-medium text-neutral-200 hover:border-neutral-500 disabled:opacity-60"
           >
-            {testing ? "Enviando…" : "Enviar alerta de prueba"}
+            {testing ? "Enviando…" : "Enviar correo de prueba"}
           </button>
         </div>
 
