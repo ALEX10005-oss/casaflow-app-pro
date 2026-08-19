@@ -363,6 +363,92 @@ export type Database = {
         }
         Relationships: []
       }
+      platform_notification_deliveries: {
+        Row: {
+          channel: string
+          created_at: string
+          error_message: string | null
+          id: string
+          incident_id: string | null
+          platform_admin_user_id: string
+          provider_message_id: string | null
+          recipient: string | null
+          sent_at: string | null
+          severity: string | null
+          status: string
+        }
+        Insert: {
+          channel?: string
+          created_at?: string
+          error_message?: string | null
+          id?: string
+          incident_id?: string | null
+          platform_admin_user_id: string
+          provider_message_id?: string | null
+          recipient?: string | null
+          sent_at?: string | null
+          severity?: string | null
+          status: string
+        }
+        Update: {
+          channel?: string
+          created_at?: string
+          error_message?: string | null
+          id?: string
+          incident_id?: string | null
+          platform_admin_user_id?: string
+          provider_message_id?: string | null
+          recipient?: string | null
+          sent_at?: string | null
+          severity?: string | null
+          status?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "platform_notification_deliveries_incident_id_fkey"
+            columns: ["incident_id"]
+            isOneToOne: false
+            referencedRelation: "system_incidents"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      platform_notification_settings: {
+        Row: {
+          created_at: string
+          id: string
+          notify_critical: boolean
+          notify_warning: boolean
+          platform_admin_user_id: string
+          updated_at: string
+          warning_repeat_threshold: number
+          whatsapp_enabled: boolean
+          whatsapp_recipient: string | null
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          notify_critical?: boolean
+          notify_warning?: boolean
+          platform_admin_user_id: string
+          updated_at?: string
+          warning_repeat_threshold?: number
+          whatsapp_enabled?: boolean
+          whatsapp_recipient?: string | null
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          notify_critical?: boolean
+          notify_warning?: boolean
+          platform_admin_user_id?: string
+          updated_at?: string
+          warning_repeat_threshold?: number
+          whatsapp_enabled?: boolean
+          whatsapp_recipient?: string | null
+        }
+        Relationships: []
+      }
       platform_notifications: {
         Row: {
           body: string | null
@@ -1083,6 +1169,32 @@ export type Database = {
       platform_mark_notifications_read: {
         Args: { _ids?: string[] }
         Returns: number
+      }
+      platform_pending_whatsapp_alerts: {
+        Args: never
+        Returns: {
+          description: string
+          detected_at: string
+          incident_id: string
+          org_name: string
+          platform_admin_user_id: string
+          recipient: string
+          recommended_action: string
+          severity: string
+          title: string
+        }[]
+      }
+      platform_record_whatsapp_delivery: {
+        Args: {
+          _error_message?: string
+          _incident_id: string
+          _platform_admin_user_id: string
+          _provider_message_id?: string
+          _recipient: string
+          _severity: string
+          _status: string
+        }
+        Returns: string
       }
       platform_stats: { Args: never; Returns: Json }
       platform_update_license: {
