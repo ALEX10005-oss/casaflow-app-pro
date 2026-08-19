@@ -21,7 +21,6 @@ import { Route as AuthenticatedEquipoRouteImport } from './routes/_authenticated
 import { Route as AuthenticatedFinanzasRouteImport } from './routes/_authenticated/finanzas'
 import { Route as AuthenticatedHuespedesRouteImport } from './routes/_authenticated/huespedes'
 import { Route as AuthenticatedIntegracionesRouteImport } from './routes/_authenticated/integraciones'
-import { Route as AuthenticatedMisTareasRouteImport } from './routes/_authenticated/mis-tareas'
 import { Route as AuthenticatedOperacionesRouteImport } from './routes/_authenticated/operaciones'
 import { Route as AuthenticatedPanelRouteImport } from './routes/_authenticated/panel'
 import { Route as AuthenticatedPropiedadesRouteImport } from './routes/_authenticated/propiedades'
@@ -104,11 +103,6 @@ const AuthenticatedIntegracionesRoute =
     path: '/integraciones',
     getParentRoute: () => AuthenticatedRouteRoute,
   } as any)
-const AuthenticatedMisTareasRoute = AuthenticatedMisTareasRouteImport.update({
-  id: '/mis-tareas',
-  path: '/mis-tareas',
-  getParentRoute: () => AuthenticatedRouteRoute,
-} as any)
 const AuthenticatedOperacionesRoute =
   AuthenticatedOperacionesRouteImport.update({
     id: '/operaciones',
@@ -231,7 +225,6 @@ export interface FileRoutesByFullPath {
   '/finanzas': typeof AuthenticatedFinanzasRoute
   '/huespedes': typeof AuthenticatedHuespedesRoute
   '/integraciones': typeof AuthenticatedIntegracionesRoute
-  '/mis-tareas': typeof AuthenticatedMisTareasRoute
   '/operaciones': typeof AuthenticatedOperacionesRoute
   '/panel': typeof AuthenticatedPanelRoute
   '/propiedades': typeof AuthenticatedPropiedadesRoute
@@ -263,7 +256,6 @@ export interface FileRoutesByTo {
   '/finanzas': typeof AuthenticatedFinanzasRoute
   '/huespedes': typeof AuthenticatedHuespedesRoute
   '/integraciones': typeof AuthenticatedIntegracionesRoute
-  '/mis-tareas': typeof AuthenticatedMisTareasRoute
   '/operaciones': typeof AuthenticatedOperacionesRoute
   '/panel': typeof AuthenticatedPanelRoute
   '/propiedades': typeof AuthenticatedPropiedadesRoute
@@ -299,7 +291,6 @@ export interface FileRoutesById {
   '/_authenticated/finanzas': typeof AuthenticatedFinanzasRoute
   '/_authenticated/huespedes': typeof AuthenticatedHuespedesRoute
   '/_authenticated/integraciones': typeof AuthenticatedIntegracionesRoute
-  '/_authenticated/mis-tareas': typeof AuthenticatedMisTareasRoute
   '/_authenticated/operaciones': typeof AuthenticatedOperacionesRoute
   '/_authenticated/panel': typeof AuthenticatedPanelRoute
   '/_authenticated/propiedades': typeof AuthenticatedPropiedadesRoute
@@ -335,7 +326,6 @@ export interface FileRouteTypes {
     | '/finanzas'
     | '/huespedes'
     | '/integraciones'
-    | '/mis-tareas'
     | '/operaciones'
     | '/panel'
     | '/propiedades'
@@ -367,7 +357,6 @@ export interface FileRouteTypes {
     | '/finanzas'
     | '/huespedes'
     | '/integraciones'
-    | '/mis-tareas'
     | '/operaciones'
     | '/panel'
     | '/propiedades'
@@ -402,7 +391,6 @@ export interface FileRouteTypes {
     | '/_authenticated/finanzas'
     | '/_authenticated/huespedes'
     | '/_authenticated/integraciones'
-    | '/_authenticated/mis-tareas'
     | '/_authenticated/operaciones'
     | '/_authenticated/panel'
     | '/_authenticated/propiedades'
@@ -518,13 +506,6 @@ declare module '@tanstack/react-router' {
       path: '/integraciones'
       fullPath: '/integraciones'
       preLoaderRoute: typeof AuthenticatedIntegracionesRouteImport
-      parentRoute: typeof AuthenticatedRouteRoute
-    }
-    '/_authenticated/mis-tareas': {
-      id: '/_authenticated/mis-tareas'
-      path: '/mis-tareas'
-      fullPath: '/mis-tareas'
-      preLoaderRoute: typeof AuthenticatedMisTareasRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
     '/_authenticated/operaciones': {
@@ -701,7 +682,6 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedFinanzasRoute: typeof AuthenticatedFinanzasRoute
   AuthenticatedHuespedesRoute: typeof AuthenticatedHuespedesRoute
   AuthenticatedIntegracionesRoute: typeof AuthenticatedIntegracionesRoute
-  AuthenticatedMisTareasRoute: typeof AuthenticatedMisTareasRoute
   AuthenticatedOperacionesRoute: typeof AuthenticatedOperacionesRoute
   AuthenticatedPanelRoute: typeof AuthenticatedPanelRoute
   AuthenticatedPropiedadesRoute: typeof AuthenticatedPropiedadesRoute
@@ -719,7 +699,6 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedFinanzasRoute: AuthenticatedFinanzasRoute,
   AuthenticatedHuespedesRoute: AuthenticatedHuespedesRoute,
   AuthenticatedIntegracionesRoute: AuthenticatedIntegracionesRoute,
-  AuthenticatedMisTareasRoute: AuthenticatedMisTareasRoute,
   AuthenticatedOperacionesRoute: AuthenticatedOperacionesRoute,
   AuthenticatedPanelRoute: AuthenticatedPanelRoute,
   AuthenticatedPropiedadesRoute: AuthenticatedPropiedadesRoute,
