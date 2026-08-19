@@ -47,6 +47,28 @@ function AuthPage() {
     return msg;
   }
 
+  async function magicLink() {
+    if (!email) {
+      toast.error("Escribe tu correo para enviarte el enlace.");
+      return;
+    }
+    setLoading(true);
+    const { error } = await supabase.auth.signInWithOtp({
+      email,
+      options: { shouldCreateUser: false, emailRedirectTo: `${window.location.origin}/panel` },
+    });
+    setLoading(false);
+    if (error) {
+      toast.error(
+        /not allowed|signups/i.test(error.message)
+          ? "Ese correo no tiene invitación. Pídele el acceso a tu administrador."
+          : error.message,
+      );
+      return;
+    }
+    toast.success("Te enviamos un enlace de acceso a tu correo.");
+  }
+
   async function signIn(e: React.FormEvent) {
     e.preventDefault();
     setLoading(true);
@@ -124,6 +146,18 @@ function AuthPage() {
                   <Button type="submit" className="w-full" disabled={loading}>
                     Entrar
                   </Button>
+                  <Button
+                    type="button"
+                    variant="outline"
+                    className="w-full"
+                    disabled={loading}
+                    onClick={magicLink}
+                  >
+                    Enviarme un enlace por correo
+                  </Button>
+                  <p className="text-center text-xs text-muted-foreground">
+                    Personal de limpieza y mantenimiento: entra con el enlace que te llegó por correo.
+                  </p>
                 </form>
               </TabsContent>
 
