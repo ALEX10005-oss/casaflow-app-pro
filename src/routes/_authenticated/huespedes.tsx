@@ -96,7 +96,7 @@ function Huespedes() {
                       </td>
                     </tr>
                   )}
-                </>
+                </Fragment>
               ))}
             </tbody>
           </table>
