@@ -56,6 +56,7 @@ export const sendEmailAlertTest = createServerFn({ method: "POST" })
       "CasaFlow · Mensaje de prueba de alertas técnicas",
       mod.buildAlertHtml(alert),
       mod.buildAlertText(alert),
+      mod.generateIdempotencyKey(`test-${context.userId}`),
     );
 
     await record(result.status, result.error ?? null, result.providerMessageId ?? null);
