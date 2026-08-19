@@ -60,7 +60,7 @@ function ControlSistema() {
   const { data: orgs = [] } = usePlatformOrganizations();
   const run = useRunHealthCheck();
   const ack = useAcknowledgeIncident();
-  const dispatchAlerts = useServerFn(dispatchWhatsAppAlerts);
+  const dispatchAlerts = useServerFn(dispatchEmailAlerts);
 
   const orgName = (id: string | null) =>
     id ? (orgs.find((o) => o.id === id)?.name ?? "Empresa desconocida") : "Global";
@@ -248,7 +248,7 @@ function ControlSistema() {
         </div>
       </section>
 
-      <WhatsAppAlertsCard />
+      <EmailAlertsCard />
     </div>
   );
 }
