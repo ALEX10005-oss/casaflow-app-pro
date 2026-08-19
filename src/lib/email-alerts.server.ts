@@ -108,18 +108,22 @@ export async function sendAlertEmail(
   if (!isValidEmail(recipient)) return { status: "skipped", error: "invalid_recipient" };
 
   try {
-    const { sendEmail } = await import("@lovable.dev/email-js");
-    const res = (await sendEmail({
-      apiKey: apiKey!,
-      senderDomain: senderDomain!,
-      from: `CasaFlow Monitor <alertas@${senderDomain}>`,
-      to: recipient.trim(),
-      subject,
-      html,
-      text,
-      ...(idempotencyKey ? { idempotencyKey } : {}),
-    })) as { id?: string } | undefined;
-    return { status: "sent", providerMessageId: res?.id };
+    const { sendLovableEmail } = await import("@lovable.dev/email-js");
+    const res = await sendLovableEmail(
+      {
+        to: recipient.trim(),
+        from: `CasaFlow Monitor <alertas@${senderDomain}>`,
+        sender_domain: senderDomain!,
+        subject,
+        html,
+        text,
+        purpose: "transactional",
+        ...(idempotencyKey ? { idempotency_key: idempotencyKey } : {}),
+      },
+      { apiKey: apiKey!, ...(idempotencyKey ? { idempotencyKey } : {}) },
+    );
+    if (!res.success) return { status: "failed", error: sanitize(res.status ?? "send_failed") };
+    return { status: "sent", providerMessageId: res.message_id };
   } catch (e) {
     const msg = e instanceof Error ? e.message : "email_error";
     return { status: "failed", error: sanitize(msg) };
