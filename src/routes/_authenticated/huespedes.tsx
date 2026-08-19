@@ -62,10 +62,10 @@ function Huespedes() {
             </thead>
             <tbody>
               {rows.map((g) => (
-                <>
+                <Fragment key={g.id}>
                   <tr
-                    key={g.id}
                     onClick={() => setOpenId(openId === g.id ? null : g.id)}
+
                     className="cursor-pointer border-b hover:bg-muted/30"
                   >
                     <td className="px-4 py-3 font-medium">{g.full_name}</td>
