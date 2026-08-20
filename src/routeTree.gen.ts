@@ -41,6 +41,7 @@ import { Route as AuthenticatedTrabajoIncidenciasRouteImport } from './routes/_a
 import { Route as AuthenticatedTrabajoPerfilRouteImport } from './routes/_authenticated/trabajo/perfil'
 import { Route as AuthenticatedTrabajoTareasRouteImport } from './routes/_authenticated/trabajo/tareas'
 import { Route as ApiPublicEmailAlertsRouteImport } from './routes/api/public/email-alerts'
+import { Route as ApiPublicIcalChar123tokenChar125DoticsRouteImport } from './routes/api/public/ical.{$token}[.]ics'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
@@ -211,6 +212,12 @@ const ApiPublicEmailAlertsRoute = ApiPublicEmailAlertsRouteImport.update({
   path: '/api/public/email-alerts',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ApiPublicIcalChar123tokenChar125DoticsRoute =
+  ApiPublicIcalChar123tokenChar125DoticsRouteImport.update({
+    id: '/api/public/ical/{$token}.ics',
+    path: '/api/public/ical/{$token}.ics',
+    getParentRoute: () => rootRouteImport,
+  } as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -244,6 +251,7 @@ export interface FileRoutesByFullPath {
   '/trabajo/tareas': typeof AuthenticatedTrabajoTareasRoute
   '/api/public/email-alerts': typeof ApiPublicEmailAlertsRoute
   '/trabajo/': typeof AuthenticatedTrabajoIndexRoute
+  '/api/public/ical/{$token}.ics': typeof ApiPublicIcalChar123tokenChar125DoticsRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -275,6 +283,7 @@ export interface FileRoutesByTo {
   '/trabajo/tareas': typeof AuthenticatedTrabajoTareasRoute
   '/api/public/email-alerts': typeof ApiPublicEmailAlertsRoute
   '/trabajo': typeof AuthenticatedTrabajoIndexRoute
+  '/api/public/ical/{$token}.ics': typeof ApiPublicIcalChar123tokenChar125DoticsRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -310,6 +319,7 @@ export interface FileRoutesById {
   '/_authenticated/trabajo/tareas': typeof AuthenticatedTrabajoTareasRoute
   '/api/public/email-alerts': typeof ApiPublicEmailAlertsRoute
   '/_authenticated/trabajo/': typeof AuthenticatedTrabajoIndexRoute
+  '/api/public/ical/{$token}.ics': typeof ApiPublicIcalChar123tokenChar125DoticsRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -345,6 +355,7 @@ export interface FileRouteTypes {
     | '/trabajo/tareas'
     | '/api/public/email-alerts'
     | '/trabajo/'
+    | '/api/public/ical/{$token}.ics'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -376,6 +387,7 @@ export interface FileRouteTypes {
     | '/trabajo/tareas'
     | '/api/public/email-alerts'
     | '/trabajo'
+    | '/api/public/ical/{$token}.ics'
   id:
     | '__root__'
     | '/'
@@ -410,6 +422,7 @@ export interface FileRouteTypes {
     | '/_authenticated/trabajo/tareas'
     | '/api/public/email-alerts'
     | '/_authenticated/trabajo/'
+    | '/api/public/ical/{$token}.ics'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -420,6 +433,7 @@ export interface RootRouteChildren {
   PendienteRoute: typeof PendienteRoute
   InviteTokenRoute: typeof InviteTokenRoute
   ApiPublicEmailAlertsRoute: typeof ApiPublicEmailAlertsRoute
+  ApiPublicIcalChar123tokenChar125DoticsRoute: typeof ApiPublicIcalChar123tokenChar125DoticsRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -648,6 +662,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiPublicEmailAlertsRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/public/ical/{$token}.ics': {
+      id: '/api/public/ical/{$token}.ics'
+      path: '/api/public/ical/{$token}.ics'
+      fullPath: '/api/public/ical/{$token}.ics'
+      preLoaderRoute: typeof ApiPublicIcalChar123tokenChar125DoticsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
@@ -740,6 +761,8 @@ const rootRouteChildren: RootRouteChildren = {
   PendienteRoute: PendienteRoute,
   InviteTokenRoute: InviteTokenRoute,
   ApiPublicEmailAlertsRoute: ApiPublicEmailAlertsRoute,
+  ApiPublicIcalChar123tokenChar125DoticsRoute:
+    ApiPublicIcalChar123tokenChar125DoticsRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

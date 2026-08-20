@@ -18,6 +18,8 @@ export type WhatsappAutomation = Tables["whatsapp_automations"]["Row"];
 export type PropertyBlock = Tables["property_blocks"]["Row"];
 export type Organization = Tables["organizations"]["Row"];
 export type Profile = Tables["profiles"]["Row"];
+export type PropertyCalendar = Tables["property_calendars"]["Row"];
+export type ExternalCalendarEvent = Tables["external_calendar_events"]["Row"];
 
 async function selectAll<T>(table: string, order?: string): Promise<T[]> {
   let q = supabase.from(table as never).select("*");
@@ -45,6 +47,8 @@ export const useMessages = table<WhatsappMessage>("whatsapp_messages", "sent_at"
 export const useTemplates = table<WhatsappTemplate>("whatsapp_templates", "name");
 export const useAutomations = table<WhatsappAutomation>("whatsapp_automations", "name");
 export const useBlocks = table<PropertyBlock>("property_blocks", "start_date");
+export const usePropertyCalendars = table<PropertyCalendar>("property_calendars", "created_at");
+export const useExternalEvents = table<ExternalCalendarEvent>("external_calendar_events", "start_date");
 
 export function useOrganization() {
   return useQuery({
@@ -125,6 +129,98 @@ export function useDeleteProperty() {
   });
 }
 
+export function useSavePropertyCalendar() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: async (input: { property_id: string; channel: string; ical_url: string }) => {
+      const org_id = await currentOrgId();
+      const { error } = await supabase.from("property_calendars").insert({
+        org_id,
+        property_id: input.property_id,
+        channel: input.channel,
+        ical_url: input.ical_url,
+        active: true,
+        status: "pending",
+      });
+      if (error) throw error;
+    },
+    onSuccess: () => qc.invalidateQueries({ queryKey: ["property_calendars"] }),
+  });
+}
+
+export function useDeletePropertyCalendar() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: async (id: string) => {
+      const { error } = await supabase.from("property_calendars").delete().eq("id", id);
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ["property_calendars"] });
+      qc.invalidateQueries({ queryKey: ["external_calendar_events"] });
+    },
+  });
+}
+
+export type CreateReservationInput = {
+  property_id: string;
+  guest_name: string;
+  guest_email: string | null;
+  guest_phone: string | null;
+  check_in: string;
+  check_out: string;
+  guests_count: number;
+  total_amount: number;
+  payment_status: string;
+  notes: string | null;
+};
+
+export function useCreateReservation() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: async (input: CreateReservationInput) => {
+    const args: Database["public"]["Functions"]["create_direct_reservation"]["Args"] = {
+  _property_id: input.property_id,
+  _guest_name: input.guest_name,
+  _check_in: input.check_in,
+  _check_out: input.check_out,
+  _guests_count: input.guests_count,
+  _total_amount: input.total_amount,
+  _payment_status: input.payment_status,
+  _channel: "directo",
+  _status: "confirmada",
+};
+
+if (input.guest_email) args._guest_email = input.guest_email;
+if (input.guest_phone) args._guest_phone = input.guest_phone;
+if (input.notes) args._notes = input.notes;
+
+const { data, error } = await supabase.rpc("create_direct_reservation", args);
+      if (error) throw error;
+      return data;
+    },
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ["reservations"] });
+      qc.invalidateQueries({ queryKey: ["guests"] });
+    },
+  });
+}
+
+export const RESERVATION_ERROR: Record<string, string> = {
+  not_authorized: "No tienes permiso para crear reservas directas.",
+  invalid_dates: "Las fechas de la reserva no son válidas.",
+  property_not_found: "La propiedad no existe o no pertenece a tu empresa.",
+  property_not_available: "La propiedad ya está ocupada o bloqueada en esas fechas.",
+  license_inactive: "La licencia de la empresa no está activa.",
+  guest_required: "Escribe los datos del huésped.",
+};
+
+export function reservationErrorMessage(err: unknown) {
+  const raw = err instanceof Error ? err.message : String(err);
+  const key = Object.keys(RESERVATION_ERROR).find((k) => raw.includes(k));
+  return key ? RESERVATION_ERROR[key]! : raw;
+}
+
 export const money = (n: number) =>
   new Intl.NumberFormat("es-MX", {
     style: "currency",
@@ -198,11 +294,8 @@ export const ROLE_SCOPE: Record<string, string> = {
   accounting: "Finanzas y reportes, sin datos operativos sensibles",
 };
 
-/** Roles que usan el panel de trabajador, nunca el panel administrativo. */
 export const WORKER_ROLES: AppRole[] = ["cleaning", "maintenance", "reception"];
-/** Roles que solo trabajan sobre propiedades asignadas. */
 export const FIELD_ROLES: AppRole[] = ["cleaning", "maintenance"];
-/** Roles invitables (owner nunca se invita). */
 export const INVITABLE_ROLES: AppRole[] = [
   "manager",
   "reception",
@@ -241,7 +334,6 @@ export function useMyRole() {
   return { ...ctx, data: ctx.data?.role ?? null };
 }
 
-/** Ruta inicial según rol; evita mandar trabajadores al panel administrativo. */
 export function homeForRole(role: AppRole | null | undefined) {
   if (!role) return "/pendiente";
   if (role === "cleaning" || role === "maintenance" || role === "reception") return "/trabajo";
@@ -345,8 +437,6 @@ export function useTeamMutations() {
   return { setProperties, setStatus, revoke, refresh };
 }
 
-/* ---------- Asignación de tareas a personas reales (owner/manager) ---------- */
-
 export function useAssignTask() {
   const qc = useQueryClient();
   return useMutation({
@@ -364,7 +454,6 @@ export function useAssignTask() {
         _task_id: taskId,
         _user_id: userId as unknown as string,
       });
-
       if (error) throw error;
     },
     onSuccess: (_d, v) => {
@@ -374,9 +463,6 @@ export function useAssignTask() {
     },
   });
 }
-
-/* ---------- Operación del trabajador ---------- */
-
 
 export function useUpdateCleaningStatus() {
   const qc = useQueryClient();
@@ -408,7 +494,6 @@ export type IssueInput = {
   blocks_guests: boolean;
 };
 
-/** Reporte de incidencia desde el panel de trabajador; queda visible para la administración. */
 export function useReportIssue() {
   const qc = useQueryClient();
   return useMutation({
@@ -431,4 +516,3 @@ export function useReportIssue() {
     onSuccess: () => qc.invalidateQueries({ queryKey: ["maintenance_issues"] }),
   });
 }
-

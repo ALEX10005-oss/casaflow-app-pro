@@ -11,6 +11,14 @@ export type IcalEvent = {
   cancelled: boolean;
 };
 
+type PartialIcalEvent = {
+  uid?: string | undefined;
+  summary?: string | null | undefined;
+  start?: string | undefined;
+  end?: string | undefined;
+  status?: string | undefined;
+};
+
 function unfold(text: string): string[] {
   const raw = text.replace(/\r\n/g, "\n").split("\n");
   const lines: string[] = [];
@@ -33,7 +41,7 @@ function toISODate(value: string): string | null {
 
 export function parseIcal(text: string): IcalEvent[] {
   const events: IcalEvent[] = [];
-  let current: Partial<IcalEvent> & { status?: string } | null = null;
+  let current: PartialIcalEvent | null = null;
 
   for (const line of unfold(text)) {
     if (line.startsWith("BEGIN:VEVENT")) {
@@ -68,7 +76,6 @@ export function parseIcal(text: string): IcalEvent[] {
     else if (name === "DTEND") current.end = toISODate(value) ?? undefined;
   }
 
-  // DTEND ausente: evento de un día
   return events.filter((e) => e.end > e.start);
 }
 
