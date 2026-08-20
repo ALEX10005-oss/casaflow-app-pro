@@ -132,6 +132,76 @@ export type Database = {
           },
         ]
       }
+      external_calendar_events: {
+        Row: {
+          calendar_id: string
+          channel: string
+          created_at: string
+          end_date: string
+          external_uid: string
+          id: string
+          last_seen_at: string
+          org_id: string
+          property_id: string
+          start_date: string
+          status: string
+          summary: string | null
+          updated_at: string
+        }
+        Insert: {
+          calendar_id: string
+          channel: string
+          created_at?: string
+          end_date: string
+          external_uid: string
+          id?: string
+          last_seen_at?: string
+          org_id: string
+          property_id: string
+          start_date: string
+          status?: string
+          summary?: string | null
+          updated_at?: string
+        }
+        Update: {
+          calendar_id?: string
+          channel?: string
+          created_at?: string
+          end_date?: string
+          external_uid?: string
+          id?: string
+          last_seen_at?: string
+          org_id?: string
+          property_id?: string
+          start_date?: string
+          status?: string
+          summary?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "external_calendar_events_calendar_id_fkey"
+            columns: ["calendar_id"]
+            isOneToOne: false
+            referencedRelation: "property_calendars"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "external_calendar_events_org_id_fkey"
+            columns: ["org_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "external_calendar_events_property_id_fkey"
+            columns: ["property_id"]
+            isOneToOne: false
+            referencedRelation: "properties"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       guests: {
         Row: {
           country: string | null
@@ -609,6 +679,7 @@ export type Database = {
           check_out_time: string
           code: string
           created_at: string
+          ical_token: string
           id: string
           image_url: string | null
           instructions: string | null
@@ -628,6 +699,7 @@ export type Database = {
           check_out_time?: string
           code: string
           created_at?: string
+          ical_token?: string
           id?: string
           image_url?: string | null
           instructions?: string | null
@@ -647,6 +719,7 @@ export type Database = {
           check_out_time?: string
           code?: string
           created_at?: string
+          ical_token?: string
           id?: string
           image_url?: string | null
           instructions?: string | null
@@ -709,6 +782,66 @@ export type Database = {
           },
           {
             foreignKeyName: "property_blocks_property_id_fkey"
+            columns: ["property_id"]
+            isOneToOne: false
+            referencedRelation: "properties"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      property_calendars: {
+        Row: {
+          active: boolean
+          channel: string
+          created_at: string
+          events_count: number
+          ical_url: string
+          id: string
+          last_error: string | null
+          last_sync: string | null
+          org_id: string
+          property_id: string
+          status: string
+          updated_at: string
+        }
+        Insert: {
+          active?: boolean
+          channel: string
+          created_at?: string
+          events_count?: number
+          ical_url: string
+          id?: string
+          last_error?: string | null
+          last_sync?: string | null
+          org_id: string
+          property_id: string
+          status?: string
+          updated_at?: string
+        }
+        Update: {
+          active?: boolean
+          channel?: string
+          created_at?: string
+          events_count?: number
+          ical_url?: string
+          id?: string
+          last_error?: string | null
+          last_sync?: string | null
+          org_id?: string
+          property_id?: string
+          status?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "property_calendars_org_id_fkey"
+            columns: ["org_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "property_calendars_property_id_fkey"
             columns: ["property_id"]
             isOneToOne: false
             referencedRelation: "properties"
@@ -1166,6 +1299,46 @@ export type Database = {
     Functions: {
       accept_invitation: { Args: { _token: string }; Returns: Json }
       can_access_property: { Args: { _p: string }; Returns: boolean }
+      create_direct_reservation: {
+        Args: {
+          _channel?: string
+          _check_in: string
+          _check_out: string
+          _guest_email?: string
+          _guest_id?: string
+          _guest_name?: string
+          _guest_phone?: string
+          _guests_count?: number
+          _notes?: string
+          _payment_status?: string
+          _property_id: string
+          _status?: string
+          _total_amount?: number
+        }
+        Returns: {
+          channel: string
+          check_in: string
+          check_out: string
+          code: string
+          commission: number
+          created_at: string
+          guest_id: string | null
+          guests_count: number
+          id: string
+          notes: string | null
+          org_id: string
+          payment_status: string
+          property_id: string
+          status: string
+          total_amount: number
+        }
+        SetofOptions: {
+          from: "*"
+          to: "reservations"
+          isOneToOne: true
+          isSetofReturn: false
+        }
+      }
       current_org_id: { Args: never; Returns: string }
       has_role: {
         Args: {
@@ -1333,6 +1506,15 @@ export type Database = {
           isOneToOne: true
           isSetofReturn: false
         }
+      }
+      property_is_available: {
+        Args: {
+          _check_in: string
+          _check_out: string
+          _exclude_reservation?: string
+          _property_id: string
+        }
+        Returns: boolean
       }
       record_health_check: {
         Args: {
