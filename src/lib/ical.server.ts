@@ -72,8 +72,13 @@ export function parseIcal(text: string): IcalEvent[] {
     if (name === "UID") current.uid = value.trim();
     else if (name === "SUMMARY") current.summary = value.trim().slice(0, 200) || null;
     else if (name === "STATUS") current.status = value.trim();
-    else if (name === "DTSTART") current.start = toISODate(value) ?? undefined;
-    else if (name === "DTEND") current.end = toISODate(value) ?? undefined;
+    else if (name === "DTSTART") {
+      const parsed = toISODate(value);
+      if (parsed) current.start = parsed;
+    } else if (name === "DTEND") {
+      const parsed = toISODate(value);
+      if (parsed) current.end = parsed;
+    }
   }
 
   return events.filter((e) => e.end > e.start);
