@@ -799,7 +799,6 @@ export type Database = {
           id: string
           last_error: string | null
           last_sync: string | null
-          listing_name: string | null
           org_id: string
           property_id: string
           status: string
@@ -814,7 +813,6 @@ export type Database = {
           id?: string
           last_error?: string | null
           last_sync?: string | null
-          listing_name?: string | null
           org_id: string
           property_id: string
           status?: string
@@ -829,7 +827,6 @@ export type Database = {
           id?: string
           last_error?: string | null
           last_sync?: string | null
-          listing_name?: string | null
           org_id?: string
           property_id?: string
           status?: string
