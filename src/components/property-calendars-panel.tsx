@@ -22,10 +22,6 @@ import { syncPropertyCalendar } from "@/lib/ical.functions";
 
 const CHANNELS = ["Airbnb", "Booking", "VRBO", "Expedia", "Otro"];
 
-type CalendarWithListingName = ReturnType<typeof usePropertyCalendars>["data"] extends Array<infer T>
-  ? T & { listing_name?: string | null }
-  : never;
-
 export function PropertyCalendarsPanel({ property }: { property: Property }) {
   const qc = useQueryClient();
   const { data: all = [] } = usePropertyCalendars();
