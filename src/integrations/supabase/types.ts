@@ -1538,6 +1538,47 @@ export type Database = {
         Returns: Database["public"]["Enums"]["app_role"]
       }
       run_platform_health_check: { Args: never; Returns: Json }
+      update_reservation: {
+        Args: {
+          _channel?: string
+          _check_in: string
+          _check_out: string
+          _code?: string
+          _guest_email?: string
+          _guest_name?: string
+          _guest_phone?: string
+          _guests_count?: number
+          _id: string
+          _notes?: string
+          _payment_status?: string
+          _property_id: string
+          _status?: string
+          _total_amount?: number
+        }
+        Returns: {
+          channel: string
+          check_in: string
+          check_out: string
+          code: string
+          commission: number
+          created_at: string
+          guest_id: string | null
+          guests_count: number
+          id: string
+          notes: string | null
+          org_id: string
+          payment_status: string
+          property_id: string
+          status: string
+          total_amount: number
+        }
+        SetofOptions: {
+          from: "*"
+          to: "reservations"
+          isOneToOne: true
+          isSetofReturn: false
+        }
+      }
     }
     Enums: {
       app_role:
