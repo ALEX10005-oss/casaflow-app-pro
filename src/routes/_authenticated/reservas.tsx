@@ -111,7 +111,11 @@ function Reservas() {
             </thead>
             <tbody>
               {rows.map((r) => (
-                <tr key={r.id} className="border-b last:border-0 hover:bg-muted/30">
+                <tr
+                  key={r.id}
+                  className="cursor-pointer border-b last:border-0 hover:bg-muted/30"
+                  onClick={() => setSelected(r)}
+                >
                   <td className="px-4 py-3 font-mono text-xs">{r.code}</td>
                   <td className="px-4 py-3 font-medium">{propById[r.property_id]?.name}</td>
                   <td className="px-4 py-3">{guestById[r.guest_id ?? ""]?.full_name ?? "—"}</td>
@@ -124,6 +128,7 @@ function Reservas() {
                   <td className="px-4 py-3 text-right font-medium">{money(Number(r.total_amount))}</td>
                 </tr>
               ))}
+
               {rows.length === 0 && (
                 <tr><td colSpan={8} className="px-4 py-10 text-center text-muted-foreground">No hay reservas con estos filtros.</td></tr>
               )}
