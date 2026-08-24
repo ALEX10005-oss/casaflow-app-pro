@@ -1,10 +1,13 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useMemo, useState } from "react";
-import { ChevronLeft, ChevronRight, Users } from "lucide-react";
+import { ChevronLeft, ChevronRight, Pencil, Users } from "lucide-react";
 import { AppShell } from "@/components/app-shell";
+import { ReservationForm } from "@/components/reservation-form";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import {
+  canEditReservations,
+  useMyContext,
   money,
   nightsBetween,
   shortDate,
@@ -100,6 +103,8 @@ function Calendario() {
   const [view, setView] = useState<ViewMode>("mes");
   const [anchor, setAnchor] = useState(today);
   const [selectedReservationId, setSelectedReservationId] = useState<string | null>(null);
+  const [editing, setEditing] = useState(false);
+  const { data: myCtx } = useMyContext();
 
   const { rangeStart, rangeEnd, label } = useMemo(() => {
     if (view === "dia") {
@@ -463,9 +468,16 @@ function Calendario() {
                   {selectedProperty?.name ?? "Propiedad"} · {selectedReservation.channel}
                 </p>
               </div>
-              <Button variant="ghost" size="sm" onClick={() => setSelectedReservationId(null)}>
-                Cerrar
-              </Button>
+              <div className="flex items-center gap-2">
+                {canEditReservations(myCtx?.role) && (
+                  <Button size="sm" onClick={() => setEditing(true)}>
+                    <Pencil className="size-4" /> Editar reserva
+                  </Button>
+                )}
+                <Button variant="ghost" size="sm" onClick={() => setSelectedReservationId(null)}>
+                  Cerrar
+                </Button>
+              </div>
             </div>
             <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
               <div className="rounded-lg border p-3">
@@ -508,6 +520,12 @@ function Calendario() {
           </CardContent>
         </Card>
       )}
+
+      <ReservationForm
+        open={editing && Boolean(selectedReservation)}
+        onOpenChange={setEditing}
+        reservation={selectedReservation}
+      />
 
       <Card className="mt-4">
         <CardContent className="overflow-x-auto p-0">

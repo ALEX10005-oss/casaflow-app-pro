@@ -3,6 +3,7 @@ import { useState } from "react";
 import { Plus, Search } from "lucide-react";
 import { AppShell } from "@/components/app-shell";
 import { ReservationForm } from "@/components/reservation-form";
+import { ReservationDetailDialog } from "@/components/reservation-detail";
 import { StatusPill } from "@/components/status-pill";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
@@ -14,7 +15,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { money, nightsBetween, shortDate, useGuests, useProperties, useReservations } from "@/lib/casaflow";
+import { money, nightsBetween, shortDate, useGuests, useProperties, useReservations, type Reservation } from "@/lib/casaflow";
 
 export const Route = createFileRoute("/_authenticated/reservas")({
   head: () => ({
@@ -40,6 +41,7 @@ function Reservas() {
   const [status, setStatus] = useState("all");
   const [property, setProperty] = useState("all");
   const [newOpen, setNewOpen] = useState(false);
+  const [selected, setSelected] = useState<Reservation | null>(null);
 
   const propById = Object.fromEntries(properties.map((p) => [p.id, p]));
   const guestById = Object.fromEntries(guests.map((g) => [g.id, g]));
@@ -138,6 +140,7 @@ function Reservas() {
       </Card>
 
       <ReservationForm open={newOpen} onOpenChange={setNewOpen} />
+      <ReservationDetailDialog reservation={selected} onOpenChange={(o) => !o && setSelected(null)} />
     </AppShell>
   );
 }
