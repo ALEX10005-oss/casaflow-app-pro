@@ -206,14 +206,69 @@ const { data, error } = await supabase.rpc("create_direct_reservation", args);
   });
 }
 
+export type UpdateReservationInput = {
+  id: string;
+  property_id: string;
+  guest_name: string;
+  guest_email: string | null;
+  guest_phone: string | null;
+  check_in: string;
+  check_out: string;
+  guests_count: number;
+  total_amount: number;
+  payment_status: string;
+  status: string;
+  channel: string;
+  code: string;
+  notes: string | null;
+};
+
+export function useUpdateReservation() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: async (input: UpdateReservationInput) => {
+      const { data, error } = await supabase.rpc("update_reservation", {
+        _id: input.id,
+        _property_id: input.property_id,
+        _check_in: input.check_in,
+        _check_out: input.check_out,
+        _guest_name: input.guest_name,
+        _guest_email: input.guest_email,
+        _guest_phone: input.guest_phone,
+        _channel: input.channel,
+        _code: input.code,
+        _status: input.status,
+        _payment_status: input.payment_status,
+        _total_amount: input.total_amount,
+        _guests_count: input.guests_count,
+        _notes: input.notes,
+      });
+      if (error) throw error;
+      return data;
+    },
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ["reservations"] });
+      qc.invalidateQueries({ queryKey: ["guests"] });
+    },
+  });
+}
+
+export function canEditReservations(role: AppRole | null | undefined) {
+  return role === "owner" || role === "manager" || role === "reception";
+}
+
 export const RESERVATION_ERROR: Record<string, string> = {
-  not_authorized: "No tienes permiso para crear reservas directas.",
-  invalid_dates: "Las fechas de la reserva no son válidas.",
+  not_authorized: "No tienes permiso para editar reservas.",
+  invalid_dates: "La salida debe ser posterior a la entrada.",
   property_not_found: "La propiedad no existe o no pertenece a tu empresa.",
-  property_not_available: "La propiedad ya está ocupada o bloqueada en esas fechas.",
+  invalid_property: "La propiedad no existe o no pertenece a tu empresa.",
+  reservation_not_found: "La reserva ya no existe.",
+  property_not_available:
+    "Esas fechas se cruzan con otra reserva, un evento importado por iCal o un bloqueo de mantenimiento.",
   license_inactive: "La licencia de la empresa no está activa.",
   guest_required: "Escribe los datos del huésped.",
 };
+
 
 export function reservationErrorMessage(err: unknown) {
   const raw = err instanceof Error ? err.message : String(err);
