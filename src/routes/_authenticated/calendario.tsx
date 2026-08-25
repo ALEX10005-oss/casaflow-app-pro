@@ -329,9 +329,9 @@ function Calendario() {
                           key={item.id}
                           type="button"
                           onClick={() => item.reservationId && setSelectedReservationId(item.reservationId)}
-                          title={`${item.name} · ${shortDate(item.from)} → ${shortDate(item.to)}`}
+                          title={`${item.name}${item.amount ? ` · ${money(item.amount)}` : ""} · ${shortDate(item.from)} → ${shortDate(item.to)}`}
                           className={cn(
-                            "absolute inset-y-[2px] z-[5] overflow-hidden rounded-sm border-2 border-white/85 px-2 text-left text-xs font-bold shadow-lg",
+                            "absolute inset-y-[3px] z-[5] flex items-center overflow-hidden rounded-md border-2 border-white/85 px-2 text-left text-[11px] font-bold leading-tight shadow-lg",
                             item.kind === "block"
                               ? "bg-slate-800 text-white"
                               : CHANNEL_COLOR[item.channel] ?? "bg-red-600 text-white",
@@ -340,8 +340,12 @@ function Calendario() {
                           )}
                           style={{ left: startIndex * DAY_WIDTH, width }}
                         >
-                          <span className="block truncate drop-shadow-sm">{item.name}</span>
+                          <span className="block truncate drop-shadow-sm">
+                            {item.name}
+                            {item.amount ? ` · ${money(item.amount)}` : ""}
+                          </span>
                         </button>
+
                       );
                     })}
                   </div>
