@@ -243,6 +243,7 @@ function Calendario() {
                   from: reservation.check_in,
                   to: reservation.check_out,
                   name: guestById[reservation.guest_id ?? ""]?.full_name ?? reservation.code,
+                  amount: Number(reservation.total_amount ?? 0),
                   channel: reservation.channel,
                   kind: "reservation" as const,
                 })),
@@ -252,6 +253,7 @@ function Calendario() {
                   from: event.start_date,
                   to: event.end_date,
                   name: event.summary || event.channel,
+                  amount: null,
                   channel: event.channel,
                   kind: "external" as const,
                 })),
@@ -261,10 +263,12 @@ function Calendario() {
                   from: block.start_date,
                   to: block.end_date,
                   name: block.reason || "Bloqueado",
+                  amount: null,
                   channel: "",
                   kind: "block" as const,
                 })),
               ];
+
 
               return (
                 <div key={property.id} className="flex border-b border-slate-600">
