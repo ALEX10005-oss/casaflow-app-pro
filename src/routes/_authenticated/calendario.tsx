@@ -104,7 +104,6 @@ function Calendario() {
   const { data: blocks = [] } = useBlocks();
 
   const guestById = Object.fromEntries(guests.map((guest) => [guest.id, guest]));
-  const propertyById = Object.fromEntries(properties.map((property) => [property.id, property]));
 
   const selectedReservation = selectedReservationId
     ? reservations.find((reservation) => reservation.id === selectedReservationId) ?? null
