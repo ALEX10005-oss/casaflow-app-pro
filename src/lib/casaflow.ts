@@ -233,15 +233,15 @@ export function useUpdateReservation() {
         _check_in: input.check_in,
         _check_out: input.check_out,
         _guest_name: input.guest_name,
-        _guest_email: input.guest_email,
-        _guest_phone: input.guest_phone,
+        _guest_email: input.guest_email ?? undefined,
+        _guest_phone: input.guest_phone ?? undefined,
         _channel: input.channel,
         _code: input.code,
         _status: input.status,
         _payment_status: input.payment_status,
         _total_amount: input.total_amount,
         _guests_count: input.guests_count,
-        _notes: input.notes,
+        _notes: input.notes ?? undefined,
       });
       if (error) throw error;
       return data;
