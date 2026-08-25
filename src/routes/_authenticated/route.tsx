@@ -44,10 +44,9 @@ function Guard() {
   return <Outlet />;
 }
 
-function Blocked({ ctx }: { ctx: MyContext }) {
+function Blocked({ ctx: _ctx }: { ctx: MyContext }) {
   const navigate = useNavigate();
   const qc = useQueryClient();
-  const licenseIssue = ctx.license_status !== "active";
 
   async function signOut() {
     qc.clear();
@@ -60,21 +59,13 @@ function Blocked({ ctx }: { ctx: MyContext }) {
       <Card className="w-full max-w-md">
         <CardHeader>
           <Lock className="size-6 text-muted-foreground" />
-          <CardTitle className="font-display text-xl">
-            {licenseIssue ? "Operación suspendida" : "Acceso desactivado"}
-          </CardTitle>
+          <CardTitle className="font-display text-xl">Servicio temporalmente inactivo</CardTitle>
           <CardDescription>
-            {licenseIssue
-              ? `La licencia de ${ctx.org_name ?? "tu empresa"} no está activa. La información se conserva intacta y se restablece al reactivarla.`
-              : "Tu administrador desactivó temporalmente tu acceso. Tus datos y tareas se conservan."}
+            Tu acceso a CasaFlow no está disponible en este momento. Ponte en contacto con soporte para revisar el estado de tu cuenta.
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-3 text-sm text-muted-foreground">
-          <p>
-            {licenseIssue
-              ? "Contacta al propietario de la cuenta para reactivar la licencia."
-              : "Pide a tu administrador que reactive tu acceso desde Equipo y roles."}
-          </p>
+          <p>Tu información permanece guardada mientras el servicio no está disponible.</p>
           <Button variant="outline" className="w-full" onClick={signOut}>
             Cerrar sesión
           </Button>
