@@ -356,42 +356,13 @@ function Calendario() {
         </CardContent>
       </Card>
 
-      {selectedReservation && (
-        <Card className="mt-4 border-primary/20">
-          <CardContent className="pt-6">
-            <div className="mb-4 flex flex-wrap items-start justify-between gap-3">
-              <div>
-                <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">Detalle de reserva</p>
-                <h2 className="text-lg font-semibold">{selectedGuest?.full_name ?? "Huésped"}</h2>
-                <p className="text-sm text-muted-foreground">
-                  {selectedProperty?.name ?? "Propiedad"} · {selectedReservation.channel}
-                </p>
-              </div>
-              <div className="flex items-center gap-2">
-                {canEditReservations(myCtx?.role) && (
-                  <Button size="sm" onClick={() => setEditing(true)}>
-                    <Pencil className="size-4" /> Editar reserva
-                  </Button>
-                )}
-                <Button variant="ghost" size="sm" onClick={() => setSelectedReservationId(null)}>Cerrar</Button>
-              </div>
-            </div>
-
-            <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
-              <div className="rounded-lg border p-3"><p className="text-xs text-muted-foreground">Entrada</p><p className="font-semibold">{shortDate(selectedReservation.check_in)}</p></div>
-              <div className="rounded-lg border p-3"><p className="text-xs text-muted-foreground">Salida</p><p className="font-semibold">{shortDate(selectedReservation.check_out)}</p></div>
-              <div className="rounded-lg border p-3"><p className="text-xs text-muted-foreground">Noches</p><p className="font-semibold">{nightsBetween(selectedReservation.check_in, selectedReservation.check_out)}</p></div>
-              <div className="rounded-lg border p-3"><p className="text-xs text-muted-foreground">Total</p><p className="font-semibold">{money(Number(selectedReservation.total_amount))}</p></div>
-            </div>
-          </CardContent>
-        </Card>
-      )}
-
-      <ReservationForm
-        open={editing && Boolean(selectedReservation)}
-        onOpenChange={setEditing}
+      <ReservationDetailDialog
         reservation={selectedReservation}
+        onOpenChange={(open) => {
+          if (!open) setSelectedReservationId(null);
+        }}
       />
     </AppShell>
   );
 }
+
