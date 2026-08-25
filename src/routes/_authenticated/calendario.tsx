@@ -25,20 +25,20 @@ export const Route = createFileRoute("/_authenticated/calendario")({
   component: Calendario,
 });
 
-const PROPERTY_WIDTH = 230;
-const DAY_WIDTH = 54;
-const ROW_HEIGHT = 38;
+const PROPERTY_WIDTH = 240;
+const DAY_WIDTH = 52;
+const ROW_HEIGHT = 48;
 const CANCELLED = ["cancelada", "cancelled", "no_show"];
 
 const CHANNEL_COLOR: Record<string, string> = {
-  Airbnb: "bg-red-600 text-white",
-  Booking: "bg-blue-600 text-white",
-  "Booking.com": "bg-blue-600 text-white",
-  VRBO: "bg-cyan-600 text-white",
-  Vrbo: "bg-cyan-600 text-white",
-  Expedia: "bg-violet-600 text-white",
-  directo: "bg-amber-400 text-slate-950",
-  Directo: "bg-amber-400 text-slate-950",
+  Airbnb: "bg-rose-500 text-white border-rose-600",
+  Booking: "bg-blue-600 text-white border-blue-700",
+  "Booking.com": "bg-blue-600 text-white border-blue-700",
+  VRBO: "bg-cyan-600 text-white border-cyan-700",
+  Vrbo: "bg-cyan-600 text-white border-cyan-700",
+  Expedia: "bg-violet-600 text-white border-violet-700",
+  directo: "bg-amber-400 text-slate-950 border-amber-500",
+  Directo: "bg-amber-400 text-slate-950 border-amber-500",
 };
 
 function dayDiff(from: string, to: string) {
@@ -117,7 +117,7 @@ function Calendario() {
   const selectedGuest = selectedReservation?.guest_id ? guestById[selectedReservation.guest_id] : null;
   const selectedProperty = selectedReservation ? propertyById[selectedReservation.property_id] : null;
   const todayIndex = today >= rangeStart && today < rangeEnd ? dayDiff(rangeStart, today) : -1;
-  const todayScrollLeft = Math.max(0, (todayIndex - 5) * DAY_WIDTH);
+  const todayScrollLeft = Math.max(0, (todayIndex - 4) * DAY_WIDTH);
 
   useEffect(() => {
     if (year !== currentYear || todayIndex < 0 || !scrollRef.current) return;
@@ -137,7 +137,7 @@ function Calendario() {
   return (
     <AppShell
       title="Calendario"
-      subtitle={`${properties.length} propiedades · planning de ocupación · ${label}`}
+      subtitle={`${properties.length} propiedades · calendario de ocupación · ${label}`}
       actions={
         <div className="flex items-center gap-1">
           <Button variant="outline" size="icon" onClick={() => setAnchor(`${year - 1}-01-01`)} aria-label="Año anterior">
@@ -152,22 +152,22 @@ function Calendario() {
         </div>
       }
     >
-      <div className="mb-3 flex flex-wrap items-center gap-3 rounded-lg border bg-card px-3 py-2 text-xs">
-        <span className="flex items-center gap-1.5"><span className="size-3 rounded-sm bg-emerald-700" /> Disponible</span>
-        <span className="flex items-center gap-1.5"><span className="size-3 rounded-sm bg-red-600" /> Airbnb / ocupada</span>
-        <span className="flex items-center gap-1.5"><span className="size-3 rounded-sm bg-blue-600" /> Booking</span>
-        <span className="flex items-center gap-1.5"><span className="size-3 rounded-sm bg-cyan-600" /> VRBO</span>
-        <span className="flex items-center gap-1.5"><span className="size-3 rounded-sm bg-slate-700" /> Bloqueo / mantenimiento</span>
-        <span className="ml-auto text-muted-foreground">Abre cerca de hoy; desliza para recorrer el resto del año.</span>
+      <div className="mb-3 flex flex-wrap items-center gap-3 rounded-xl border bg-card px-4 py-3 text-xs shadow-sm">
+        <span className="flex items-center gap-1.5"><span className="size-3 rounded-full bg-rose-500" /> Airbnb</span>
+        <span className="flex items-center gap-1.5"><span className="size-3 rounded-full bg-blue-600" /> Booking</span>
+        <span className="flex items-center gap-1.5"><span className="size-3 rounded-full bg-cyan-600" /> VRBO</span>
+        <span className="flex items-center gap-1.5"><span className="size-3 rounded-full bg-amber-400" /> Directo</span>
+        <span className="flex items-center gap-1.5"><span className="size-3 rounded-full bg-slate-500" /> Bloqueo</span>
+        <span className="ml-auto text-muted-foreground">Los días libres permanecen neutros para que las reservas destaquen.</span>
       </div>
 
-      <Card className="overflow-hidden border-slate-700 bg-slate-950 text-white">
+      <Card className="overflow-hidden border bg-background shadow-sm">
         <CardContent ref={scrollRef} className="overflow-x-auto p-0">
           <div style={{ minWidth: PROPERTY_WIDTH + timelineWidth }}>
-            <div className="sticky top-0 z-30 border-b border-slate-600 bg-slate-950 shadow-md">
+            <div className="sticky top-0 z-30 border-b bg-background shadow-sm">
               <div className="flex">
                 <div
-                  className="sticky left-0 z-40 shrink-0 border-r border-slate-600 bg-slate-950 px-3 py-2 text-xs font-bold uppercase tracking-wide text-slate-300"
+                  className="sticky left-0 z-40 shrink-0 border-r bg-background px-4 py-3 text-xs font-semibold uppercase tracking-wide text-muted-foreground"
                   style={{ width: PROPERTY_WIDTH }}
                 >
                   Propiedad
@@ -176,13 +176,10 @@ function Calendario() {
                   {monthGroups.map((month) => (
                     <div
                       key={month.key}
-                      className="relative shrink-0 border-r-2 border-slate-500 bg-blue-950 py-2 text-sm font-bold uppercase text-white"
+                      className="relative shrink-0 border-r bg-muted/25 py-3 text-sm font-semibold capitalize text-foreground"
                       style={{ width: month.days * DAY_WIDTH }}
                     >
-                      <span
-                        className="inline-block whitespace-nowrap px-3"
-                        style={{ position: "sticky", left: PROPERTY_WIDTH + 10 }}
-                      >
+                      <span className="inline-block whitespace-nowrap px-3" style={{ position: "sticky", left: PROPERTY_WIDTH + 12 }}>
                         {month.name} {year}
                       </span>
                     </div>
@@ -190,8 +187,8 @@ function Calendario() {
                 </div>
               </div>
 
-              <div className="flex border-t border-slate-600">
-                <div className="sticky left-0 z-40 shrink-0 border-r border-slate-600 bg-slate-950" style={{ width: PROPERTY_WIDTH }} />
+              <div className="flex border-t bg-background">
+                <div className="sticky left-0 z-40 shrink-0 border-r bg-background" style={{ width: PROPERTY_WIDTH }} />
                 <div className="flex" style={{ width: timelineWidth }}>
                   {columns.map((iso) => {
                     const d = new Date(`${iso}T12:00:00`);
@@ -200,16 +197,16 @@ function Calendario() {
                       <div
                         key={iso}
                         className={cn(
-                          "shrink-0 border-r border-slate-600 py-1 text-center leading-tight",
-                          isWeekend ? "bg-blue-900" : "bg-blue-800",
-                          iso === today && "bg-cyan-700 ring-2 ring-inset ring-cyan-300",
+                          "shrink-0 border-r py-2 text-center leading-tight",
+                          isWeekend ? "bg-muted/35" : "bg-background",
+                          iso === today && "bg-rose-50 text-rose-600 ring-1 ring-inset ring-rose-300",
                         )}
                         style={{ width: DAY_WIDTH }}
                       >
-                        <div className="text-[10px] font-semibold uppercase text-slate-200">
+                        <div className="text-[10px] font-medium uppercase text-muted-foreground">
                           {d.toLocaleDateString("es-MX", { weekday: "narrow" })}
                         </div>
-                        <div className="text-sm font-bold">{d.getDate()}</div>
+                        <div className="mt-0.5 text-sm font-semibold">{d.getDate()}</div>
                       </div>
                     );
                   })}
@@ -267,19 +264,19 @@ function Calendario() {
               ];
 
               return (
-                <div key={property.id} className="flex border-b border-slate-600">
+                <div key={property.id} className="flex border-b bg-background">
                   <div
                     className={cn(
-                      "sticky left-0 z-20 shrink-0 border-r border-slate-600 px-3 py-1.5",
-                      propertyIndex % 2 === 0 ? "bg-slate-950" : "bg-slate-900",
+                      "sticky left-0 z-20 shrink-0 border-r px-4 py-2.5",
+                      propertyIndex % 2 === 0 ? "bg-background" : "bg-muted/15",
                     )}
                     style={{ width: PROPERTY_WIDTH, height: ROW_HEIGHT }}
                   >
-                    <p className="truncate text-xs font-semibold text-white">{property.name}</p>
-                    <p className="truncate text-[10px] text-slate-400">{property.code} · {property.location}</p>
+                    <p className="truncate text-sm font-semibold text-foreground">{property.name}</p>
+                    <p className="truncate text-[11px] text-muted-foreground">{property.code} · {property.location}</p>
                   </div>
 
-                  <div className="relative bg-black" style={{ width: timelineWidth, height: ROW_HEIGHT }}>
+                  <div className="relative bg-background" style={{ width: timelineWidth, height: ROW_HEIGHT }}>
                     {columns.map((iso, index) => {
                       const d = new Date(`${iso}T12:00:00`);
                       const isWeekend = [0, 6].includes(d.getDay());
@@ -287,8 +284,8 @@ function Calendario() {
                         <div
                           key={iso}
                           className={cn(
-                            "absolute inset-y-0 border-r border-slate-500/70",
-                            isWeekend ? "bg-emerald-900/75" : "bg-emerald-800/70",
+                            "absolute inset-y-0 border-r",
+                            isWeekend ? "bg-muted/20" : "bg-background",
                           )}
                           style={{ left: index * DAY_WIDTH, width: DAY_WIDTH }}
                         />
@@ -298,14 +295,14 @@ function Calendario() {
                     {monthGroups.slice(1).map((month) => (
                       <div
                         key={`month-${month.key}`}
-                        className="absolute inset-y-0 z-[2] border-l-2 border-white/70"
+                        className="absolute inset-y-0 z-[2] border-l-2 border-border"
                         style={{ left: month.startIndex * DAY_WIDTH }}
                       />
                     ))}
 
                     {todayIndex >= 0 && (
                       <div
-                        className="absolute inset-y-0 z-[4] w-0.5 bg-cyan-300 shadow-[0_0_6px_rgba(103,232,249,0.9)]"
+                        className="absolute inset-y-0 z-[4] w-0.5 bg-rose-400"
                         style={{ left: todayIndex * DAY_WIDTH }}
                         title="Hoy"
                       />
@@ -318,7 +315,7 @@ function Calendario() {
                       const startIndex = clamp(rawStart, 0, totalDays);
                       const endIndex = clamp(rawEnd, 0, totalDays);
                       const widthDays = Math.max(1, endIndex - startIndex);
-                      const width = Math.max(DAY_WIDTH, widthDays * DAY_WIDTH);
+                      const width = Math.max(DAY_WIDTH, widthDays * DAY_WIDTH - 6);
 
                       return (
                         <button
@@ -327,16 +324,16 @@ function Calendario() {
                           onClick={() => item.reservationId && setSelectedReservationId(item.reservationId)}
                           title={`${item.name} · ${shortDate(item.from)} → ${shortDate(item.to)}`}
                           className={cn(
-                            "absolute inset-y-[2px] z-[5] overflow-hidden rounded-sm border-2 border-white/85 px-2 text-left text-xs font-bold shadow-lg",
+                            "absolute top-1.5 z-[5] flex h-[36px] items-center overflow-hidden rounded-xl border px-3 text-left text-xs font-semibold shadow-sm transition",
                             item.kind === "block"
-                              ? "bg-slate-800 text-white"
-                              : CHANNEL_COLOR[item.channel] ?? "bg-red-600 text-white",
-                            item.kind === "external" && "border-dashed",
-                            item.reservationId && "cursor-pointer hover:brightness-110 focus:outline-none focus:ring-2 focus:ring-white",
+                              ? "border-slate-600 bg-slate-500 text-white"
+                              : CHANNEL_COLOR[item.channel] ?? "border-rose-600 bg-rose-500 text-white",
+                            item.kind === "external" && "border-dashed opacity-90",
+                            item.reservationId && "cursor-pointer hover:brightness-105 focus:outline-none focus:ring-2 focus:ring-ring",
                           )}
-                          style={{ left: startIndex * DAY_WIDTH, width }}
+                          style={{ left: startIndex * DAY_WIDTH + 3, width }}
                         >
-                          <span className="block truncate drop-shadow-sm">{item.name}</span>
+                          <span className="block truncate">{item.name}</span>
                         </button>
                       );
                     })}
