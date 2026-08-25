@@ -28,14 +28,14 @@ const ROW_HEIGHT = 44;
 const CANCELLED = ["cancelada", "cancelled", "no_show"];
 
 const CHANNEL_COLOR: Record<string, string> = {
-  Airbnb: "bg-red-600 text-white",
+  Airbnb: "bg-red-500 text-white",
   Booking: "bg-blue-600 text-white",
   "Booking.com": "bg-blue-600 text-white",
-  VRBO: "bg-cyan-600 text-white",
-  Vrbo: "bg-cyan-600 text-white",
+  VRBO: "bg-teal-500 text-white",
+  Vrbo: "bg-teal-500 text-white",
   Expedia: "bg-violet-600 text-white",
-  directo: "bg-amber-400 text-slate-950",
-  Directo: "bg-amber-400 text-slate-950",
+  directo: "bg-orange-500 text-white",
+  Directo: "bg-orange-500 text-white",
 };
 
 function dayDiff(from: string, to: string) {
@@ -146,9 +146,10 @@ function Calendario() {
     >
       <div className="mb-3 flex flex-wrap items-center gap-3 rounded-lg border bg-card px-3 py-2 text-xs">
         <span className="flex items-center gap-1.5"><span className="size-3 rounded-sm bg-emerald-700" /> Disponible</span>
-        <span className="flex items-center gap-1.5"><span className="size-3 rounded-sm bg-red-600" /> Airbnb / ocupada</span>
+        <span className="flex items-center gap-1.5"><span className="size-3 rounded-sm bg-red-500" /> Airbnb / ocupada</span>
         <span className="flex items-center gap-1.5"><span className="size-3 rounded-sm bg-blue-600" /> Booking</span>
-        <span className="flex items-center gap-1.5"><span className="size-3 rounded-sm bg-cyan-600" /> VRBO</span>
+        <span className="flex items-center gap-1.5"><span className="size-3 rounded-sm bg-teal-500" /> VRBO</span>
+        <span className="flex items-center gap-1.5"><span className="size-3 rounded-sm bg-orange-500" /> Directo</span>
         <span className="flex items-center gap-1.5"><span className="size-3 rounded-sm bg-slate-700" /> Bloqueo / mantenimiento</span>
         <span className="ml-auto text-muted-foreground">Abre cerca de hoy; desliza para recorrer el resto del año.</span>
       </div>
