@@ -1,20 +1,17 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useEffect, useMemo, useRef, useState } from "react";
-import { ChevronLeft, ChevronRight, Pencil } from "lucide-react";
+import { ChevronLeft, ChevronRight } from "lucide-react";
 import { AppShell } from "@/components/app-shell";
-import { ReservationForm } from "@/components/reservation-form";
+import { ReservationDetailDialog } from "@/components/reservation-detail";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import {
-  canEditReservations,
   money,
-  nightsBetween,
   shortDate,
   todayISO,
   useBlocks,
   useExternalEvents,
   useGuests,
-  useMyContext,
   useProperties,
   useReservations,
 } from "@/lib/casaflow";
@@ -27,7 +24,7 @@ export const Route = createFileRoute("/_authenticated/calendario")({
 
 const PROPERTY_WIDTH = 230;
 const DAY_WIDTH = 54;
-const ROW_HEIGHT = 38;
+const ROW_HEIGHT = 44;
 const CANCELLED = ["cancelada", "cancelled", "no_show"];
 
 const CHANNEL_COLOR: Record<string, string> = {
@@ -66,9 +63,7 @@ function Calendario() {
   const currentYear = Number(today.slice(0, 4));
   const [anchor, setAnchor] = useState(today);
   const [selectedReservationId, setSelectedReservationId] = useState<string | null>(null);
-  const [editing, setEditing] = useState(false);
   const scrollRef = useRef<HTMLDivElement | null>(null);
-  const { data: myCtx } = useMyContext();
 
   const year = Number(anchor.slice(0, 4));
   const rangeStart = year === currentYear ? startOfMonth(today) : `${year}-01-01`;
@@ -114,8 +109,6 @@ function Calendario() {
   const selectedReservation = selectedReservationId
     ? reservations.find((reservation) => reservation.id === selectedReservationId) ?? null
     : null;
-  const selectedGuest = selectedReservation?.guest_id ? guestById[selectedReservation.guest_id] : null;
-  const selectedProperty = selectedReservation ? propertyById[selectedReservation.property_id] : null;
   const todayIndex = today >= rangeStart && today < rangeEnd ? dayDiff(rangeStart, today) : -1;
   const todayScrollLeft = Math.max(0, (todayIndex - 5) * DAY_WIDTH);
 
