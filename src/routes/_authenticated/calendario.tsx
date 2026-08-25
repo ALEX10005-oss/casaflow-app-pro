@@ -145,7 +145,7 @@ function Calendario() {
       }
     >
       <div className="mb-3 flex flex-wrap items-center gap-3 rounded-lg border bg-card px-3 py-2 text-xs">
-        <span className="flex items-center gap-1.5"><span className="size-3 rounded-sm bg-emerald-700" /> Disponible</span>
+        <span className="flex items-center gap-1.5"><span className="size-3 rounded-sm bg-[#0F766E]" /> Disponible</span>
         <span className="flex items-center gap-1.5"><span className="size-3 rounded-sm bg-red-500" /> Airbnb / ocupada</span>
         <span className="flex items-center gap-1.5"><span className="size-3 rounded-sm bg-blue-600" /> Booking</span>
         <span className="flex items-center gap-1.5"><span className="size-3 rounded-sm bg-teal-500" /> VRBO</span>
@@ -285,7 +285,7 @@ function Calendario() {
                           key={iso}
                           className={cn(
                             "absolute inset-y-0 border-r border-slate-500/70",
-                            isWeekend ? "bg-emerald-900/75" : "bg-emerald-800/70",
+                            isWeekend ? "bg-[#115E59]" : "bg-[#0F766E]",
                           )}
                           style={{ left: index * DAY_WIDTH, width: DAY_WIDTH }}
                         />
