@@ -28,14 +28,14 @@ const ROW_HEIGHT = 44;
 const CANCELLED = ["cancelada", "cancelled", "no_show"];
 
 const CHANNEL_COLOR: Record<string, string> = {
-  Airbnb: "bg-red-500 text-white",
-  Booking: "bg-blue-600 text-white",
-  "Booking.com": "bg-blue-600 text-white",
-  VRBO: "bg-teal-500 text-white",
-  Vrbo: "bg-teal-500 text-white",
-  Expedia: "bg-violet-600 text-white",
-  directo: "bg-orange-500 text-white",
-  Directo: "bg-orange-500 text-white",
+  Airbnb: "bg-[#FF5A5F]",
+  Booking: "bg-[#1D4ED8]",
+  "Booking.com": "bg-[#1D4ED8]",
+  VRBO: "bg-[#14B8A6]",
+  Vrbo: "bg-[#14B8A6]",
+  Expedia: "bg-[#7C3AED]",
+  directo: "bg-[#F97316]",
+  Directo: "bg-[#F97316]",
 };
 
 function dayDiff(from: string, to: string) {
@@ -145,22 +145,22 @@ function Calendario() {
       }
     >
       <div className="mb-3 flex flex-wrap items-center gap-3 rounded-lg border bg-card px-3 py-2 text-xs">
-        <span className="flex items-center gap-1.5"><span className="size-3 rounded-sm bg-[#0F766E]" /> Disponible</span>
-        <span className="flex items-center gap-1.5"><span className="size-3 rounded-sm bg-red-500" /> Airbnb / ocupada</span>
-        <span className="flex items-center gap-1.5"><span className="size-3 rounded-sm bg-blue-600" /> Booking</span>
-        <span className="flex items-center gap-1.5"><span className="size-3 rounded-sm bg-teal-500" /> VRBO</span>
-        <span className="flex items-center gap-1.5"><span className="size-3 rounded-sm bg-orange-500" /> Directo</span>
-        <span className="flex items-center gap-1.5"><span className="size-3 rounded-sm bg-slate-700" /> Bloqueo / mantenimiento</span>
+        <span className="flex items-center gap-1.5"><span className="size-3 rounded-sm border bg-background" /> Disponible</span>
+        <span className="flex items-center gap-1.5"><span className="size-3 rounded-sm bg-[#FF5A5F]" /> Airbnb</span>
+        <span className="flex items-center gap-1.5"><span className="size-3 rounded-sm bg-[#1D4ED8]" /> Booking</span>
+        <span className="flex items-center gap-1.5"><span className="size-3 rounded-sm bg-[#14B8A6]" /> VRBO</span>
+        <span className="flex items-center gap-1.5"><span className="size-3 rounded-sm bg-[#F97316]" /> Directo</span>
+        <span className="flex items-center gap-1.5"><span className="size-3 rounded-sm bg-[#334155]" /> Bloqueo / mantenimiento</span>
         <span className="ml-auto text-muted-foreground">Abre cerca de hoy; desliza para recorrer el resto del año.</span>
       </div>
 
-      <Card className="overflow-hidden border-slate-700 bg-slate-950 text-white">
+      <Card className="overflow-hidden">
         <CardContent ref={scrollRef} className="overflow-x-auto p-0">
           <div style={{ minWidth: PROPERTY_WIDTH + timelineWidth }}>
-            <div className="sticky top-0 z-30 border-b border-slate-600 bg-slate-950 shadow-md">
+            <div className="sticky top-0 z-30 border-b bg-card shadow-sm">
               <div className="flex">
                 <div
-                  className="sticky left-0 z-40 shrink-0 border-r border-slate-600 bg-slate-950 px-3 py-2 text-xs font-bold uppercase tracking-wide text-slate-300"
+                  className="sticky left-0 z-40 shrink-0 border-r bg-card px-3 py-2 text-xs font-semibold uppercase tracking-wide text-muted-foreground"
                   style={{ width: PROPERTY_WIDTH }}
                 >
                   Propiedad
@@ -169,7 +169,7 @@ function Calendario() {
                   {monthGroups.map((month) => (
                     <div
                       key={month.key}
-                      className="relative shrink-0 border-r-2 border-slate-500 bg-blue-950 py-2 text-sm font-bold uppercase text-white"
+                      className="relative shrink-0 border-r bg-muted/50 py-2 text-xs font-semibold uppercase tracking-wide text-foreground"
                       style={{ width: month.days * DAY_WIDTH }}
                     >
                       <span
@@ -183,8 +183,8 @@ function Calendario() {
                 </div>
               </div>
 
-              <div className="flex border-t border-slate-600">
-                <div className="sticky left-0 z-40 shrink-0 border-r border-slate-600 bg-slate-950" style={{ width: PROPERTY_WIDTH }} />
+              <div className="flex border-t">
+                <div className="sticky left-0 z-40 shrink-0 border-r bg-card" style={{ width: PROPERTY_WIDTH }} />
                 <div className="flex" style={{ width: timelineWidth }}>
                   {columns.map((iso) => {
                     const d = new Date(`${iso}T12:00:00`);
@@ -193,16 +193,16 @@ function Calendario() {
                       <div
                         key={iso}
                         className={cn(
-                          "shrink-0 border-r border-slate-600 py-1 text-center leading-tight",
-                          isWeekend ? "bg-blue-900" : "bg-blue-800",
-                          iso === today && "bg-cyan-700 ring-2 ring-inset ring-cyan-300",
+                          "shrink-0 border-r py-1 text-center leading-tight",
+                          isWeekend ? "bg-muted/60" : "bg-card",
+                          iso === today && "bg-[#FF5A5F]/10",
                         )}
                         style={{ width: DAY_WIDTH }}
                       >
-                        <div className="text-[10px] font-semibold uppercase text-slate-200">
+                        <div className="text-[10px] font-medium uppercase text-muted-foreground">
                           {d.toLocaleDateString("es-MX", { weekday: "narrow" })}
                         </div>
-                        <div className="text-sm font-bold">{d.getDate()}</div>
+                        <div className={cn("text-sm font-semibold", iso === today && "text-[#FF5A5F]")}>{d.getDate()}</div>
                       </div>
                     );
                   })}
@@ -237,6 +237,7 @@ function Calendario() {
                   to: reservation.check_out,
                   name: guestById[reservation.guest_id ?? ""]?.full_name ?? reservation.code,
                   amount: Number(reservation.total_amount ?? 0),
+                  guestsCount: Number(reservation.guests_count ?? 0),
                   channel: reservation.channel,
                   kind: "reservation" as const,
                 })),
@@ -247,6 +248,7 @@ function Calendario() {
                   to: event.end_date,
                   name: event.summary || event.channel,
                   amount: null,
+                  guestsCount: 0,
                   channel: event.channel,
                   kind: "external" as const,
                 })),
@@ -257,6 +259,7 @@ function Calendario() {
                   to: block.end_date,
                   name: block.reason || "Bloqueado",
                   amount: null,
+                  guestsCount: 0,
                   channel: "",
                   kind: "block" as const,
                 })),
@@ -264,19 +267,19 @@ function Calendario() {
 
 
               return (
-                <div key={property.id} className="flex border-b border-slate-600">
+                <div key={property.id} className="flex border-b">
                   <div
                     className={cn(
-                      "sticky left-0 z-20 shrink-0 border-r border-slate-600 px-3 py-1.5",
-                      propertyIndex % 2 === 0 ? "bg-slate-950" : "bg-slate-900",
+                      "sticky left-0 z-20 shrink-0 border-r px-3 py-1.5",
+                      propertyIndex % 2 === 0 ? "bg-card" : "bg-muted/40",
                     )}
                     style={{ width: PROPERTY_WIDTH, height: ROW_HEIGHT }}
                   >
-                    <p className="truncate text-xs font-semibold text-white">{property.name}</p>
-                    <p className="truncate text-[10px] text-slate-400">{property.code} · {property.location}</p>
+                    <p className="truncate text-xs font-semibold text-foreground">{property.name}</p>
+                    <p className="truncate text-[10px] text-muted-foreground">{property.code} · {property.location}</p>
                   </div>
 
-                  <div className="relative bg-black" style={{ width: timelineWidth, height: ROW_HEIGHT }}>
+                  <div className="relative bg-background" style={{ width: timelineWidth, height: ROW_HEIGHT }}>
                     {columns.map((iso, index) => {
                       const d = new Date(`${iso}T12:00:00`);
                       const isWeekend = [0, 6].includes(d.getDay());
@@ -284,8 +287,8 @@ function Calendario() {
                         <div
                           key={iso}
                           className={cn(
-                            "absolute inset-y-0 border-r border-slate-500/70",
-                            isWeekend ? "bg-[#115E59]" : "bg-[#0F766E]",
+                            "absolute inset-y-0 border-r border-border/70",
+                            isWeekend ? "bg-muted/50" : "bg-card",
                           )}
                           style={{ left: index * DAY_WIDTH, width: DAY_WIDTH }}
                         />
@@ -295,14 +298,14 @@ function Calendario() {
                     {monthGroups.slice(1).map((month) => (
                       <div
                         key={`month-${month.key}`}
-                        className="absolute inset-y-0 z-[2] border-l-2 border-white/70"
+                        className="absolute inset-y-0 z-[2] border-l border-border"
                         style={{ left: month.startIndex * DAY_WIDTH }}
                       />
                     ))}
 
                     {todayIndex >= 0 && (
                       <div
-                        className="absolute inset-y-0 z-[4] w-0.5 bg-cyan-300 shadow-[0_0_6px_rgba(103,232,249,0.9)]"
+                        className="absolute inset-y-0 z-[4] w-0.5 bg-[#FF5A5F]"
                         style={{ left: todayIndex * DAY_WIDTH }}
                         title="Hoy"
                       />
@@ -316,6 +319,13 @@ function Calendario() {
                       const endIndex = clamp(rawEnd, 0, totalDays);
                       const widthDays = Math.max(1, endIndex - startIndex);
                       const width = Math.max(DAY_WIDTH, widthDays * DAY_WIDTH);
+                      const label = [
+                        item.name,
+                        item.amount ? money(item.amount) : null,
+                        widthDays >= 3 && item.guestsCount ? `${item.guestsCount} hu.` : null,
+                      ]
+                        .filter(Boolean)
+                        .join(" · ");
 
                       return (
                         <button
@@ -324,19 +334,14 @@ function Calendario() {
                           onClick={() => item.reservationId && setSelectedReservationId(item.reservationId)}
                           title={`${item.name}${item.amount ? ` · ${money(item.amount)}` : ""} · ${shortDate(item.from)} → ${shortDate(item.to)}`}
                           className={cn(
-                            "absolute inset-y-[3px] z-[5] flex items-center overflow-hidden rounded-md border-2 border-white/85 px-2 text-left text-[11px] font-bold leading-tight shadow-lg",
-                            item.kind === "block"
-                              ? "bg-slate-800 text-white"
-                              : CHANNEL_COLOR[item.channel] ?? "bg-red-600 text-white",
-                            item.kind === "external" && "border-dashed",
-                            item.reservationId && "cursor-pointer hover:brightness-110 focus:outline-none focus:ring-2 focus:ring-white",
+                            "absolute inset-y-[5px] z-[5] flex items-center overflow-hidden rounded-full px-3 text-left text-[11px] font-semibold leading-tight text-white shadow-sm ring-1 ring-black/5",
+                            item.kind === "block" ? "bg-[#334155]" : CHANNEL_COLOR[item.channel] ?? "bg-[#FF5A5F]",
+                            item.kind === "external" && "border-2 border-dashed border-white/70",
+                            item.reservationId && "cursor-pointer hover:brightness-105 focus:outline-none focus:ring-2 focus:ring-ring",
                           )}
-                          style={{ left: startIndex * DAY_WIDTH, width }}
+                          style={{ left: startIndex * DAY_WIDTH + 2, width: width - 4 }}
                         >
-                          <span className="block truncate drop-shadow-sm">
-                            {item.name}
-                            {item.amount ? ` · ${money(item.amount)}` : ""}
-                          </span>
+                          <span className="block truncate">{label}</span>
                         </button>
 
                       );
@@ -348,6 +353,7 @@ function Calendario() {
           </div>
         </CardContent>
       </Card>
+
 
       <ReservationDetailDialog
         reservation={selectedReservation}
