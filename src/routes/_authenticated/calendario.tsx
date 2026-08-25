@@ -1,20 +1,17 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useEffect, useMemo, useRef, useState } from "react";
-import { ChevronLeft, ChevronRight, Pencil } from "lucide-react";
+import { ChevronLeft, ChevronRight } from "lucide-react";
 import { AppShell } from "@/components/app-shell";
-import { ReservationForm } from "@/components/reservation-form";
+import { ReservationDetailDialog } from "@/components/reservation-detail";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import {
-  canEditReservations,
   money,
-  nightsBetween,
   shortDate,
   todayISO,
   useBlocks,
   useExternalEvents,
   useGuests,
-  useMyContext,
   useProperties,
   useReservations,
 } from "@/lib/casaflow";
@@ -27,7 +24,7 @@ export const Route = createFileRoute("/_authenticated/calendario")({
 
 const PROPERTY_WIDTH = 230;
 const DAY_WIDTH = 54;
-const ROW_HEIGHT = 38;
+const ROW_HEIGHT = 44;
 const CANCELLED = ["cancelada", "cancelled", "no_show"];
 
 const CHANNEL_COLOR: Record<string, string> = {
@@ -66,9 +63,7 @@ function Calendario() {
   const currentYear = Number(today.slice(0, 4));
   const [anchor, setAnchor] = useState(today);
   const [selectedReservationId, setSelectedReservationId] = useState<string | null>(null);
-  const [editing, setEditing] = useState(false);
   const scrollRef = useRef<HTMLDivElement | null>(null);
-  const { data: myCtx } = useMyContext();
 
   const year = Number(anchor.slice(0, 4));
   const rangeStart = year === currentYear ? startOfMonth(today) : `${year}-01-01`;
@@ -109,13 +104,10 @@ function Calendario() {
   const { data: blocks = [] } = useBlocks();
 
   const guestById = Object.fromEntries(guests.map((guest) => [guest.id, guest]));
-  const propertyById = Object.fromEntries(properties.map((property) => [property.id, property]));
 
   const selectedReservation = selectedReservationId
     ? reservations.find((reservation) => reservation.id === selectedReservationId) ?? null
     : null;
-  const selectedGuest = selectedReservation?.guest_id ? guestById[selectedReservation.guest_id] : null;
-  const selectedProperty = selectedReservation ? propertyById[selectedReservation.property_id] : null;
   const todayIndex = today >= rangeStart && today < rangeEnd ? dayDiff(rangeStart, today) : -1;
   const todayScrollLeft = Math.max(0, (todayIndex - 5) * DAY_WIDTH);
 
@@ -243,6 +235,7 @@ function Calendario() {
                   from: reservation.check_in,
                   to: reservation.check_out,
                   name: guestById[reservation.guest_id ?? ""]?.full_name ?? reservation.code,
+                  amount: Number(reservation.total_amount ?? 0),
                   channel: reservation.channel,
                   kind: "reservation" as const,
                 })),
@@ -252,6 +245,7 @@ function Calendario() {
                   from: event.start_date,
                   to: event.end_date,
                   name: event.summary || event.channel,
+                  amount: null,
                   channel: event.channel,
                   kind: "external" as const,
                 })),
@@ -261,10 +255,12 @@ function Calendario() {
                   from: block.start_date,
                   to: block.end_date,
                   name: block.reason || "Bloqueado",
+                  amount: null,
                   channel: "",
                   kind: "block" as const,
                 })),
               ];
+
 
               return (
                 <div key={property.id} className="flex border-b border-slate-600">
@@ -325,9 +321,9 @@ function Calendario() {
                           key={item.id}
                           type="button"
                           onClick={() => item.reservationId && setSelectedReservationId(item.reservationId)}
-                          title={`${item.name} · ${shortDate(item.from)} → ${shortDate(item.to)}`}
+                          title={`${item.name}${item.amount ? ` · ${money(item.amount)}` : ""} · ${shortDate(item.from)} → ${shortDate(item.to)}`}
                           className={cn(
-                            "absolute inset-y-[2px] z-[5] overflow-hidden rounded-sm border-2 border-white/85 px-2 text-left text-xs font-bold shadow-lg",
+                            "absolute inset-y-[3px] z-[5] flex items-center overflow-hidden rounded-md border-2 border-white/85 px-2 text-left text-[11px] font-bold leading-tight shadow-lg",
                             item.kind === "block"
                               ? "bg-slate-800 text-white"
                               : CHANNEL_COLOR[item.channel] ?? "bg-red-600 text-white",
@@ -336,8 +332,12 @@ function Calendario() {
                           )}
                           style={{ left: startIndex * DAY_WIDTH, width }}
                         >
-                          <span className="block truncate drop-shadow-sm">{item.name}</span>
+                          <span className="block truncate drop-shadow-sm">
+                            {item.name}
+                            {item.amount ? ` · ${money(item.amount)}` : ""}
+                          </span>
                         </button>
+
                       );
                     })}
                   </div>
@@ -348,42 +348,13 @@ function Calendario() {
         </CardContent>
       </Card>
 
-      {selectedReservation && (
-        <Card className="mt-4 border-primary/20">
-          <CardContent className="pt-6">
-            <div className="mb-4 flex flex-wrap items-start justify-between gap-3">
-              <div>
-                <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">Detalle de reserva</p>
-                <h2 className="text-lg font-semibold">{selectedGuest?.full_name ?? "Huésped"}</h2>
-                <p className="text-sm text-muted-foreground">
-                  {selectedProperty?.name ?? "Propiedad"} · {selectedReservation.channel}
-                </p>
-              </div>
-              <div className="flex items-center gap-2">
-                {canEditReservations(myCtx?.role) && (
-                  <Button size="sm" onClick={() => setEditing(true)}>
-                    <Pencil className="size-4" /> Editar reserva
-                  </Button>
-                )}
-                <Button variant="ghost" size="sm" onClick={() => setSelectedReservationId(null)}>Cerrar</Button>
-              </div>
-            </div>
-
-            <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
-              <div className="rounded-lg border p-3"><p className="text-xs text-muted-foreground">Entrada</p><p className="font-semibold">{shortDate(selectedReservation.check_in)}</p></div>
-              <div className="rounded-lg border p-3"><p className="text-xs text-muted-foreground">Salida</p><p className="font-semibold">{shortDate(selectedReservation.check_out)}</p></div>
-              <div className="rounded-lg border p-3"><p className="text-xs text-muted-foreground">Noches</p><p className="font-semibold">{nightsBetween(selectedReservation.check_in, selectedReservation.check_out)}</p></div>
-              <div className="rounded-lg border p-3"><p className="text-xs text-muted-foreground">Total</p><p className="font-semibold">{money(Number(selectedReservation.total_amount))}</p></div>
-            </div>
-          </CardContent>
-        </Card>
-      )}
-
-      <ReservationForm
-        open={editing && Boolean(selectedReservation)}
-        onOpenChange={setEditing}
+      <ReservationDetailDialog
         reservation={selectedReservation}
+        onOpenChange={(open) => {
+          if (!open) setSelectedReservationId(null);
+        }}
       />
     </AppShell>
   );
 }
+

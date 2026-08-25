@@ -227,22 +227,27 @@ export function useUpdateReservation() {
   const qc = useQueryClient();
   return useMutation({
     mutationFn: async (input: UpdateReservationInput) => {
-      const { data, error } = await supabase.rpc("update_reservation", {
+      const args: Record<string, unknown> = {
         _id: input.id,
         _property_id: input.property_id,
         _check_in: input.check_in,
         _check_out: input.check_out,
         _guest_name: input.guest_name,
-        _guest_email: input.guest_email,
-        _guest_phone: input.guest_phone,
         _channel: input.channel,
         _code: input.code,
         _status: input.status,
         _payment_status: input.payment_status,
         _total_amount: input.total_amount,
         _guests_count: input.guests_count,
-        _notes: input.notes,
-      });
+      };
+      if (input.guest_email) args["_guest_email"] = input.guest_email;
+      if (input.guest_phone) args["_guest_phone"] = input.guest_phone;
+      if (input.notes) args["_notes"] = input.notes;
+      const { data, error } = await supabase.rpc(
+        "update_reservation",
+        args as never,
+      );
+
       if (error) throw error;
       return data;
     },

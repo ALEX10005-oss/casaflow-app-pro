@@ -51,6 +51,9 @@ export function ReservationDetailDialog({
               </DialogHeader>
 
               <div className="grid gap-3 sm:grid-cols-2">
+                <Field label="Propiedad" value={property?.name ?? "—"} />
+                <Field label="Canal" value={reservation.channel} />
+                <Field label="Código" value={reservation.code || "—"} />
                 <Field label="Entrada" value={shortDate(reservation.check_in)} />
                 <Field label="Salida" value={shortDate(reservation.check_out)} />
                 <Field
@@ -61,6 +64,7 @@ export function ReservationDetailDialog({
                 <Field label="Total" value={money(Number(reservation.total_amount))} />
                 <Field label="Correo" value={guest?.email ?? "—"} />
                 <Field label="Teléfono" value={guest?.phone ?? "—"} />
+
                 <div className="rounded-lg border p-3">
                   <p className="text-xs text-muted-foreground">Estado</p>
                   <div className="mt-1 flex flex-wrap gap-1.5">
