@@ -1,5 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { ChevronLeft, ChevronRight, Pencil } from "lucide-react";
 import { AppShell } from "@/components/app-shell";
 import { ReservationForm } from "@/components/reservation-form";
@@ -34,11 +34,11 @@ const CHANNEL_COLOR: Record<string, string> = {
   Airbnb: "bg-red-600 text-white",
   Booking: "bg-blue-600 text-white",
   "Booking.com": "bg-blue-600 text-white",
-  VRBO: "bg-cyan-700 text-white",
-  Vrbo: "bg-cyan-700 text-white",
+  VRBO: "bg-cyan-600 text-white",
+  Vrbo: "bg-cyan-600 text-white",
   Expedia: "bg-violet-600 text-white",
-  directo: "bg-amber-500 text-slate-950",
-  Directo: "bg-amber-500 text-slate-950",
+  directo: "bg-amber-400 text-slate-950",
+  Directo: "bg-amber-400 text-slate-950",
 };
 
 function dayDiff(from: string, to: string) {
@@ -57,12 +57,6 @@ function startOfMonth(iso: string) {
   return `${iso.slice(0, 7)}-01`;
 }
 
-function addMonths(iso: string, amount: number) {
-  const d = new Date(`${startOfMonth(iso)}T12:00:00`);
-  d.setMonth(d.getMonth() + amount);
-  return d.toISOString().slice(0, 10);
-}
-
 function clamp(value: number, min: number, max: number) {
   return Math.min(max, Math.max(min, value));
 }
@@ -73,6 +67,7 @@ function Calendario() {
   const [anchor, setAnchor] = useState(today);
   const [selectedReservationId, setSelectedReservationId] = useState<string | null>(null);
   const [editing, setEditing] = useState(false);
+  const scrollRef = useRef<HTMLDivElement | null>(null);
   const { data: myCtx } = useMyContext();
 
   const year = Number(anchor.slice(0, 4));
@@ -122,6 +117,22 @@ function Calendario() {
   const selectedGuest = selectedReservation?.guest_id ? guestById[selectedReservation.guest_id] : null;
   const selectedProperty = selectedReservation ? propertyById[selectedReservation.property_id] : null;
   const todayIndex = today >= rangeStart && today < rangeEnd ? dayDiff(rangeStart, today) : -1;
+  const todayScrollLeft = Math.max(0, (todayIndex - 5) * DAY_WIDTH);
+
+  useEffect(() => {
+    if (year !== currentYear || todayIndex < 0 || !scrollRef.current) return;
+    const frame = window.requestAnimationFrame(() => {
+      scrollRef.current?.scrollTo({ left: todayScrollLeft, behavior: "auto" });
+    });
+    return () => window.cancelAnimationFrame(frame);
+  }, [year, currentYear, todayIndex, todayScrollLeft, properties.length]);
+
+  const goToday = () => {
+    setAnchor(today);
+    window.requestAnimationFrame(() => {
+      scrollRef.current?.scrollTo({ left: todayScrollLeft, behavior: "smooth" });
+    });
+  };
 
   return (
     <AppShell
@@ -132,7 +143,7 @@ function Calendario() {
           <Button variant="outline" size="icon" onClick={() => setAnchor(`${year - 1}-01-01`)} aria-label="Año anterior">
             <ChevronLeft className="size-4" />
           </Button>
-          <Button variant="outline" size="sm" onClick={() => setAnchor(today)}>
+          <Button variant="outline" size="sm" onClick={goToday}>
             Hoy
           </Button>
           <Button variant="outline" size="icon" onClick={() => setAnchor(`${year + 1}-01-01`)} aria-label="Año siguiente">
@@ -142,18 +153,18 @@ function Calendario() {
       }
     >
       <div className="mb-3 flex flex-wrap items-center gap-3 rounded-lg border bg-card px-3 py-2 text-xs">
-        <span className="flex items-center gap-1.5"><span className="size-3 rounded-sm bg-emerald-500" /> Disponible</span>
+        <span className="flex items-center gap-1.5"><span className="size-3 rounded-sm bg-emerald-700" /> Disponible</span>
         <span className="flex items-center gap-1.5"><span className="size-3 rounded-sm bg-red-600" /> Airbnb / ocupada</span>
         <span className="flex items-center gap-1.5"><span className="size-3 rounded-sm bg-blue-600" /> Booking</span>
-        <span className="flex items-center gap-1.5"><span className="size-3 rounded-sm bg-cyan-700" /> VRBO</span>
+        <span className="flex items-center gap-1.5"><span className="size-3 rounded-sm bg-cyan-600" /> VRBO</span>
         <span className="flex items-center gap-1.5"><span className="size-3 rounded-sm bg-slate-700" /> Bloqueo / mantenimiento</span>
-        <span className="ml-auto text-muted-foreground">Desliza horizontalmente para recorrer las fechas.</span>
+        <span className="ml-auto text-muted-foreground">Abre cerca de hoy; desliza para recorrer el resto del año.</span>
       </div>
 
       <Card className="overflow-hidden border-slate-700 bg-slate-950 text-white">
-        <CardContent className="overflow-x-auto p-0">
+        <CardContent ref={scrollRef} className="overflow-x-auto p-0">
           <div style={{ minWidth: PROPERTY_WIDTH + timelineWidth }}>
-            <div className="sticky top-0 z-30 border-b border-slate-600 bg-slate-950">
+            <div className="sticky top-0 z-30 border-b border-slate-600 bg-slate-950 shadow-md">
               <div className="flex">
                 <div
                   className="sticky left-0 z-40 shrink-0 border-r border-slate-600 bg-slate-950 px-3 py-2 text-xs font-bold uppercase tracking-wide text-slate-300"
@@ -165,10 +176,15 @@ function Calendario() {
                   {monthGroups.map((month) => (
                     <div
                       key={month.key}
-                      className="shrink-0 border-r-2 border-slate-500 bg-blue-950 px-2 py-2 text-center text-sm font-bold capitalize text-white"
+                      className="relative shrink-0 border-r-2 border-slate-500 bg-blue-950 py-2 text-sm font-bold uppercase text-white"
                       style={{ width: month.days * DAY_WIDTH }}
                     >
-                      {month.name}
+                      <span
+                        className="inline-block whitespace-nowrap px-3"
+                        style={{ position: "sticky", left: PROPERTY_WIDTH + 10 }}
+                      >
+                        {month.name} {year}
+                      </span>
                     </div>
                   ))}
                 </div>
@@ -186,7 +202,7 @@ function Calendario() {
                         className={cn(
                           "shrink-0 border-r border-slate-600 py-1 text-center leading-tight",
                           isWeekend ? "bg-blue-900" : "bg-blue-800",
-                          iso === today && "bg-cyan-700",
+                          iso === today && "bg-cyan-700 ring-2 ring-inset ring-cyan-300",
                         )}
                         style={{ width: DAY_WIDTH }}
                       >
@@ -271,8 +287,8 @@ function Calendario() {
                         <div
                           key={iso}
                           className={cn(
-                            "absolute inset-y-0 border-r border-slate-500/80",
-                            isWeekend ? "bg-emerald-600" : "bg-emerald-500",
+                            "absolute inset-y-0 border-r border-slate-500/70",
+                            isWeekend ? "bg-emerald-900/75" : "bg-emerald-800/70",
                           )}
                           style={{ left: index * DAY_WIDTH, width: DAY_WIDTH }}
                         />
@@ -289,7 +305,7 @@ function Calendario() {
 
                     {todayIndex >= 0 && (
                       <div
-                        className="absolute inset-y-0 z-[4] w-0.5 bg-cyan-300"
+                        className="absolute inset-y-0 z-[4] w-0.5 bg-cyan-300 shadow-[0_0_6px_rgba(103,232,249,0.9)]"
                         style={{ left: todayIndex * DAY_WIDTH }}
                         title="Hoy"
                       />
@@ -311,15 +327,16 @@ function Calendario() {
                           onClick={() => item.reservationId && setSelectedReservationId(item.reservationId)}
                           title={`${item.name} · ${shortDate(item.from)} → ${shortDate(item.to)}`}
                           className={cn(
-                            "absolute inset-y-[1px] z-[3] overflow-hidden border border-white/50 px-2 text-left text-xs font-semibold shadow-sm",
+                            "absolute inset-y-[2px] z-[5] overflow-hidden rounded-sm border-2 border-white/85 px-2 text-left text-xs font-bold shadow-lg",
                             item.kind === "block"
                               ? "bg-slate-800 text-white"
                               : CHANNEL_COLOR[item.channel] ?? "bg-red-600 text-white",
-                            item.reservationId && "cursor-pointer hover:brightness-110",
+                            item.kind === "external" && "border-dashed",
+                            item.reservationId && "cursor-pointer hover:brightness-110 focus:outline-none focus:ring-2 focus:ring-white",
                           )}
                           style={{ left: startIndex * DAY_WIDTH, width }}
                         >
-                          <span className="block truncate">{item.name}</span>
+                          <span className="block truncate drop-shadow-sm">{item.name}</span>
                         </button>
                       );
                     })}
