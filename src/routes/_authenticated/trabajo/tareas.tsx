@@ -1,6 +1,7 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { toast } from "sonner";
 import { WorkerShell } from "@/components/worker-shell";
+import { MaintenanceChecklist } from "@/components/maintenance-checklist";
 import { StatusPill } from "@/components/status-pill";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
@@ -83,6 +84,7 @@ function Tareas() {
 
   return (
     <WorkerShell title={isCleaning ? "Limpiezas asignadas" : "Incidencias asignadas"}>
+      {!isCleaning && <MaintenanceChecklist />}
       {empty && (
         <Card>
           <CardContent className="py-10 text-center text-sm text-muted-foreground">

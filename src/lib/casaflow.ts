@@ -48,7 +48,10 @@ export const useTemplates = table<WhatsappTemplate>("whatsapp_templates", "name"
 export const useAutomations = table<WhatsappAutomation>("whatsapp_automations", "name");
 export const useBlocks = table<PropertyBlock>("property_blocks", "start_date");
 export const usePropertyCalendars = table<PropertyCalendar>("property_calendars", "created_at");
-export const useExternalEvents = table<ExternalCalendarEvent>("external_calendar_events", "start_date");
+export const useExternalEvents = table<ExternalCalendarEvent>(
+  "external_calendar_events",
+  "start_date",
+);
 
 export function useOrganization() {
   return useQuery({
@@ -173,29 +176,30 @@ export type CreateReservationInput = {
   total_amount: number;
   payment_status: string;
   notes: string | null;
+  channel?: string;
 };
 
 export function useCreateReservation() {
   const qc = useQueryClient();
   return useMutation({
     mutationFn: async (input: CreateReservationInput) => {
-    const args: Database["public"]["Functions"]["create_direct_reservation"]["Args"] = {
-  _property_id: input.property_id,
-  _guest_name: input.guest_name,
-  _check_in: input.check_in,
-  _check_out: input.check_out,
-  _guests_count: input.guests_count,
-  _total_amount: input.total_amount,
-  _payment_status: input.payment_status,
-  _channel: "directo",
-  _status: "confirmada",
-};
+      const args: Database["public"]["Functions"]["create_direct_reservation"]["Args"] = {
+        _property_id: input.property_id,
+        _guest_name: input.guest_name,
+        _check_in: input.check_in,
+        _check_out: input.check_out,
+        _guests_count: input.guests_count,
+        _total_amount: input.total_amount,
+        _payment_status: input.payment_status,
+        _channel: input.channel ?? "directo",
+        _status: "confirmada",
+      };
 
-if (input.guest_email) args._guest_email = input.guest_email;
-if (input.guest_phone) args._guest_phone = input.guest_phone;
-if (input.notes) args._notes = input.notes;
+      if (input.guest_email) args._guest_email = input.guest_email;
+      if (input.guest_phone) args._guest_phone = input.guest_phone;
+      if (input.notes) args._notes = input.notes;
 
-const { data, error } = await supabase.rpc("create_direct_reservation", args);
+      const { data, error } = await supabase.rpc("create_direct_reservation", args);
       if (error) throw error;
       return data;
     },
@@ -243,10 +247,7 @@ export function useUpdateReservation() {
       if (input.guest_email) args["_guest_email"] = input.guest_email;
       if (input.guest_phone) args["_guest_phone"] = input.guest_phone;
       if (input.notes) args["_notes"] = input.notes;
-      const { data, error } = await supabase.rpc(
-        "update_reservation",
-        args as never,
-      );
+      const { data, error } = await supabase.rpc("update_reservation", args as never);
 
       if (error) throw error;
       return data;
@@ -273,7 +274,6 @@ export const RESERVATION_ERROR: Record<string, string> = {
   license_inactive: "La licencia de la empresa no está activa.",
   guest_required: "Escribe los datos del huésped.",
 };
-
 
 export function reservationErrorMessage(err: unknown) {
   const raw = err instanceof Error ? err.message : String(err);
@@ -322,11 +322,45 @@ export const channelLabel: Record<string, string> = {
 
 export function statusTone(status: string) {
   const s = status.toLowerCase();
-  if (["confirmada", "in_house", "hospedado", "active", "connected", "resuelta", "completada", "available", "activo", "active"].includes(s))
+  if (
+    [
+      "confirmada",
+      "in_house",
+      "hospedado",
+      "active",
+      "connected",
+      "resuelta",
+      "completada",
+      "available",
+      "activo",
+      "active",
+    ].includes(s)
+  )
     return "success";
-  if (["pendiente", "pending", "en_proceso", "programada", "media", "warning", "por_confirmar"].includes(s))
+  if (
+    [
+      "pendiente",
+      "pending",
+      "en_proceso",
+      "programada",
+      "media",
+      "warning",
+      "por_confirmar",
+    ].includes(s)
+  )
     return "warning";
-  if (["cancelada", "urgente", "critical", "alta", "error", "bloqueada", "suspendido", "vencida"].includes(s))
+  if (
+    [
+      "cancelada",
+      "urgente",
+      "critical",
+      "alta",
+      "error",
+      "bloqueada",
+      "suspendido",
+      "vencida",
+    ].includes(s)
+  )
     return "destructive";
   return "muted";
 }
@@ -348,7 +382,8 @@ export const ROLE_LABEL: Record<string, string> = {
 export const ROLE_SCOPE: Record<string, string> = {
   owner: "Acceso total, licencias y finanzas",
   manager: "Operación completa sin configuración de licencia",
-  reception: "Llegadas, salidas y huéspedes de sus propiedades",
+  reception:
+    "Calendario completo, llegadas, salidas, reservas y huéspedes; sin reportes financieros",
   cleaning: "Solo sus limpiezas asignadas (vista de trabajo)",
   maintenance: "Solo sus incidencias asignadas (vista de trabajo)",
   accounting: "Finanzas y reportes, sin datos operativos sensibles",

@@ -17,7 +17,8 @@ export function PropertyCalendarsPanel({ property }: { property: Property }) {
           <div className="space-y-1 text-sm">
             <p className="font-semibold">CSV activo desde el 7 de septiembre de 2026</p>
             <p className="text-muted-foreground">
-              Las nuevas reservas de Airbnb, Booking, VRBO, Expedia u otros canales se consolidan mediante la importación CSV de CasaFlow.
+              Las nuevas reservas de Airbnb, Booking, VRBO, Expedia u otros canales se consolidan
+              mediante la importación CSV de CasaFlow.
             </p>
           </div>
         </div>

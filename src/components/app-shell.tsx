@@ -14,6 +14,7 @@ import {
   MessageCircle,
   Plug,
   Receipt,
+  Upload,
   Users,
   UserCog,
 } from "lucide-react";
@@ -24,49 +25,64 @@ import { cn } from "@/lib/utils";
 
 const ROLE_ACCESS: Record<string, string[] | "all"> = {
   owner: "all",
-  manager: ["/panel", "/calendario", "/reservas", "/propiedades", "/huespedes", "/operaciones", "/whatsapp", "/finanzas", "/reportes", "/integraciones", "/equipo", "/alertas"],
+  manager: [
+    "/panel",
+    "/calendario",
+    "/reservas",
+    "/importar",
+    "/propiedades",
+    "/huespedes",
+    "/operaciones",
+    "/whatsapp",
+    "/finanzas",
+    "/reportes",
+    "/integraciones",
+    "/equipo",
+    "/alertas",
+  ],
   accounting: ["/finanzas", "/reportes"],
-  reception: [],
+  reception: ["/calendario", "/reservas", "/huespedes"],
   cleaning: [],
   maintenance: [],
 };
 
-
-const GROUPS: { label: string; items: { to: string; label: string; icon: typeof Building2 }[] }[] = [
-  {
-    label: "Operación diaria",
-    items: [
-      { to: "/panel", label: "Panel del día", icon: LayoutDashboard },
-      { to: "/calendario", label: "Calendario PMS", icon: CalendarDays },
-      { to: "/reservas", label: "Reservas", icon: ClipboardList },
-      { to: "/propiedades", label: "Propiedades", icon: Building2 },
-      { to: "/huespedes", label: "Huéspedes", icon: Users },
-    ],
-  },
-  {
-    label: "Ejecución",
-    items: [
-      { to: "/operaciones", label: "Limpieza y mantenimiento", icon: Cog },
-      { to: "/whatsapp", label: "WhatsApp", icon: MessageCircle },
-    ],
-  },
-  {
-    label: "Negocio",
-    items: [
-      { to: "/finanzas", label: "Finanzas", icon: Receipt },
-      { to: "/reportes", label: "Reportes", icon: LineChart },
-    ],
-  },
-  {
-    label: "Administración",
-    items: [
-      { to: "/integraciones", label: "Integraciones", icon: Plug },
-      { to: "/equipo", label: "Equipo y roles", icon: UserCog },
-      { to: "/alertas", label: "Alertas", icon: AlertTriangle },
-      { to: "/configuracion", label: "Configuración", icon: Cog },
-    ],
-  },
-];
+const GROUPS: { label: string; items: { to: string; label: string; icon: typeof Building2 }[] }[] =
+  [
+    {
+      label: "Operación diaria",
+      items: [
+        { to: "/panel", label: "Panel del día", icon: LayoutDashboard },
+        { to: "/calendario", label: "Calendario PMS", icon: CalendarDays },
+        { to: "/reservas", label: "Reservas", icon: ClipboardList },
+        { to: "/importar", label: "Importar CSV", icon: Upload },
+        { to: "/propiedades", label: "Propiedades", icon: Building2 },
+        { to: "/huespedes", label: "Huéspedes", icon: Users },
+      ],
+    },
+    {
+      label: "Ejecución",
+      items: [
+        { to: "/operaciones", label: "Limpieza y mantenimiento", icon: Cog },
+        { to: "/whatsapp", label: "WhatsApp", icon: MessageCircle },
+      ],
+    },
+    {
+      label: "Negocio",
+      items: [
+        { to: "/finanzas", label: "Finanzas", icon: Receipt },
+        { to: "/reportes", label: "Reportes", icon: LineChart },
+      ],
+    },
+    {
+      label: "Administración",
+      items: [
+        { to: "/integraciones", label: "Integraciones", icon: Plug },
+        { to: "/equipo", label: "Equipo y roles", icon: UserCog },
+        { to: "/alertas", label: "Alertas", icon: AlertTriangle },
+        { to: "/configuracion", label: "Configuración", icon: Cog },
+      ],
+    },
+  ];
 
 export function AppShell({
   title,

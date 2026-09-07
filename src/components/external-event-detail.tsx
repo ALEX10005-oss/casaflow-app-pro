@@ -1,5 +1,16 @@
-import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import { nightsBetween, shortDate, type ExternalCalendarEvent, type Property } from "@/lib/casaflow";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import {
+  nightsBetween,
+  shortDate,
+  type ExternalCalendarEvent,
+  type Property,
+} from "@/lib/casaflow";
 
 export function ExternalEventDetailDialog({
   event,
@@ -27,7 +38,10 @@ export function ExternalEventDetailDialog({
               <Field label="Canal / origen" value={event.channel} />
               <Field label="Entrada" value={shortDate(event.start_date)} />
               <Field label="Salida" value={shortDate(event.end_date)} />
-              <Field label="Noches" value={String(nightsBetween(event.start_date, event.end_date))} />
+              <Field
+                label="Noches"
+                value={String(nightsBetween(event.start_date, event.end_date))}
+              />
               <Field label="Estado de sincronización" value={event.status} />
               <div className="sm:col-span-2">
                 <Field label="Referencia externa" value={event.external_uid || "—"} />
@@ -35,7 +49,9 @@ export function ExternalEventDetailDialog({
             </div>
 
             <p className="rounded-lg border p-3 text-sm text-muted-foreground">
-              Este canal solo entregó información de calendario. CasaFlow muestra únicamente los datos reales recibidos; teléfono, correo, huéspedes, importe y pago aparecerán cuando la fuente de reserva los proporcione.
+              Este canal solo entregó información de calendario. CasaFlow muestra únicamente los
+              datos reales recibidos; teléfono, correo, huéspedes, importe y pago aparecerán cuando
+              la fuente de reserva los proporcione.
             </p>
           </>
         )}

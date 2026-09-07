@@ -85,7 +85,8 @@ function Incidencias() {
         </CardHeader>
         <CardContent className="space-y-3">
           <p className="text-sm text-muted-foreground">
-            Usa el formulario oficial de mantenimiento para registrar el reporte solicitado por la administración.
+            Usa el formulario oficial de mantenimiento para registrar el reporte solicitado por la
+            administración.
           </p>
           <Button asChild className="w-full">
             <a href={MAINTENANCE_FORM_URL} target="_blank" rel="noreferrer">

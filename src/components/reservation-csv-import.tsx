@@ -75,7 +75,11 @@ export function ReservationCsvImport({
       setRows(
         validateReservationsCsv(
           parsed,
-          properties.map((property) => ({ id: property.id, code: property.code, name: property.name })),
+          properties.map((property) => ({
+            id: property.id,
+            code: property.code,
+            name: property.name,
+          })),
           reservations.map((reservation) => ({
             code: reservation.code,
             property_id: reservation.property_id,
@@ -121,7 +125,8 @@ export function ReservationCsvImport({
         <DialogHeader>
           <DialogTitle>Importar reservas desde CSV</DialogTitle>
           <DialogDescription>
-            Puedes subir directamente el CSV original de Airbnb. CasaFlow ignora las columnas adicionales y solo toma los datos acordados.
+            Puedes subir directamente el CSV original de Airbnb. CasaFlow ignora las columnas
+            adicionales y solo toma los datos acordados.
           </DialogDescription>
         </DialogHeader>
 
@@ -131,7 +136,8 @@ export function ReservationCsvImport({
             <div className="space-y-1 text-sm">
               <p className="font-semibold">Protección de datos del cliente</p>
               <p className="text-muted-foreground">
-                Primero se valida todo el archivo. Las reservas existentes se omiten y nunca se actualizan ni se eliminan durante la importación.
+                Primero se valida todo el archivo. Las reservas existentes se omiten y nunca se
+                actualizan ni se eliminan durante la importación.
               </p>
             </div>
           </div>
@@ -145,7 +151,12 @@ export function ReservationCsvImport({
             className="hidden"
             onChange={(event) => void loadFile(event.target.files?.[0])}
           />
-          <Button type="button" variant="outline" onClick={() => inputRef.current?.click()} disabled={importing}>
+          <Button
+            type="button"
+            variant="outline"
+            onClick={() => inputRef.current?.click()}
+            disabled={importing}
+          >
             <Upload className="size-4" /> Seleccionar CSV
           </Button>
           <Button type="button" variant="ghost" onClick={downloadTemplate} disabled={importing}>
@@ -159,7 +170,9 @@ export function ReservationCsvImport({
         </div>
 
         <div className="rounded-md border bg-background px-3 py-2 text-xs text-muted-foreground">
-          Datos que CasaFlow mostrará e importará: código de confirmación, propiedad, huésped, check-in, check-out, noches calculadas, canal y total. Las demás columnas del archivo de Airbnb se ignoran.
+          Datos que CasaFlow mostrará e importará: código de confirmación, propiedad, huésped,
+          check-in, check-out, noches calculadas, canal y total. Las demás columnas del archivo de
+          Airbnb se ignoran.
         </div>
 
         {parseError && (
@@ -197,9 +210,13 @@ export function ReservationCsvImport({
                       <td className="px-3 py-2 font-mono">{row.codigo || "—"}</td>
                       <td className="px-3 py-2">{row.propiedad || "—"}</td>
                       <td className="px-3 py-2">{row.huesped || "—"}</td>
-                      <td className="px-3 py-2">{row.check_in || "—"} → {row.check_out || "—"}</td>
+                      <td className="px-3 py-2">
+                        {row.check_in || "—"} → {row.check_out || "—"}
+                      </td>
                       <td className="px-3 py-2">{row.canal || "—"}</td>
-                      <td className="px-3 py-2">{row.total >= 0 ? row.total.toLocaleString("es-MX") : "—"}</td>
+                      <td className="px-3 py-2">
+                        {row.total >= 0 ? row.total.toLocaleString("es-MX") : "—"}
+                      </td>
                       <td className="px-3 py-2">
                         {row.duplicate ? (
                           <span className="font-medium text-amber-700">Duplicada · se omite</span>
@@ -221,12 +238,15 @@ export function ReservationCsvImport({
           <div className="rounded-lg border bg-muted/30 p-4 text-sm">
             <p className="font-semibold">Resultado de importación</p>
             <p className="mt-1 text-muted-foreground">
-              {result.imported} nuevas · {result.skipped} omitidas · {result.errors.length} con error.
+              {result.imported} nuevas · {result.skipped} omitidas · {result.errors.length} con
+              error.
             </p>
             {result.errors.length > 0 && (
               <div className="mt-2 space-y-1 text-destructive">
                 {result.errors.map((error) => (
-                  <p key={`${error.rowNumber}-${error.message}`}>Fila {error.rowNumber}: {error.message}</p>
+                  <p key={`${error.rowNumber}-${error.message}`}>
+                    Fila {error.rowNumber}: {error.message}
+                  </p>
                 ))}
               </div>
             )}
@@ -234,10 +254,19 @@ export function ReservationCsvImport({
         )}
 
         <DialogFooter>
-          <Button type="button" variant="outline" onClick={() => handleOpenChange(false)} disabled={importing}>
+          <Button
+            type="button"
+            variant="outline"
+            onClick={() => handleOpenChange(false)}
+            disabled={importing}
+          >
             Cerrar
           </Button>
-          <Button type="button" onClick={() => void runImport()} disabled={!validRows.length || importing}>
+          <Button
+            type="button"
+            onClick={() => void runImport()}
+            disabled={!validRows.length || importing}
+          >
             {importing ? "Importando…" : `Importar ${validRows.length} nuevas`}
           </Button>
         </DialogFooter>

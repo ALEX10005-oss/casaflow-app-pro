@@ -114,7 +114,9 @@ function splitCsvRecords(text: string) {
 }
 
 function validIsoDate(value: string) {
-  return /^\d{4}-\d{2}-\d{2}$/.test(value) && !Number.isNaN(new Date(`${value}T12:00:00`).getTime());
+  return (
+    /^\d{4}-\d{2}-\d{2}$/.test(value) && !Number.isNaN(new Date(`${value}T12:00:00`).getTime())
+  );
 }
 
 function normalizeDate(value: string) {
@@ -122,7 +124,7 @@ function normalizeDate(value: string) {
   if (!raw) return "";
   if (/^\d{4}-\d{2}-\d{2}$/.test(raw)) return raw;
 
-  const match = raw.match(/^(\d{1,2})[\/-](\d{1,2})[\/-](\d{4})$/);
+  const match = raw.match(/^(\d{1,2})[/-](\d{1,2})[/-](\d{4})$/);
   if (match) {
     const [, d, m, y] = match;
     return `${y}-${m!.padStart(2, "0")}-${d!.padStart(2, "0")}`;
@@ -182,7 +184,9 @@ export function parseReservationsCsv(text: string): CsvReservationRow[] {
 
   const headers = parseCsvLine(records[0]!).map(normalize);
   const airbnb = isAirbnb(headers);
-  const casaFlow = ["codigo", "propiedad", "huesped", "check_in", "check_out"].every((h) => headers.includes(h));
+  const casaFlow = ["codigo", "propiedad", "huesped", "check_in", "check_out"].every((h) =>
+    headers.includes(h),
+  );
 
   if (!airbnb && !casaFlow) {
     throw new Error(
@@ -245,7 +249,12 @@ export function validateReservationsCsv(
   const existingCodes = new Set(reservations.map((reservation) => normalize(reservation.code)));
   const existingStays = new Set(
     reservations.map((reservation) =>
-      [reservation.property_id, normalize(reservation.channel), reservation.check_in, reservation.check_out].join("|"),
+      [
+        reservation.property_id,
+        normalize(reservation.channel),
+        reservation.check_in,
+        reservation.check_out,
+      ].join("|"),
     ),
   );
   const seenCodes = new Set<string>();
@@ -260,7 +269,7 @@ export function validateReservationsCsv(
       : "";
     const duplicate = Boolean(
       (codeKey && (existingCodes.has(codeKey) || seenCodes.has(codeKey))) ||
-        (stayKey && (existingStays.has(stayKey) || seenStays.has(stayKey))),
+      (stayKey && (existingStays.has(stayKey) || seenStays.has(stayKey))),
     );
 
     if (!row.codigo) errors.push("Falta código de reserva.");
@@ -268,7 +277,11 @@ export function validateReservationsCsv(
     if (!row.huesped) errors.push("Falta el nombre del huésped.");
     if (!validIsoDate(row.check_in)) errors.push("La fecha de entrada no es válida.");
     if (!validIsoDate(row.check_out)) errors.push("La fecha de salida no es válida.");
-    if (validIsoDate(row.check_in) && validIsoDate(row.check_out) && row.check_out <= row.check_in) {
+    if (
+      validIsoDate(row.check_in) &&
+      validIsoDate(row.check_out) &&
+      row.check_out <= row.check_in
+    ) {
       errors.push("La salida debe ser posterior a la entrada.");
     }
     if (!Number.isFinite(row.total) || row.total < 0) errors.push("El total no es válido.");
