@@ -1,5 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { ExternalLink } from "lucide-react";
 import { toast } from "sonner";
 import { AppShell } from "@/components/app-shell";
 import { StatusPill } from "@/components/status-pill";
@@ -31,6 +32,8 @@ export const Route = createFileRoute("/_authenticated/operaciones")({
   }),
   component: Operaciones,
 });
+
+const MAINTENANCE_FORM_URL = "https://forms.gle/QNZjcC5yq9WwjXsp9";
 
 function Operaciones() {
   const qc = useQueryClient();
@@ -164,6 +167,21 @@ function Operaciones() {
         </TabsContent>
 
         <TabsContent value="mantenimiento" className="space-y-2 pt-4">
+          <Card>
+            <CardContent className="flex flex-wrap items-center justify-between gap-3 py-4">
+              <div>
+                <p className="text-sm font-medium">Formulario oficial de mantenimiento</p>
+                <p className="text-xs text-muted-foreground">Abre el formulario enviado por el cliente para registrar un nuevo reporte.</p>
+              </div>
+              <Button asChild variant="outline">
+                <a href={MAINTENANCE_FORM_URL} target="_blank" rel="noreferrer">
+                  Abrir formulario
+                  <ExternalLink className="ml-2 size-4" />
+                </a>
+              </Button>
+            </CardContent>
+          </Card>
+
           {issues.map((i) => (
             <Card key={i.id} className={i.blocks_guests && i.status !== "resuelta" ? "border-destructive/40" : ""}>
               <CardContent className="flex flex-wrap items-start justify-between gap-3 pt-6">
