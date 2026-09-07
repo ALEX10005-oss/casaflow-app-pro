@@ -33,8 +33,9 @@ export const Route = createFileRoute("/_authenticated/calendario")({
 
 const PROPERTY_WIDTH = 230;
 const DAY_WIDTH = 54;
-const ROW_HEIGHT = 44;
+const ROW_HEIGHT = 52;
 const CANCELLED = ["cancelada", "cancelled", "no_show"];
+
 const CHANNEL_COLOR: Record<string, string> = {
   Airbnb: "bg-[#FF5A5F]",
   Booking: "bg-[#1D4ED8]",
@@ -51,13 +52,20 @@ function dayDiff(from: string, to: string) {
   const b = new Date(`${to}T12:00:00`).getTime();
   return Math.round((b - a) / 86_400_000);
 }
+
 function shift(iso: string, days: number) {
   const d = new Date(`${iso}T12:00:00`);
   d.setDate(d.getDate() + days);
   return d.toISOString().slice(0, 10);
 }
-function startOfMonth(iso: string) { return `${iso.slice(0, 7)}-01`; }
-function clamp(value: number, min: number, max: number) { return Math.min(max, Math.max(min, value)); }
+
+function startOfMonth(iso: string) {
+  return `${iso.slice(0, 7)}-01`;
+}
+
+function clamp(value: number, min: number, max: number) {
+  return Math.min(max, Math.max(min, value));
+}
 
 function Calendario() {
   const qc = useQueryClient();
@@ -83,14 +91,24 @@ function Calendario() {
   const monthLabel = new Date(`${rangeStart}T12:00:00`).toLocaleDateString("es-MX", { month: "long" });
   const label = year === currentYear ? `${year} · desde ${monthLabel}` : String(year);
 
-  const columns = useMemo(() => Array.from({ length: totalDays }, (_, i) => shift(rangeStart, i)), [rangeStart, totalDays]);
+  const columns = useMemo(
+    () => Array.from({ length: totalDays }, (_, i) => shift(rangeStart, i)),
+    [rangeStart, totalDays],
+  );
+
   const monthGroups = useMemo(() => {
-    const groups: { key: string; name: string; startIndex: number; days: number }[] = [];
-    columns.forEach((iso, index) => {
+    const groups: { key: string; name: string; days: number }[] = [];
+    columns.forEach((iso) => {
       const key = iso.slice(0, 7);
       const last = groups[groups.length - 1];
       if (last?.key === key) last.days += 1;
-      else groups.push({ key, name: new Date(`${iso}T12:00:00`).toLocaleDateString("es-MX", { month: "long" }), startIndex: index, days: 1 });
+      else {
+        groups.push({
+          key,
+          name: new Date(`${iso}T12:00:00`).toLocaleDateString("es-MX", { month: "long" }),
+          days: 1,
+        });
+      }
     });
     return groups;
   }, [columns]);
@@ -100,11 +118,18 @@ function Calendario() {
   const { data: external = [] } = useExternalEvents();
   const { data: guests = [] } = useGuests();
   const { data: blocks = [] } = useBlocks();
-  const guestById = Object.fromEntries(guests.map((guest) => [guest.id, guest]));
 
-  const selectedReservation = selectedReservationId ? reservations.find((r) => r.id === selectedReservationId) ?? null : null;
-  const selectedExternal = selectedExternalId ? external.find((e) => e.id === selectedExternalId) ?? null : null;
-  const selectedExternalProperty = selectedExternal ? properties.find((p) => p.id === selectedExternal.property_id) ?? null : null;
+  const guestById = Object.fromEntries(guests.map((guest) => [guest.id, guest]));
+  const selectedReservation = selectedReservationId
+    ? reservations.find((r) => r.id === selectedReservationId) ?? null
+    : null;
+  const selectedExternal = selectedExternalId
+    ? external.find((e) => e.id === selectedExternalId) ?? null
+    : null;
+  const selectedExternalProperty = selectedExternal
+    ? properties.find((p) => p.id === selectedExternal.property_id) ?? null
+    : null;
+
   const todayIndex = today >= rangeStart && today < rangeEnd ? dayDiff(rangeStart, today) : -1;
   const todayScrollLeft = Math.max(0, (todayIndex - 5) * DAY_WIDTH);
 
@@ -120,9 +145,15 @@ function Calendario() {
   const syncScroll = (source: "main" | "bottom") => {
     if (syncingScroll.current) return;
     syncingScroll.current = true;
-    if (source === "main" && scrollRef.current && bottomScrollRef.current) bottomScrollRef.current.scrollLeft = scrollRef.current.scrollLeft;
-    if (source === "bottom" && scrollRef.current && bottomScrollRef.current) scrollRef.current.scrollLeft = bottomScrollRef.current.scrollLeft;
-    requestAnimationFrame(() => { syncingScroll.current = false; });
+    if (source === "main" && scrollRef.current && bottomScrollRef.current) {
+      bottomScrollRef.current.scrollLeft = scrollRef.current.scrollLeft;
+    }
+    if (source === "bottom" && scrollRef.current && bottomScrollRef.current) {
+      scrollRef.current.scrollLeft = bottomScrollRef.current.scrollLeft;
+    }
+    requestAnimationFrame(() => {
+      syncingScroll.current = false;
+    });
   };
 
   const goToday = () => {
@@ -137,6 +168,7 @@ function Calendario() {
     if (!canEdit) return;
     event.preventDefault();
     event.stopPropagation();
+
     const startX = event.clientX;
     const original = reservation.check_out;
     let finalCheckOut = original;
@@ -148,20 +180,32 @@ function Calendario() {
       finalCheckOut = candidate <= reservation.check_in ? shift(reservation.check_in, 1) : candidate;
       setResizePreview({ id: reservation.id, checkOut: finalCheckOut });
     };
+
     const onUp = async () => {
       window.removeEventListener("pointermove", onMove);
       window.removeEventListener("pointerup", onUp);
       setResizePreview(null);
       if (finalCheckOut === original) return;
-      const rpc = supabase.rpc as unknown as (fn: string, args: Record<string, unknown>) => Promise<{ data: unknown; error: { message: string } | null }>;
-      const { error } = await rpc("resize_reservation_checkout", { _id: reservation.id, _check_out: finalCheckOut });
+
+      const rpc = supabase.rpc as unknown as (
+        fn: string,
+        args: Record<string, unknown>,
+      ) => Promise<{ data: unknown; error: { message: string } | null }>;
+
+      const { error } = await rpc("resize_reservation_checkout", {
+        _id: reservation.id,
+        _check_out: finalCheckOut,
+      });
+
       if (error) {
         toast.error(reservationErrorMessage(new Error(error.message)));
         return;
       }
+
       await qc.invalidateQueries({ queryKey: ["reservations"] });
       toast.success(`Reserva ajustada hasta ${shortDate(finalCheckOut)}.`);
     };
+
     window.addEventListener("pointermove", onMove);
     window.addEventListener("pointerup", onUp, { once: true });
   };
@@ -170,7 +214,17 @@ function Calendario() {
     <AppShell
       title="Calendario"
       subtitle={`${properties.length} propiedades · planning de ocupación · ${label}`}
-      actions={<div className="flex items-center gap-1"><Button variant="outline" size="icon" onClick={() => setAnchor(`${year - 1}-01-01`)} aria-label="Año anterior"><ChevronLeft className="size-4" /></Button><Button variant="outline" size="sm" onClick={goToday}>Hoy</Button><Button variant="outline" size="icon" onClick={() => setAnchor(`${year + 1}-01-01`)} aria-label="Año siguiente"><ChevronRight className="size-4" /></Button></div>}
+      actions={
+        <div className="flex items-center gap-1">
+          <Button variant="outline" size="icon" onClick={() => setAnchor(`${year - 1}-01-01`)} aria-label="Año anterior">
+            <ChevronLeft className="size-4" />
+          </Button>
+          <Button variant="outline" size="sm" onClick={goToday}>Hoy</Button>
+          <Button variant="outline" size="icon" onClick={() => setAnchor(`${year + 1}-01-01`)} aria-label="Año siguiente">
+            <ChevronRight className="size-4" />
+          </Button>
+        </div>
+      }
     >
       <div className="mb-3 flex flex-wrap items-center gap-3 rounded-lg border bg-card px-3 py-2 text-xs">
         <span className="flex items-center gap-1.5"><span className="size-3 rounded-sm border bg-background" /> Disponible</span>
@@ -178,63 +232,260 @@ function Calendario() {
         <span className="flex items-center gap-1.5"><span className="size-3 rounded-sm bg-[#1D4ED8]" /> Booking</span>
         <span className="flex items-center gap-1.5"><span className="size-3 rounded-sm bg-[#14B8A6]" /> VRBO</span>
         <span className="flex items-center gap-1.5"><span className="size-3 rounded-sm bg-[#F97316]" /> Directo</span>
-        <span className="ml-auto text-muted-foreground">Clic = detalle · lápiz = editar · arrastra el borde derecho = noches.</span>
+        <span className="ml-auto rounded-md border bg-muted/40 px-2 py-1 font-medium text-foreground">
+          Clic: detalle · ✎ Editar · ⇔ arrastrar borde derecho: noches
+        </span>
       </div>
 
       <Card className="overflow-hidden">
-        <CardContent ref={scrollRef} onScroll={() => syncScroll("main")} className="max-h-[calc(100vh-230px)] overflow-auto p-0">
+        <CardContent
+          ref={scrollRef}
+          onScroll={() => syncScroll("main")}
+          className="h-[calc(100vh-235px)] min-h-[420px] overflow-auto p-0"
+        >
           <div style={{ minWidth: fullWidth }}>
-            <div className="sticky top-0 z-30 border-b bg-card shadow-sm">
+            <div className="sticky top-0 z-50 border-b bg-card shadow-md">
               <div className="flex">
-                <div className="sticky left-0 z-40 shrink-0 border-r bg-card px-3 py-2 text-xs font-semibold uppercase tracking-wide text-muted-foreground" style={{ width: PROPERTY_WIDTH }}>Propiedad</div>
+                <div
+                  className="sticky left-0 z-[60] shrink-0 border-r bg-card px-3 py-2 text-xs font-semibold uppercase tracking-wide text-muted-foreground"
+                  style={{ width: PROPERTY_WIDTH }}
+                >
+                  Propiedad
+                </div>
                 <div className="flex" style={{ width: timelineWidth }}>
-                  {monthGroups.map((month) => <div key={month.key} className="shrink-0 border-r bg-muted/50 py-2 text-xs font-semibold uppercase tracking-wide" style={{ width: month.days * DAY_WIDTH }}><span className="px-3">{month.name} {year}</span></div>)}
+                  {monthGroups.map((month) => (
+                    <div
+                      key={month.key}
+                      className="shrink-0 border-r bg-muted/50 py-2 text-xs font-semibold uppercase tracking-wide"
+                      style={{ width: month.days * DAY_WIDTH }}
+                    >
+                      <span className="px-3">{month.name} {year}</span>
+                    </div>
+                  ))}
                 </div>
               </div>
+
               <div className="flex border-t">
-                <div className="sticky left-0 z-40 shrink-0 border-r bg-card" style={{ width: PROPERTY_WIDTH }} />
+                <div className="sticky left-0 z-[60] shrink-0 border-r bg-card" style={{ width: PROPERTY_WIDTH }} />
                 <div className="flex" style={{ width: timelineWidth }}>
-                  {columns.map((iso) => { const d = new Date(`${iso}T12:00:00`); const weekend = [0, 6].includes(d.getDay()); return <div key={iso} className={cn("shrink-0 border-r py-1 text-center leading-tight", weekend ? "bg-muted/60" : "bg-card", iso === today && "bg-[#FF5A5F]/10")} style={{ width: DAY_WIDTH }}><div className="text-[10px] uppercase text-muted-foreground">{d.toLocaleDateString("es-MX", { weekday: "narrow" })}</div><div className={cn("text-sm font-semibold", iso === today && "text-[#FF5A5F]")}>{d.getDate()}</div></div>; })}
+                  {columns.map((iso) => {
+                    const d = new Date(`${iso}T12:00:00`);
+                    const weekend = [0, 6].includes(d.getDay());
+                    return (
+                      <div
+                        key={iso}
+                        className={cn(
+                          "shrink-0 border-r py-1 text-center leading-tight",
+                          weekend ? "bg-muted/60" : "bg-card",
+                          iso === today && "bg-[#FF5A5F]/10",
+                        )}
+                        style={{ width: DAY_WIDTH }}
+                      >
+                        <div className="text-[10px] uppercase text-muted-foreground">
+                          {d.toLocaleDateString("es-MX", { weekday: "narrow" })}
+                        </div>
+                        <div className={cn("text-sm font-semibold", iso === today && "text-[#FF5A5F]")}>{d.getDate()}</div>
+                      </div>
+                    );
+                  })}
                 </div>
               </div>
             </div>
 
             {properties.map((property, propertyIndex) => {
-              const propertyReservations = reservations.filter((r) => r.property_id === property.id && r.check_in < rangeEnd && r.check_out > rangeStart && !CANCELLED.includes(r.status));
-              const propertyExternal = external.filter((e) => e.property_id === property.id && e.start_date < rangeEnd && e.end_date > rangeStart && e.status !== "cancelled");
-              const propertyBlocks = blocks.filter((b) => b.property_id === property.id && b.start_date < rangeEnd && b.end_date > rangeStart);
+              const propertyReservations = reservations.filter(
+                (r) => r.property_id === property.id && r.check_in < rangeEnd && r.check_out > rangeStart && !CANCELLED.includes(r.status),
+              );
+              const propertyExternal = external.filter(
+                (e) => e.property_id === property.id && e.start_date < rangeEnd && e.end_date > rangeStart && e.status !== "cancelled",
+              );
+              const propertyBlocks = blocks.filter(
+                (b) => b.property_id === property.id && b.start_date < rangeEnd && b.end_date > rangeStart,
+              );
+
               const timeline = [
-                ...propertyReservations.map((r) => ({ id: `r-${r.id}`, reservationId: r.id, externalId: null as string | null, from: r.check_in, to: resizePreview?.id === r.id ? resizePreview.checkOut : r.check_out, name: guestById[r.guest_id ?? ""]?.full_name ?? r.code, amount: Number(r.total_amount ?? 0), guestsCount: Number(r.guests_count ?? 0), channel: r.channel, kind: "reservation" as const })),
-                ...propertyExternal.map((e) => ({ id: `e-${e.id}`, reservationId: null as string | null, externalId: e.id, from: e.start_date, to: e.end_date, name: e.summary || e.channel, amount: null as number | null, guestsCount: 0, channel: e.channel, kind: "external" as const })),
-                ...propertyBlocks.map((b) => ({ id: `b-${b.id}`, reservationId: null as string | null, externalId: null as string | null, from: b.start_date, to: b.end_date, name: b.reason || "Bloqueado", amount: null as number | null, guestsCount: 0, channel: "", kind: "block" as const })),
+                ...propertyReservations.map((r) => ({
+                  id: `r-${r.id}`,
+                  reservationId: r.id,
+                  externalId: null as string | null,
+                  from: r.check_in,
+                  to: resizePreview?.id === r.id ? resizePreview.checkOut : r.check_out,
+                  name: guestById[r.guest_id ?? ""]?.full_name ?? r.code,
+                  amount: Number(r.total_amount ?? 0),
+                  guestsCount: Number(r.guests_count ?? 0),
+                  channel: r.channel,
+                  kind: "reservation" as const,
+                })),
+                ...propertyExternal.map((e) => ({
+                  id: `e-${e.id}`,
+                  reservationId: null as string | null,
+                  externalId: e.id,
+                  from: e.start_date,
+                  to: e.end_date,
+                  name: e.summary || e.channel,
+                  amount: null as number | null,
+                  guestsCount: 0,
+                  channel: e.channel,
+                  kind: "external" as const,
+                })),
+                ...propertyBlocks.map((b) => ({
+                  id: `b-${b.id}`,
+                  reservationId: null as string | null,
+                  externalId: null as string | null,
+                  from: b.start_date,
+                  to: b.end_date,
+                  name: b.reason || "Bloqueado",
+                  amount: null as number | null,
+                  guestsCount: 0,
+                  channel: "",
+                  kind: "block" as const,
+                })),
               ];
-              return <div key={property.id} className="flex border-b">
-                <div className={cn("sticky left-0 z-20 shrink-0 border-r px-3 py-1.5", propertyIndex % 2 === 0 ? "bg-card" : "bg-muted/40")} style={{ width: PROPERTY_WIDTH, height: ROW_HEIGHT }}><p className="truncate text-xs font-semibold">{property.name}</p><p className="truncate text-[10px] text-muted-foreground">{property.code} · {property.location}</p></div>
-                <div className="relative bg-background" style={{ width: timelineWidth, height: ROW_HEIGHT }}>
-                  {columns.map((iso, index) => { const weekend = [0, 6].includes(new Date(`${iso}T12:00:00`).getDay()); return <div key={iso} className={cn("absolute inset-y-0 border-r border-border/70", weekend ? "bg-muted/50" : "bg-card")} style={{ left: index * DAY_WIDTH, width: DAY_WIDTH }} />; })}
-                  {todayIndex >= 0 && <div className="absolute inset-y-0 z-[4] w-0.5 bg-[#FF5A5F]" style={{ left: todayIndex * DAY_WIDTH }} />}
-                  {timeline.map((item) => {
-                    const rawStart = dayDiff(rangeStart, item.from); const rawEnd = dayDiff(rangeStart, item.to); if (rawEnd <= 0 || rawStart >= totalDays) return null;
-                    const startIndex = clamp(rawStart, 0, totalDays); const endIndex = clamp(rawEnd, 0, totalDays); const widthDays = Math.max(1, endIndex - startIndex); const width = Math.max(DAY_WIDTH, widthDays * DAY_WIDTH);
-                    const labelText = [item.name, item.amount ? money(item.amount) : null, widthDays >= 3 && item.guestsCount ? `${item.guestsCount} hu.` : null].filter(Boolean).join(" · ");
-                    const reservation = item.reservationId ? reservations.find((r) => r.id === item.reservationId) ?? null : null;
-                    return <div key={item.id} role={item.reservationId || item.externalId ? "button" : undefined} tabIndex={item.reservationId || item.externalId ? 0 : -1} onClick={() => { if (item.reservationId) setSelectedReservationId(item.reservationId); else if (item.externalId) setSelectedExternalId(item.externalId); }} className={cn("absolute inset-y-[5px] z-[5] flex items-center overflow-hidden rounded-full px-3 text-left text-[11px] font-semibold text-white shadow-sm ring-1 ring-black/5", item.kind === "block" ? "bg-[#334155]" : CHANNEL_COLOR[item.channel] ?? "bg-[#FF5A5F]", item.kind === "external" && "border-2 border-dashed border-white/70", (item.reservationId || item.externalId) && "cursor-pointer hover:brightness-105")} style={{ left: startIndex * DAY_WIDTH + 2, width: width - 4 }} title={`${item.name} · ${shortDate(item.from)} → ${shortDate(item.to)}`}>
-                      <span className="block min-w-0 flex-1 truncate">{labelText}</span>
-                      {reservation && canEdit && <><button type="button" className="ml-1 grid size-6 shrink-0 place-items-center rounded-full bg-black/20 hover:bg-black/35" title="Editar reserva" onClick={(e) => { e.stopPropagation(); setEditingReservation(reservation); }}><Pencil className="size-3" /></button><button type="button" className="-mr-2 ml-1 grid h-8 w-4 shrink-0 cursor-ew-resize place-items-center rounded-r-full bg-black/20 hover:bg-black/35" title="Arrastrar para cambiar noches" onPointerDown={(e) => startResize(e, reservation)}><GripVertical className="size-3" /></button></>}
-                    </div>;
-                  })}
+
+              return (
+                <div key={property.id} className="flex border-b">
+                  <div
+                    className={cn(
+                      "sticky left-0 z-30 shrink-0 border-r px-3 py-2",
+                      propertyIndex % 2 === 0 ? "bg-card" : "bg-muted/40",
+                    )}
+                    style={{ width: PROPERTY_WIDTH, height: ROW_HEIGHT }}
+                  >
+                    <p className="truncate text-xs font-semibold">{property.name}</p>
+                    <p className="truncate text-[10px] text-muted-foreground">{property.code} · {property.location}</p>
+                  </div>
+
+                  <div className="relative bg-background" style={{ width: timelineWidth, height: ROW_HEIGHT }}>
+                    {columns.map((iso, index) => {
+                      const weekend = [0, 6].includes(new Date(`${iso}T12:00:00`).getDay());
+                      return (
+                        <div
+                          key={iso}
+                          className={cn(
+                            "absolute inset-y-0 border-r border-border/70",
+                            weekend ? "bg-muted/50" : "bg-card",
+                          )}
+                          style={{ left: index * DAY_WIDTH, width: DAY_WIDTH }}
+                        />
+                      );
+                    })}
+
+                    {todayIndex >= 0 && (
+                      <div className="absolute inset-y-0 z-[4] w-0.5 bg-[#FF5A5F]" style={{ left: todayIndex * DAY_WIDTH }} />
+                    )}
+
+                    {timeline.map((item) => {
+                      const rawStart = dayDiff(rangeStart, item.from);
+                      const rawEnd = dayDiff(rangeStart, item.to);
+                      if (rawEnd <= 0 || rawStart >= totalDays) return null;
+
+                      const startIndex = clamp(rawStart, 0, totalDays);
+                      const endIndex = clamp(rawEnd, 0, totalDays);
+                      const widthDays = Math.max(1, endIndex - startIndex);
+                      const width = Math.max(DAY_WIDTH, widthDays * DAY_WIDTH);
+                      const labelText = [
+                        item.name,
+                        item.amount ? money(item.amount) : null,
+                        widthDays >= 3 && item.guestsCount ? `${item.guestsCount} hu.` : null,
+                      ].filter(Boolean).join(" · ");
+                      const reservation = item.reservationId
+                        ? reservations.find((r) => r.id === item.reservationId) ?? null
+                        : null;
+
+                      return (
+                        <div
+                          key={item.id}
+                          role={item.reservationId || item.externalId ? "button" : undefined}
+                          tabIndex={item.reservationId || item.externalId ? 0 : -1}
+                          onClick={() => {
+                            if (item.reservationId) setSelectedReservationId(item.reservationId);
+                            else if (item.externalId) setSelectedExternalId(item.externalId);
+                          }}
+                          className="absolute inset-y-[7px] z-[10] overflow-visible"
+                          style={{ left: startIndex * DAY_WIDTH + 2, width: width - 4 }}
+                          title={`${item.name} · ${shortDate(item.from)} → ${shortDate(item.to)}`}
+                        >
+                          <div
+                            className={cn(
+                              "absolute inset-0 flex items-center overflow-hidden rounded-full px-3 pr-14 text-left text-[11px] font-semibold text-white shadow-sm ring-1 ring-black/5",
+                              item.kind === "block" ? "bg-[#334155]" : CHANNEL_COLOR[item.channel] ?? "bg-[#FF5A5F]",
+                              item.kind === "external" && "border-2 border-dashed border-white/70",
+                              (item.reservationId || item.externalId) && "cursor-pointer hover:brightness-105",
+                            )}
+                          >
+                            <span className="block min-w-0 flex-1 truncate">{labelText}</span>
+                          </div>
+
+                          {reservation && canEdit && (
+                            <>
+                              <button
+                                type="button"
+                                className="absolute right-6 top-1/2 z-30 grid size-7 -translate-y-1/2 place-items-center rounded-full border border-white/70 bg-background text-foreground shadow-md hover:bg-muted"
+                                title="Editar reserva"
+                                aria-label={`Editar reserva ${reservation.code}`}
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  setEditingReservation(reservation);
+                                }}
+                              >
+                                <Pencil className="size-3.5" />
+                              </button>
+                              <button
+                                type="button"
+                                className="absolute -right-1 top-1/2 z-40 grid h-9 w-6 -translate-y-1/2 cursor-ew-resize place-items-center rounded-md border border-white/80 bg-foreground text-background shadow-lg hover:scale-105"
+                                title="Arrastrar para agregar o quitar noches"
+                                aria-label={`Cambiar noches de la reserva ${reservation.code}`}
+                                onPointerDown={(e) => startResize(e, reservation)}
+                              >
+                                <GripVertical className="size-4" />
+                              </button>
+                            </>
+                          )}
+                        </div>
+                      );
+                    })}
+                  </div>
                 </div>
-              </div>;
+              );
             })}
           </div>
         </CardContent>
       </Card>
 
-      <div ref={bottomScrollRef} onScroll={() => syncScroll("bottom")} className="sticky bottom-0 z-50 mt-2 w-full overflow-x-auto rounded-md border bg-background/95 shadow-sm backdrop-blur"><div style={{ width: fullWidth, height: 14 }} /></div>
+      <div className="sticky bottom-2 z-[70] mt-2 rounded-lg border bg-background/95 p-2 shadow-lg backdrop-blur">
+        <div className="mb-1 flex items-center justify-between text-[11px] font-medium text-muted-foreground">
+          <span>Desplazar calendario</span>
+          <span>← meses y fechas →</span>
+        </div>
+        <div
+          ref={bottomScrollRef}
+          onScroll={() => syncScroll("bottom")}
+          className="w-full overflow-x-scroll overflow-y-hidden"
+        >
+          <div style={{ width: fullWidth, height: 18 }} />
+        </div>
+      </div>
 
-      <ReservationDetailDialog reservation={selectedReservation} onOpenChange={(open) => { if (!open) setSelectedReservationId(null); }} />
-      <ReservationForm open={Boolean(editingReservation)} reservation={editingReservation} onOpenChange={(open) => { if (!open) setEditingReservation(null); }} />
-      <ExternalEventDetailDialog event={selectedExternal} property={selectedExternalProperty} onOpenChange={(open) => { if (!open) setSelectedExternalId(null); }} />
+      <ReservationDetailDialog
+        reservation={selectedReservation}
+        onOpenChange={(open) => {
+          if (!open) setSelectedReservationId(null);
+        }}
+      />
+      <ReservationForm
+        open={Boolean(editingReservation)}
+        reservation={editingReservation}
+        onOpenChange={(open) => {
+          if (!open) setEditingReservation(null);
+        }}
+      />
+      <ExternalEventDetailDialog
+        event={selectedExternal}
+        property={selectedExternalProperty}
+        onOpenChange={(open) => {
+          if (!open) setSelectedExternalId(null);
+        }}
+      />
     </AppShell>
   );
 }
