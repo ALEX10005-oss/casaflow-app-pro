@@ -121,7 +121,7 @@ export function ReservationCsvImport({
         <DialogHeader>
           <DialogTitle>Importar reservas desde CSV</DialogTitle>
           <DialogDescription>
-            La importación solo agrega reservas nuevas. Las reservas y huéspedes existentes nunca se actualizan ni se eliminan.
+            Puedes subir directamente el CSV original de Airbnb. CasaFlow ignora las columnas adicionales y solo toma los datos acordados.
           </DialogDescription>
         </DialogHeader>
 
@@ -131,7 +131,7 @@ export function ReservationCsvImport({
             <div className="space-y-1 text-sm">
               <p className="font-semibold">Protección de datos del cliente</p>
               <p className="text-muted-foreground">
-                Primero se valida todo el archivo. Los códigos o estancias ya existentes se marcan como duplicados y se omiten sin sobrescribir información.
+                Primero se valida todo el archivo. Las reservas existentes se omiten y nunca se actualizan ni se eliminan durante la importación.
               </p>
             </div>
           </div>
@@ -159,7 +159,7 @@ export function ReservationCsvImport({
         </div>
 
         <div className="rounded-md border bg-background px-3 py-2 text-xs text-muted-foreground">
-          Columnas permitidas únicamente: codigo, propiedad, huesped, email, telefono, check_in, check_out, huespedes, total, canal, estado, pago, notas. Las noches se calculan automáticamente con las fechas.
+          Datos que CasaFlow mostrará e importará: código de confirmación, propiedad, huésped, check-in, check-out, noches calculadas, canal y total. Las demás columnas del archivo de Airbnb se ignoran.
         </div>
 
         {parseError && (
