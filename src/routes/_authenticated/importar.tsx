@@ -5,6 +5,8 @@ import { toast } from "sonner";
 import { AppShell } from "@/components/app-shell";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 import {
   money,
   nightsBetween,
@@ -91,6 +93,50 @@ function Importar() {
   const create = useCreateReservation();
   const [rows, setRows] = useState<ParsedRow[]>([]);
   const [defaultChannel, setDefaultChannel] = useState("airbnb");
+  const [manual, setManual] = useState({
+    channel: "booking",
+    propertyId: "",
+    guestName: "",
+    checkIn: "",
+    checkOut: "",
+    amount: "",
+  });
+
+  async function createManualReservation() {
+    if (!manual.propertyId || !manual.guestName.trim() || !manual.checkIn || !manual.checkOut) {
+      return toast.error("Completa alojamiento, huésped y fechas.");
+    }
+    if (manual.checkOut <= manual.checkIn) {
+      return toast.error("La salida debe ser posterior a la entrada.");
+    }
+
+    try {
+      await create.mutateAsync({
+        property_id: manual.propertyId,
+        guest_name: manual.guestName.trim(),
+        guest_email: null,
+        guest_phone: null,
+        check_in: manual.checkIn,
+        check_out: manual.checkOut,
+        guests_count: 1,
+        total_amount: Number(manual.amount) || 0,
+        payment_status: "registrado",
+        notes: `Captura manual · ${manual.channel}`,
+        channel: manual.channel,
+      });
+      toast.success("Reservación agregada al calendario y a los reportes.");
+      setManual({
+        channel: manual.channel,
+        propertyId: "",
+        guestName: "",
+        checkIn: "",
+        checkOut: "",
+        amount: "",
+      });
+    } catch (error) {
+      toast.error(error instanceof Error ? error.message : "No se pudo guardar la reservación.");
+    }
+  }
 
   async function selectFile(file?: File) {
     if (!file) return;
@@ -195,9 +241,99 @@ function Importar() {
 
   return (
     <AppShell
-      title="Importar reservaciones"
-      subtitle="Airbnb, Booking.com, Vrbo, Expedia u otro canal mediante CSV"
+      title="Agregar reservaciones externas"
+      subtitle="Airbnb por CSV; Booking.com, Vrbo, Expedia y otros canales mediante captura manual"
     >
+      <Card className="mb-4">
+        <CardHeader>
+          <CardTitle className="text-base">Captura manual de otros canales</CardTitle>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          <p className="text-sm text-muted-foreground">
+            Registra únicamente los datos que necesita el cliente. Al guardar, la reservación
+            aparecerá inmediatamente en el calendario y en los reportes con su canal de origen.
+          </p>
+          <div className="grid gap-3 md:grid-cols-2 lg:grid-cols-3">
+            <Field label="Canal">
+              <select
+                className="h-10 w-full rounded-md border bg-background px-3 text-sm"
+                value={manual.channel}
+                onChange={(event) =>
+                  setManual((value) => ({ ...value, channel: event.target.value }))
+                }
+              >
+                <option value="booking">Booking.com</option>
+                <option value="vrbo">Vrbo</option>
+                <option value="expedia">Expedia</option>
+                <option value="directo">Directa</option>
+                <option value="otro">Otro canal</option>
+              </select>
+            </Field>
+            <Field label="Casa / alojamiento">
+              <select
+                className="h-10 w-full rounded-md border bg-background px-3 text-sm"
+                value={manual.propertyId}
+                onChange={(event) =>
+                  setManual((value) => ({ ...value, propertyId: event.target.value }))
+                }
+              >
+                <option value="">Selecciona una propiedad</option>
+                {properties.map((property) => (
+                  <option key={property.id} value={property.id}>
+                    {property.code} · {property.name}
+                  </option>
+                ))}
+              </select>
+            </Field>
+            <Field label="Nombre del huésped">
+              <Input
+                value={manual.guestName}
+                onChange={(event) =>
+                  setManual((value) => ({ ...value, guestName: event.target.value }))
+                }
+              />
+            </Field>
+            <Field label="Entrada">
+              <Input
+                type="date"
+                value={manual.checkIn}
+                onChange={(event) =>
+                  setManual((value) => ({ ...value, checkIn: event.target.value }))
+                }
+              />
+            </Field>
+            <Field label="Salida">
+              <Input
+                type="date"
+                value={manual.checkOut}
+                onChange={(event) =>
+                  setManual((value) => ({ ...value, checkOut: event.target.value }))
+                }
+              />
+            </Field>
+            <Field label="Importe pagado">
+              <Input
+                type="number"
+                min="0"
+                step="0.01"
+                value={manual.amount}
+                onChange={(event) =>
+                  setManual((value) => ({ ...value, amount: event.target.value }))
+                }
+              />
+            </Field>
+          </div>
+          {manual.checkIn && manual.checkOut && manual.checkOut > manual.checkIn && (
+            <p className="text-sm text-muted-foreground">
+              Estancia: {nightsBetween(manual.checkIn, manual.checkOut)} noches
+            </p>
+          )}
+          <Button disabled={create.isPending} onClick={createManualReservation}>
+            {create.isPending ? "Guardando…" : "Agregar al calendario"}
+          </Button>
+        </CardContent>
+      </Card>
+
       <Card>
         <CardHeader>
           <CardTitle className="text-base">Datos que CasaFlow utilizará</CardTitle>
@@ -290,5 +426,14 @@ function Importar() {
         </Card>
       )}
     </AppShell>
+  );
+}
+
+function Field({ label, children }: { label: string; children: React.ReactNode }) {
+  return (
+    <div className="space-y-1.5">
+      <Label>{label}</Label>
+      {children}
+    </div>
   );
 }
