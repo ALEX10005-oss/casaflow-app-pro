@@ -2,6 +2,7 @@ import { createFileRoute } from "@tanstack/react-router";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import { AppShell } from "@/components/app-shell";
+import { ExternalEventDetailDialog } from "@/components/external-event-detail";
 import { ReservationDetailDialog } from "@/components/reservation-detail";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
@@ -63,6 +64,7 @@ function Calendario() {
   const currentYear = Number(today.slice(0, 4));
   const [anchor, setAnchor] = useState(today);
   const [selectedReservationId, setSelectedReservationId] = useState<string | null>(null);
+  const [selectedExternalId, setSelectedExternalId] = useState<string | null>(null);
   const scrollRef = useRef<HTMLDivElement | null>(null);
 
   const year = Number(anchor.slice(0, 4));
@@ -107,6 +109,12 @@ function Calendario() {
 
   const selectedReservation = selectedReservationId
     ? reservations.find((reservation) => reservation.id === selectedReservationId) ?? null
+    : null;
+  const selectedExternal = selectedExternalId
+    ? external.find((event) => event.id === selectedExternalId) ?? null
+    : null;
+  const selectedExternalProperty = selectedExternal
+    ? properties.find((property) => property.id === selectedExternal.property_id) ?? null
     : null;
   const todayIndex = today >= rangeStart && today < rangeEnd ? dayDiff(rangeStart, today) : -1;
   const todayScrollLeft = Math.max(0, (todayIndex - 5) * DAY_WIDTH);
@@ -233,6 +241,7 @@ function Calendario() {
                 ...propertyReservations.map((reservation) => ({
                   id: `r-${reservation.id}`,
                   reservationId: reservation.id,
+                  externalId: null,
                   from: reservation.check_in,
                   to: reservation.check_out,
                   name: guestById[reservation.guest_id ?? ""]?.full_name ?? reservation.code,
@@ -244,6 +253,7 @@ function Calendario() {
                 ...propertyExternal.map((event) => ({
                   id: `e-${event.id}`,
                   reservationId: null,
+                  externalId: event.id,
                   from: event.start_date,
                   to: event.end_date,
                   name: event.summary || event.channel,
@@ -255,6 +265,7 @@ function Calendario() {
                 ...propertyBlocks.map((block) => ({
                   id: `b-${block.id}`,
                   reservationId: null,
+                  externalId: null,
                   from: block.start_date,
                   to: block.end_date,
                   name: block.reason || "Bloqueado",
@@ -264,7 +275,6 @@ function Calendario() {
                   kind: "block" as const,
                 })),
               ];
-
 
               return (
                 <div key={property.id} className="flex border-b">
@@ -326,24 +336,27 @@ function Calendario() {
                       ]
                         .filter(Boolean)
                         .join(" · ");
+                      const interactive = Boolean(item.reservationId || item.externalId);
 
                       return (
                         <button
                           key={item.id}
                           type="button"
-                          onClick={() => item.reservationId && setSelectedReservationId(item.reservationId)}
+                          onClick={() => {
+                            if (item.reservationId) setSelectedReservationId(item.reservationId);
+                            else if (item.externalId) setSelectedExternalId(item.externalId);
+                          }}
                           title={`${item.name}${item.amount ? ` · ${money(item.amount)}` : ""} · ${shortDate(item.from)} → ${shortDate(item.to)}`}
                           className={cn(
                             "absolute inset-y-[5px] z-[5] flex items-center overflow-hidden rounded-full px-3 text-left text-[11px] font-semibold leading-tight text-white shadow-sm ring-1 ring-black/5",
                             item.kind === "block" ? "bg-[#334155]" : CHANNEL_COLOR[item.channel] ?? "bg-[#FF5A5F]",
                             item.kind === "external" && "border-2 border-dashed border-white/70",
-                            item.reservationId && "cursor-pointer hover:brightness-105 focus:outline-none focus:ring-2 focus:ring-ring",
+                            interactive && "cursor-pointer hover:brightness-105 focus:outline-none focus:ring-2 focus:ring-ring",
                           )}
                           style={{ left: startIndex * DAY_WIDTH + 2, width: width - 4 }}
                         >
                           <span className="block truncate">{label}</span>
                         </button>
-
                       );
                     })}
                   </div>
@@ -354,14 +367,19 @@ function Calendario() {
         </CardContent>
       </Card>
 
-
       <ReservationDetailDialog
         reservation={selectedReservation}
         onOpenChange={(open) => {
           if (!open) setSelectedReservationId(null);
         }}
       />
+      <ExternalEventDetailDialog
+        event={selectedExternal}
+        property={selectedExternalProperty}
+        onOpenChange={(open) => {
+          if (!open) setSelectedExternalId(null);
+        }}
+      />
     </AppShell>
   );
 }
-
