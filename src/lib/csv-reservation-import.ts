@@ -4,8 +4,6 @@ export const CSV_RESERVATION_HEADERS = [
   "codigo",
   "propiedad",
   "huesped",
-  "email",
-  "telefono",
   "check_in",
   "check_out",
   "huespedes",
@@ -56,7 +54,11 @@ type ReservationRef = {
 };
 
 function normalize(value: string) {
-  return value.trim().toLowerCase();
+  return value
+    .trim()
+    .toLowerCase()
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "");
 }
 
 function parseCsvLine(line: string) {
@@ -115,6 +117,22 @@ function validIsoDate(value: string) {
   return /^\d{4}-\d{2}-\d{2}$/.test(value) && !Number.isNaN(new Date(`${value}T12:00:00`).getTime());
 }
 
+function normalizeDate(value: string) {
+  const raw = value.trim();
+  if (!raw) return "";
+  if (/^\d{4}-\d{2}-\d{2}$/.test(raw)) return raw;
+
+  const match = raw.match(/^(\d{1,2})[\/-](\d{1,2})[\/-](\d{4})$/);
+  if (match) {
+    const [, d, m, y] = match;
+    return `${y}-${m!.padStart(2, "0")}-${d!.padStart(2, "0")}`;
+  }
+
+  const parsed = new Date(raw);
+  if (!Number.isNaN(parsed.getTime())) return parsed.toISOString().slice(0, 10);
+  return raw;
+}
+
 function normalizeChannel(value: string) {
   const v = normalize(value);
   if (v === "airbnb") return "Airbnb";
@@ -125,45 +143,90 @@ function normalizeChannel(value: string) {
   return value.trim();
 }
 
+function parseMoney(value: string) {
+  const cleaned = value
+    .replace(/\s/g, "")
+    .replace(/[$€£MXNUSDMXN\u00a0]/gi, "")
+    .replace(/,/g, "")
+    .replace(/[^0-9.-]/g, "");
+  const parsed = Number.parseFloat(cleaned || "0");
+  return Number.isFinite(parsed) ? parsed : -1;
+}
+
+function findIndex(headers: string[], aliases: string[]) {
+  for (const alias of aliases) {
+    const i = headers.indexOf(normalize(alias));
+    if (i >= 0) return i;
+  }
+  return -1;
+}
+
+function getCell(cells: string[], headers: string[], aliases: string[]) {
+  const i = findIndex(headers, aliases);
+  return i >= 0 ? (cells[i] ?? "").trim() : "";
+}
+
+function isAirbnb(headers: string[]) {
+  return [
+    "codigo de confirmacion",
+    "fecha de inicio",
+    "fecha de finalizacion",
+    "huesped",
+    "espacio",
+  ].every((header) => headers.includes(header));
+}
+
 export function parseReservationsCsv(text: string): CsvReservationRow[] {
   const records = splitCsvRecords(text.replace(/^\uFEFF/, ""));
   if (records.length < 2) throw new Error("El CSV no contiene filas de reservas.");
 
   const headers = parseCsvLine(records[0]!).map(normalize);
-  const expected = [...CSV_RESERVATION_HEADERS];
-  const missing = expected.filter((header) => !headers.includes(header));
-  const extra = headers.filter((header) => !expected.includes(header as (typeof CSV_RESERVATION_HEADERS)[number]));
+  const airbnb = isAirbnb(headers);
+  const casaFlow = ["codigo", "propiedad", "huesped", "check_in", "check_out"].every((h) => headers.includes(h));
 
-  if (missing.length || extra.length) {
-    const parts = [
-      missing.length ? `Faltan columnas: ${missing.join(", ")}.` : "",
-      extra.length ? `Columnas no permitidas: ${extra.join(", ")}.` : "",
-    ].filter(Boolean);
-    throw new Error(parts.join(" "));
+  if (!airbnb && !casaFlow) {
+    throw new Error(
+      "Formato no reconocido. Sube el CSV original de Airbnb o usa la plantilla de CasaFlow.",
+    );
   }
 
-  const index = Object.fromEntries(headers.map((header, i) => [header, i]));
   return records.slice(1).map((record, i) => {
     const cells = parseCsvLine(record);
-    const get = (key: (typeof CSV_RESERVATION_HEADERS)[number]) => cells[index[key]!] ?? "";
-    const guests = Number.parseInt(get("huespedes") || "1", 10);
-    const total = Number.parseFloat((get("total") || "0").replace(/[$\s]/g, "").replace(/,/g, ""));
+
+    const codigo = airbnb
+      ? getCell(cells, headers, ["Código de confirmación"])
+      : getCell(cells, headers, ["codigo"]);
+    const propiedad = airbnb
+      ? getCell(cells, headers, ["Espacio"])
+      : getCell(cells, headers, ["propiedad"]);
+    const huesped = getCell(cells, headers, airbnb ? ["Huésped"] : ["huesped"]);
+    const checkIn = normalizeDate(
+      getCell(cells, headers, airbnb ? ["Fecha de inicio"] : ["check_in"]),
+    );
+    const checkOut = normalizeDate(
+      getCell(cells, headers, airbnb ? ["Fecha de finalización"] : ["check_out"]),
+    );
+    const guestsRaw = airbnb ? "1" : getCell(cells, headers, ["huespedes"]);
+    const guests = Number.parseInt(guestsRaw || "1", 10);
+    const totalRaw = airbnb
+      ? getCell(cells, headers, ["Ingresos brutos", "Monto", "Ingresos recibidos"])
+      : getCell(cells, headers, ["total"]);
 
     return {
       rowNumber: i + 2,
-      codigo: get("codigo").trim(),
-      propiedad: get("propiedad").trim(),
-      huesped: get("huesped").trim(),
-      email: get("email").trim(),
-      telefono: get("telefono").trim(),
-      check_in: get("check_in").trim(),
-      check_out: get("check_out").trim(),
-      huespedes: Number.isFinite(guests) ? guests : 0,
-      total: Number.isFinite(total) ? total : -1,
-      canal: normalizeChannel(get("canal")),
-      estado: get("estado").trim() || "confirmada",
-      pago: get("pago").trim() || "pendiente",
-      notas: get("notas").trim(),
+      codigo,
+      propiedad,
+      huesped,
+      email: "",
+      telefono: "",
+      check_in: checkIn,
+      check_out: checkOut,
+      huespedes: Number.isFinite(guests) && guests > 0 ? guests : 1,
+      total: parseMoney(totalRaw),
+      canal: airbnb ? "Airbnb" : normalizeChannel(getCell(cells, headers, ["canal"])),
+      estado: airbnb ? "confirmada" : getCell(cells, headers, ["estado"]) || "confirmada",
+      pago: airbnb ? "registrado" : getCell(cells, headers, ["pago"]) || "pendiente",
+      notas: "",
     };
   });
 }
@@ -201,18 +264,15 @@ export function validateReservationsCsv(
     );
 
     if (!row.codigo) errors.push("Falta código de reserva.");
-    if (!property) errors.push("La propiedad no coincide con un código o nombre existente.");
+    if (!property) errors.push("La propiedad no coincide con una propiedad existente de CasaFlow.");
     if (!row.huesped) errors.push("Falta el nombre del huésped.");
-    if (!validIsoDate(row.check_in)) errors.push("check_in debe usar formato YYYY-MM-DD.");
-    if (!validIsoDate(row.check_out)) errors.push("check_out debe usar formato YYYY-MM-DD.");
+    if (!validIsoDate(row.check_in)) errors.push("La fecha de entrada no es válida.");
+    if (!validIsoDate(row.check_out)) errors.push("La fecha de salida no es válida.");
     if (validIsoDate(row.check_in) && validIsoDate(row.check_out) && row.check_out <= row.check_in) {
-      errors.push("check_out debe ser posterior a check_in.");
+      errors.push("La salida debe ser posterior a la entrada.");
     }
-    if (!Number.isInteger(row.huespedes) || row.huespedes < 1) errors.push("huespedes debe ser un entero mayor a 0.");
-    if (!Number.isFinite(row.total) || row.total < 0) errors.push("total debe ser un número igual o mayor a 0.");
+    if (!Number.isFinite(row.total) || row.total < 0) errors.push("El total no es válido.");
     if (!row.canal) errors.push("Falta el canal.");
-    if (!row.estado) errors.push("Falta el estado.");
-    if (!row.pago) errors.push("Falta el estado de pago.");
 
     if (codeKey) seenCodes.add(codeKey);
     if (stayKey) seenStays.add(stayKey);
@@ -244,8 +304,8 @@ export async function importReservationsCsv(rows: CsvRowValidation[]): Promise<C
       _code: row.codigo,
       _property_id: row.propertyId,
       _guest_name: row.huesped,
-      _guest_email: row.email || null,
-      _guest_phone: row.telefono || null,
+      _guest_email: null,
+      _guest_phone: null,
       _check_in: row.check_in,
       _check_out: row.check_out,
       _guests_count: row.huespedes,
@@ -253,7 +313,7 @@ export async function importReservationsCsv(rows: CsvRowValidation[]): Promise<C
       _channel: row.canal,
       _status: row.estado,
       _payment_status: row.pago,
-      _notes: row.notas || null,
+      _notes: null,
     });
 
     if (error) {
@@ -269,4 +329,4 @@ export async function importReservationsCsv(rows: CsvRowValidation[]): Promise<C
   return result;
 }
 
-export const CSV_TEMPLATE = `${CSV_RESERVATION_HEADERS.join(",")}\nRES-001,CF-001,Nombre Apellido,correo@ejemplo.com,+525500000000,2026-09-10,2026-09-12,2,3500,Booking,confirmada,pagado,`;
+export const CSV_TEMPLATE = `${CSV_RESERVATION_HEADERS.join(",")}\nRES-001,CF-001,Nombre Apellido,2026-09-10,2026-09-12,2,3500,Airbnb,confirmada,registrado,`;
