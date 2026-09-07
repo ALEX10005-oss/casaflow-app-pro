@@ -129,3 +129,49 @@ CREATE INDEX IF NOT EXISTS maintenance_checklists_org_month_idx
 
 REVOKE ALL ON FUNCTION public.can_access_property(uuid) FROM PUBLIC, anon;
 GRANT EXECUTE ON FUNCTION public.can_access_property(uuid) TO authenticated;
+
+-- Recepción puede ajustar noches desde el calendario, con la misma validación
+-- de disponibilidad que administración.
+CREATE OR REPLACE FUNCTION public.resize_reservation_checkout(
+  _id uuid,
+  _check_out date
+) RETURNS public.reservations
+LANGUAGE plpgsql
+SECURITY DEFINER
+SET search_path = public
+AS $$
+DECLARE
+  _org uuid := public.current_org_id();
+  _r public.reservations;
+BEGIN
+  IF _org IS NULL THEN RAISE EXCEPTION 'not_authenticated'; END IF;
+
+  SELECT * INTO _r
+  FROM public.reservations
+  WHERE id = _id AND org_id = _org
+  FOR UPDATE;
+
+  IF _r.id IS NULL THEN RAISE EXCEPTION 'reservation_not_found'; END IF;
+  IF NOT (
+    public.is_org_admin()
+    OR (public.my_role() = 'reception' AND public.can_access_property(_r.property_id))
+  ) THEN
+    RAISE EXCEPTION 'not_authorized';
+  END IF;
+  IF _check_out IS NULL OR _check_out <= _r.check_in THEN
+    RAISE EXCEPTION 'invalid_dates';
+  END IF;
+  IF NOT public.property_is_available(_r.property_id, _r.check_in, _check_out, _r.id) THEN
+    RAISE EXCEPTION 'property_not_available';
+  END IF;
+
+  UPDATE public.reservations
+  SET check_out = _check_out
+  WHERE id = _r.id
+  RETURNING * INTO _r;
+  RETURN _r;
+END;
+$$;
+
+REVOKE ALL ON FUNCTION public.resize_reservation_checkout(uuid, date) FROM PUBLIC, anon;
+GRANT EXECUTE ON FUNCTION public.resize_reservation_checkout(uuid, date) TO authenticated;

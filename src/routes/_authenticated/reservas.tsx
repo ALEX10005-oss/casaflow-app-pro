@@ -1,7 +1,9 @@
 import { createFileRoute } from "@tanstack/react-router";
+import { useQueryClient } from "@tanstack/react-query";
 import { useState } from "react";
-import { Plus, Search } from "lucide-react";
+import { Plus, Search, Upload } from "lucide-react";
 import { AppShell } from "@/components/app-shell";
+import { ReservationCsvImport } from "@/components/reservation-csv-import";
 import { ReservationForm } from "@/components/reservation-form";
 import { ReservationDetailDialog } from "@/components/reservation-detail";
 import { StatusPill } from "@/components/status-pill";
@@ -15,7 +17,15 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { money, nightsBetween, shortDate, useGuests, useProperties, useReservations, type Reservation } from "@/lib/casaflow";
+import {
+  money,
+  nightsBetween,
+  shortDate,
+  useGuests,
+  useProperties,
+  useReservations,
+  type Reservation,
+} from "@/lib/casaflow";
 
 export const Route = createFileRoute("/_authenticated/reservas")({
   head: () => ({
@@ -23,16 +33,21 @@ export const Route = createFileRoute("/_authenticated/reservas")({
       { title: "Reservas consolidadas — CasaFlow" },
       {
         name: "description",
-        content: "Consulta reservas de canales externos y registra reservas directas con validación de disponibilidad.",
+        content:
+          "Consulta reservas consolidadas e importa nuevas reservas de canales externos mediante CSV.",
       },
       { property: "og:title", content: "Reservas — CasaFlow" },
-      { property: "og:description", content: "Reservas externas y directas en una sola operación." },
+      {
+        property: "og:description",
+        content: "Reservas externas y directas en una sola operación.",
+      },
     ],
   }),
   component: Reservas,
 });
 
 function Reservas() {
+  const qc = useQueryClient();
   const { data: reservations = [] } = useReservations();
   const { data: properties = [] } = useProperties();
   const { data: guests = [] } = useGuests();
@@ -41,6 +56,7 @@ function Reservas() {
   const [status, setStatus] = useState("all");
   const [property, setProperty] = useState("all");
   const [newOpen, setNewOpen] = useState(false);
+  const [csvOpen, setCsvOpen] = useState(false);
   const [selected, setSelected] = useState<Reservation | null>(null);
 
   const propById = Object.fromEntries(properties.map((p) => [p.id, p]));
@@ -60,30 +76,59 @@ function Reservas() {
   const total = rows.reduce((s, r) => s + Number(r.total_amount), 0);
   const commission = rows.reduce((s, r) => s + Number(r.commission), 0);
 
+  const refreshImportedData = () => {
+    void qc.invalidateQueries({ queryKey: ["reservations"] });
+    void qc.invalidateQueries({ queryKey: ["guests"] });
+  };
+
   return (
     <AppShell
       title="Reservas"
-      subtitle="Las reservas de Airbnb, Booking y VRBO llegan por iCal; las reservas directas se registran aquí."
+      subtitle="Desde el 7 de septiembre de 2026, las reservas externas se consolidan mediante CSV; iCal queda solo como histórico previo."
       actions={
-        <Button onClick={() => setNewOpen(true)}>
-          <Plus className="size-4" /> Nueva reserva
-        </Button>
+        <div className="flex flex-wrap gap-2">
+          <Button variant="outline" onClick={() => setCsvOpen(true)}>
+            <Upload className="size-4" /> Importar CSV
+          </Button>
+          <Button onClick={() => setNewOpen(true)}>
+            <Plus className="size-4" /> Nueva reserva
+          </Button>
+        </div>
       }
     >
       <Card className="mb-4">
         <CardContent className="grid gap-3 pt-6 md:grid-cols-4">
           <div className="relative">
             <Search className="absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
-            <Input className="pl-9" placeholder="Código, huésped o propiedad" value={q} onChange={(e) => setQ(e.target.value)} />
+            <Input
+              className="pl-9"
+              placeholder="Código, huésped o propiedad"
+              value={q}
+              onChange={(e) => setQ(e.target.value)}
+            />
           </div>
-          <Picker value={channel} onChange={setChannel} placeholder="Canal" options={["Airbnb", "Booking", "VRBO", "directo"]} />
-          <Picker value={status} onChange={setStatus} placeholder="Estado" options={["confirmada", "en_curso", "completada"]} />
+          <Picker
+            value={channel}
+            onChange={setChannel}
+            placeholder="Canal"
+            options={["Airbnb", "Booking", "VRBO", "Expedia", "directo"]}
+          />
+          <Picker
+            value={status}
+            onChange={setStatus}
+            placeholder="Estado"
+            options={["confirmada", "en_curso", "completada"]}
+          />
           <Select value={property} onValueChange={setProperty}>
-            <SelectTrigger><SelectValue placeholder="Propiedad" /></SelectTrigger>
+            <SelectTrigger>
+              <SelectValue placeholder="Propiedad" />
+            </SelectTrigger>
             <SelectContent>
               <SelectItem value="all">Todas las propiedades</SelectItem>
               {properties.map((p) => (
-                <SelectItem key={p.id} value={p.id}>{p.code} · {p.name}</SelectItem>
+                <SelectItem key={p.id} value={p.id}>
+                  {p.code} · {p.name}
+                </SelectItem>
               ))}
             </SelectContent>
           </Select>
@@ -122,25 +167,46 @@ function Reservas() {
                   <td className="px-4 py-3 font-medium">{propById[r.property_id]?.name}</td>
                   <td className="px-4 py-3">{guestById[r.guest_id ?? ""]?.full_name ?? "—"}</td>
                   <td className="px-4 py-3 text-muted-foreground">
-                    {shortDate(r.check_in)} → {shortDate(r.check_out)} · {nightsBetween(r.check_in, r.check_out)} n
+                    {shortDate(r.check_in)} → {shortDate(r.check_out)} ·{" "}
+                    {nightsBetween(r.check_in, r.check_out)} n
                   </td>
                   <td className="px-4 py-3">{r.channel}</td>
-                  <td className="px-4 py-3"><StatusPill value={r.status} /></td>
-                  <td className="px-4 py-3"><StatusPill value={r.payment_status} /></td>
-                  <td className="px-4 py-3 text-right font-medium">{money(Number(r.total_amount))}</td>
+                  <td className="px-4 py-3">
+                    <StatusPill value={r.status} />
+                  </td>
+                  <td className="px-4 py-3">
+                    <StatusPill value={r.payment_status} />
+                  </td>
+                  <td className="px-4 py-3 text-right font-medium">
+                    {money(Number(r.total_amount))}
+                  </td>
                 </tr>
               ))}
 
               {rows.length === 0 && (
-                <tr><td colSpan={8} className="px-4 py-10 text-center text-muted-foreground">No hay reservas con estos filtros.</td></tr>
+                <tr>
+                  <td colSpan={8} className="px-4 py-10 text-center text-muted-foreground">
+                    No hay reservas con estos filtros.
+                  </td>
+                </tr>
               )}
             </tbody>
           </table>
         </CardContent>
       </Card>
 
+      <ReservationCsvImport
+        open={csvOpen}
+        onOpenChange={setCsvOpen}
+        properties={properties}
+        reservations={reservations}
+        onImported={refreshImportedData}
+      />
       <ReservationForm open={newOpen} onOpenChange={setNewOpen} />
-      <ReservationDetailDialog reservation={selected} onOpenChange={(o) => !o && setSelected(null)} />
+      <ReservationDetailDialog
+        reservation={selected}
+        onOpenChange={(o) => !o && setSelected(null)}
+      />
     </AppShell>
   );
 }
@@ -158,10 +224,16 @@ function Picker({
 }) {
   return (
     <Select value={value} onValueChange={onChange}>
-      <SelectTrigger><SelectValue placeholder={placeholder} /></SelectTrigger>
+      <SelectTrigger>
+        <SelectValue placeholder={placeholder} />
+      </SelectTrigger>
       <SelectContent>
         <SelectItem value="all">Todos · {placeholder}</SelectItem>
-        {options.map((o) => <SelectItem key={o} value={o}>{o.replace("_", " ")}</SelectItem>)}
+        {options.map((o) => (
+          <SelectItem key={o} value={o}>
+            {o.replace("_", " ")}
+          </SelectItem>
+        ))}
       </SelectContent>
     </Select>
   );

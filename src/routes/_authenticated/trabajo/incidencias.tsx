@@ -1,5 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useState } from "react";
+import { ExternalLink } from "lucide-react";
 import { toast } from "sonner";
 import { WorkerShell } from "@/components/worker-shell";
 import { StatusPill } from "@/components/status-pill";
@@ -34,6 +35,8 @@ export const Route = createFileRoute("/_authenticated/trabajo/incidencias")({
   }),
   component: Incidencias,
 });
+
+const MAINTENANCE_FORM_URL = "https://forms.gle/QNZjcC5yq9WwjXsp9";
 
 const PRIORITIES = [
   { value: "baja", label: "Baja" },
@@ -78,7 +81,25 @@ function Incidencias() {
     <WorkerShell title="Incidencias" subtitle="Reporta y sigue los desperfectos de tus propiedades">
       <Card>
         <CardHeader className="pb-3">
-          <CardTitle className="text-base">Reportar incidencia</CardTitle>
+          <CardTitle className="text-base">Formulario de mantenimiento</CardTitle>
+        </CardHeader>
+        <CardContent className="space-y-3">
+          <p className="text-sm text-muted-foreground">
+            Usa el formulario oficial de mantenimiento para registrar el reporte solicitado por la
+            administración.
+          </p>
+          <Button asChild className="w-full">
+            <a href={MAINTENANCE_FORM_URL} target="_blank" rel="noreferrer">
+              Abrir formulario de mantenimiento
+              <ExternalLink className="ml-2 size-4" />
+            </a>
+          </Button>
+        </CardContent>
+      </Card>
+
+      <Card>
+        <CardHeader className="pb-3">
+          <CardTitle className="text-base">Reportar incidencia en CasaFlow</CardTitle>
         </CardHeader>
         <CardContent>
           <form onSubmit={submit} className="space-y-3">
