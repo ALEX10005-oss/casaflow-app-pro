@@ -10,7 +10,8 @@ import { fetchMyContext, homeForRole, type AppRole, type MyContext } from "@/lib
 export function allowedPaths(role: AppRole | null): string[] | null {
   if (role === "owner" || role === "manager") return null;
   if (role === "accounting") return ["/finanzas", "/reportes"];
-  if (role === "cleaning" || role === "maintenance" || role === "reception") return ["/trabajo"];
+  if (role === "reception") return ["/trabajo", "/calendario", "/reservas", "/huespedes"];
+  if (role === "cleaning" || role === "maintenance") return ["/trabajo"];
   return [];
 }
 
@@ -61,7 +62,8 @@ function Blocked({ ctx: _ctx }: { ctx: MyContext }) {
           <Lock className="size-6 text-muted-foreground" />
           <CardTitle className="font-display text-xl">Servicio temporalmente inactivo</CardTitle>
           <CardDescription>
-            Tu acceso a CasaFlow no está disponible en este momento. Ponte en contacto con soporte para revisar el estado de tu cuenta.
+            Tu acceso a CasaFlow no está disponible en este momento. Ponte en contacto con soporte
+            para revisar el estado de tu cuenta.
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-3 text-sm text-muted-foreground">

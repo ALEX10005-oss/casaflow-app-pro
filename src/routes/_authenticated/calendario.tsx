@@ -1,6 +1,13 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { useEffect, useMemo, useRef, useState } from "react";
+import {
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+  type PointerEvent as ReactPointerEvent,
+} from "react";
 import { ChevronLeft, ChevronRight } from "lucide-react";
+import { toast } from "sonner";
 import { AppShell } from "@/components/app-shell";
 import { ReservationDetailDialog } from "@/components/reservation-detail";
 import { Button } from "@/components/ui/button";
@@ -10,10 +17,10 @@ import {
   shortDate,
   todayISO,
   useBlocks,
-  useExternalEvents,
   useGuests,
   useProperties,
   useReservations,
+  useUpdateReservation,
 } from "@/lib/casaflow";
 import { cn } from "@/lib/utils";
 
@@ -63,6 +70,7 @@ function Calendario() {
   const currentYear = Number(today.slice(0, 4));
   const [anchor, setAnchor] = useState(today);
   const [selectedReservationId, setSelectedReservationId] = useState<string | null>(null);
+  const [draftCheckouts, setDraftCheckouts] = useState<Record<string, string>>({});
   const scrollRef = useRef<HTMLDivElement | null>(null);
 
   const year = Number(anchor.slice(0, 4));
@@ -70,7 +78,9 @@ function Calendario() {
   const rangeEnd = `${year + 1}-01-01`;
   const totalDays = dayDiff(rangeStart, rangeEnd);
   const timelineWidth = totalDays * DAY_WIDTH;
-  const monthLabel = new Date(`${rangeStart}T12:00:00`).toLocaleDateString("es-MX", { month: "long" });
+  const monthLabel = new Date(`${rangeStart}T12:00:00`).toLocaleDateString("es-MX", {
+    month: "long",
+  });
   const label = year === currentYear ? `${year} · desde ${monthLabel}` : String(year);
 
   const columns = useMemo(
@@ -99,14 +109,14 @@ function Calendario() {
 
   const { data: properties = [] } = useProperties();
   const { data: reservations = [] } = useReservations();
-  const { data: external = [] } = useExternalEvents();
   const { data: guests = [] } = useGuests();
   const { data: blocks = [] } = useBlocks();
+  const updateReservation = useUpdateReservation();
 
   const guestById = Object.fromEntries(guests.map((guest) => [guest.id, guest]));
 
   const selectedReservation = selectedReservationId
-    ? reservations.find((reservation) => reservation.id === selectedReservationId) ?? null
+    ? (reservations.find((reservation) => reservation.id === selectedReservationId) ?? null)
     : null;
   const todayIndex = today >= rangeStart && today < rangeEnd ? dayDiff(rangeStart, today) : -1;
   const todayScrollLeft = Math.max(0, (todayIndex - 5) * DAY_WIDTH);
@@ -126,32 +136,121 @@ function Calendario() {
     });
   };
 
+  function beginResize(event: ReactPointerEvent<HTMLButtonElement>, reservationId: string) {
+    event.preventDefault();
+    event.stopPropagation();
+    const reservation = reservations.find((item) => item.id === reservationId);
+    if (!reservation) return;
+    const guest = guestById[reservation.guest_id ?? ""];
+    const startX = event.clientX;
+    const originalCheckout = reservation.check_out;
+    let candidate = originalCheckout;
+
+    const calculate = (clientX: number) => {
+      const delta = Math.round((clientX - startX) / DAY_WIDTH);
+      const next = shift(originalCheckout, delta);
+      return next > reservation.check_in ? next : shift(reservation.check_in, 1);
+    };
+    const move = (moveEvent: PointerEvent) => {
+      candidate = calculate(moveEvent.clientX);
+      setDraftCheckouts((current) => ({ ...current, [reservation.id]: candidate }));
+    };
+    const up = async (upEvent: PointerEvent) => {
+      window.removeEventListener("pointermove", move);
+      window.removeEventListener("pointerup", up);
+      candidate = calculate(upEvent.clientX);
+      if (candidate === originalCheckout) {
+        setDraftCheckouts((current) => {
+          const next = { ...current };
+          delete next[reservation.id];
+          return next;
+        });
+        return;
+      }
+      try {
+        await updateReservation.mutateAsync({
+          id: reservation.id,
+          property_id: reservation.property_id,
+          guest_name: guest?.full_name ?? reservation.code,
+          guest_email: guest?.email ?? null,
+          guest_phone: guest?.phone ?? null,
+          check_in: reservation.check_in,
+          check_out: candidate,
+          guests_count: reservation.guests_count,
+          total_amount: Number(reservation.total_amount),
+          payment_status: reservation.payment_status,
+          status: reservation.status,
+          channel: reservation.channel,
+          code: reservation.code,
+          notes: reservation.notes,
+        });
+        toast.success(`Estancia actualizada a ${dayDiff(reservation.check_in, candidate)} noches.`);
+      } catch (error) {
+        toast.error(
+          error instanceof Error ? error.message : "No se pudieron actualizar las fechas.",
+        );
+      } finally {
+        setDraftCheckouts((current) => {
+          const next = { ...current };
+          delete next[reservation.id];
+          return next;
+        });
+      }
+    };
+    window.addEventListener("pointermove", move);
+    window.addEventListener("pointerup", up);
+  }
+
   return (
     <AppShell
       title="Calendario"
       subtitle={`${properties.length} propiedades · planning de ocupación · ${label}`}
       actions={
         <div className="flex items-center gap-1">
-          <Button variant="outline" size="icon" onClick={() => setAnchor(`${year - 1}-01-01`)} aria-label="Año anterior">
+          <Button
+            variant="outline"
+            size="icon"
+            onClick={() => setAnchor(`${year - 1}-01-01`)}
+            aria-label="Año anterior"
+          >
             <ChevronLeft className="size-4" />
           </Button>
           <Button variant="outline" size="sm" onClick={goToday}>
             Hoy
           </Button>
-          <Button variant="outline" size="icon" onClick={() => setAnchor(`${year + 1}-01-01`)} aria-label="Año siguiente">
+          <Button
+            variant="outline"
+            size="icon"
+            onClick={() => setAnchor(`${year + 1}-01-01`)}
+            aria-label="Año siguiente"
+          >
             <ChevronRight className="size-4" />
           </Button>
         </div>
       }
     >
       <div className="mb-3 flex flex-wrap items-center gap-3 rounded-lg border bg-card px-3 py-2 text-xs">
-        <span className="flex items-center gap-1.5"><span className="size-3 rounded-sm border bg-background" /> Disponible</span>
-        <span className="flex items-center gap-1.5"><span className="size-3 rounded-sm bg-[#FF5A5F]" /> Airbnb</span>
-        <span className="flex items-center gap-1.5"><span className="size-3 rounded-sm bg-[#1D4ED8]" /> Booking</span>
-        <span className="flex items-center gap-1.5"><span className="size-3 rounded-sm bg-[#14B8A6]" /> VRBO</span>
-        <span className="flex items-center gap-1.5"><span className="size-3 rounded-sm bg-[#F97316]" /> Directo</span>
-        <span className="flex items-center gap-1.5"><span className="size-3 rounded-sm bg-[#334155]" /> Bloqueo / mantenimiento</span>
-        <span className="ml-auto text-muted-foreground">Abre cerca de hoy; desliza para recorrer el resto del año.</span>
+        <span className="flex items-center gap-1.5">
+          <span className="size-3 rounded-sm border bg-background" /> Disponible
+        </span>
+        <span className="flex items-center gap-1.5">
+          <span className="size-3 rounded-sm bg-[#FF5A5F]" /> Airbnb
+        </span>
+        <span className="flex items-center gap-1.5">
+          <span className="size-3 rounded-sm bg-[#1D4ED8]" /> Booking
+        </span>
+        <span className="flex items-center gap-1.5">
+          <span className="size-3 rounded-sm bg-[#14B8A6]" /> VRBO
+        </span>
+        <span className="flex items-center gap-1.5">
+          <span className="size-3 rounded-sm bg-[#F97316]" /> Directo
+        </span>
+        <span className="flex items-center gap-1.5">
+          <span className="size-3 rounded-sm bg-[#334155]" /> Bloqueo / mantenimiento
+        </span>
+        <span className="ml-auto text-muted-foreground">
+          Abre cerca de hoy; desliza para recorrer el resto del año.
+        </span>
       </div>
 
       <Card className="overflow-hidden">
@@ -184,7 +283,10 @@ function Calendario() {
               </div>
 
               <div className="flex border-t">
-                <div className="sticky left-0 z-40 shrink-0 border-r bg-card" style={{ width: PROPERTY_WIDTH }} />
+                <div
+                  className="sticky left-0 z-40 shrink-0 border-r bg-card"
+                  style={{ width: PROPERTY_WIDTH }}
+                />
                 <div className="flex" style={{ width: timelineWidth }}>
                   {columns.map((iso) => {
                     const d = new Date(`${iso}T12:00:00`);
@@ -202,7 +304,11 @@ function Calendario() {
                         <div className="text-[10px] font-medium uppercase text-muted-foreground">
                           {d.toLocaleDateString("es-MX", { weekday: "narrow" })}
                         </div>
-                        <div className={cn("text-sm font-semibold", iso === today && "text-[#FF5A5F]")}>{d.getDate()}</div>
+                        <div
+                          className={cn("text-sm font-semibold", iso === today && "text-[#FF5A5F]")}
+                        >
+                          {d.getDate()}
+                        </div>
                       </div>
                     );
                   })}
@@ -218,15 +324,11 @@ function Calendario() {
                   reservation.check_out > rangeStart &&
                   !CANCELLED.includes(reservation.status),
               );
-              const propertyExternal = external.filter(
-                (event) =>
-                  event.property_id === property.id &&
-                  event.start_date < rangeEnd &&
-                  event.end_date > rangeStart &&
-                  event.status !== "cancelled",
-              );
               const propertyBlocks = blocks.filter(
-                (block) => block.property_id === property.id && block.start_date < rangeEnd && block.end_date > rangeStart,
+                (block) =>
+                  block.property_id === property.id &&
+                  block.start_date < rangeEnd &&
+                  block.end_date > rangeStart,
               );
 
               const timeline = [
@@ -234,23 +336,12 @@ function Calendario() {
                   id: `r-${reservation.id}`,
                   reservationId: reservation.id,
                   from: reservation.check_in,
-                  to: reservation.check_out,
+                  to: draftCheckouts[reservation.id] ?? reservation.check_out,
                   name: guestById[reservation.guest_id ?? ""]?.full_name ?? reservation.code,
                   amount: Number(reservation.total_amount ?? 0),
                   guestsCount: Number(reservation.guests_count ?? 0),
                   channel: reservation.channel,
                   kind: "reservation" as const,
-                })),
-                ...propertyExternal.map((event) => ({
-                  id: `e-${event.id}`,
-                  reservationId: null,
-                  from: event.start_date,
-                  to: event.end_date,
-                  name: event.summary || event.channel,
-                  amount: null,
-                  guestsCount: 0,
-                  channel: event.channel,
-                  kind: "external" as const,
                 })),
                 ...propertyBlocks.map((block) => ({
                   id: `b-${block.id}`,
@@ -265,7 +356,6 @@ function Calendario() {
                 })),
               ];
 
-
               return (
                 <div key={property.id} className="flex border-b">
                   <div
@@ -275,11 +365,18 @@ function Calendario() {
                     )}
                     style={{ width: PROPERTY_WIDTH, height: ROW_HEIGHT }}
                   >
-                    <p className="truncate text-xs font-semibold text-foreground">{property.name}</p>
-                    <p className="truncate text-[10px] text-muted-foreground">{property.code} · {property.location}</p>
+                    <p className="truncate text-xs font-semibold text-foreground">
+                      {property.name}
+                    </p>
+                    <p className="truncate text-[10px] text-muted-foreground">
+                      {property.code} · {property.location}
+                    </p>
                   </div>
 
-                  <div className="relative bg-background" style={{ width: timelineWidth, height: ROW_HEIGHT }}>
+                  <div
+                    className="relative bg-background"
+                    style={{ width: timelineWidth, height: ROW_HEIGHT }}
+                  >
                     {columns.map((iso, index) => {
                       const d = new Date(`${iso}T12:00:00`);
                       const isWeekend = [0, 6].includes(d.getDay());
@@ -321,6 +418,7 @@ function Calendario() {
                       const width = Math.max(DAY_WIDTH, widthDays * DAY_WIDTH);
                       const label = [
                         item.name,
+                        item.channel ? item.channel : null,
                         item.amount ? money(item.amount) : null,
                         widthDays >= 3 && item.guestsCount ? `${item.guestsCount} hu.` : null,
                       ]
@@ -328,22 +426,40 @@ function Calendario() {
                         .join(" · ");
 
                       return (
-                        <button
+                        <div
                           key={item.id}
-                          type="button"
-                          onClick={() => item.reservationId && setSelectedReservationId(item.reservationId)}
                           title={`${item.name}${item.amount ? ` · ${money(item.amount)}` : ""} · ${shortDate(item.from)} → ${shortDate(item.to)}`}
                           className={cn(
                             "absolute inset-y-[5px] z-[5] flex items-center overflow-hidden rounded-full px-3 text-left text-[11px] font-semibold leading-tight text-white shadow-sm ring-1 ring-black/5",
-                            item.kind === "block" ? "bg-[#334155]" : CHANNEL_COLOR[item.channel] ?? "bg-[#FF5A5F]",
-                            item.kind === "external" && "border-2 border-dashed border-white/70",
-                            item.reservationId && "cursor-pointer hover:brightness-105 focus:outline-none focus:ring-2 focus:ring-ring",
+                            item.kind === "block"
+                              ? "bg-[#334155]"
+                              : (CHANNEL_COLOR[item.channel] ?? "bg-[#FF5A5F]"),
+                            item.reservationId &&
+                              "cursor-pointer hover:brightness-105 focus:outline-none focus:ring-2 focus:ring-ring",
                           )}
                           style={{ left: startIndex * DAY_WIDTH + 2, width: width - 4 }}
                         >
-                          <span className="block truncate">{label}</span>
-                        </button>
-
+                          <button
+                            type="button"
+                            className="min-w-0 flex-1 truncate text-left"
+                            onClick={() =>
+                              item.reservationId && setSelectedReservationId(item.reservationId)
+                            }
+                          >
+                            {label}
+                          </button>
+                          {item.reservationId && (
+                            <button
+                              type="button"
+                              aria-label="Cambiar noches"
+                              title="Arrastra para cambiar el número de noches"
+                              className="h-full w-3 shrink-0 cursor-ew-resize border-l border-white/40 bg-black/10"
+                              onPointerDown={(resizeEvent) =>
+                                beginResize(resizeEvent, item.reservationId!)
+                              }
+                            />
+                          )}
+                        </div>
                       );
                     })}
                   </div>
@@ -354,7 +470,6 @@ function Calendario() {
         </CardContent>
       </Card>
 
-
       <ReservationDetailDialog
         reservation={selectedReservation}
         onOpenChange={(open) => {
@@ -364,4 +479,3 @@ function Calendario() {
     </AppShell>
   );
 }
-

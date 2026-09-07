@@ -2,6 +2,7 @@ import { createFileRoute } from "@tanstack/react-router";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
 import { AppShell } from "@/components/app-shell";
+import { MaintenanceChecklist } from "@/components/maintenance-checklist";
 import { StatusPill } from "@/components/status-pill";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -23,10 +24,14 @@ export const Route = createFileRoute("/_authenticated/operaciones")({
       { title: "Limpieza y mantenimiento — CasaFlow" },
       {
         name: "description",
-        content: "Coordina limpiezas por ventana de salida y entrada, y da seguimiento a incidencias de mantenimiento.",
+        content:
+          "Coordina limpiezas por ventana de salida y entrada, y da seguimiento a incidencias de mantenimiento.",
       },
       { property: "og:title", content: "Operaciones — CasaFlow" },
-      { property: "og:description", content: "Limpiezas del día e incidencias abiertas por propiedad." },
+      {
+        property: "og:description",
+        content: "Limpiezas del día e incidencias abiertas por propiedad.",
+      },
     ],
   }),
   component: Operaciones,
@@ -113,8 +118,12 @@ function Operaciones() {
     <AppShell title="Operaciones" subtitle="Ejecución diaria de limpieza y mantenimiento">
       <Tabs defaultValue="limpieza">
         <TabsList>
-          <TabsTrigger value="limpieza">Limpieza ({cleaning.filter((c) => c.status !== "completada").length})</TabsTrigger>
-          <TabsTrigger value="mantenimiento">Mantenimiento ({issues.filter((i) => i.status !== "resuelta").length})</TabsTrigger>
+          <TabsTrigger value="limpieza">
+            Limpieza ({cleaning.filter((c) => c.status !== "completada").length})
+          </TabsTrigger>
+          <TabsTrigger value="mantenimiento">
+            Mantenimiento ({issues.filter((i) => i.status !== "resuelta").length})
+          </TabsTrigger>
         </TabsList>
 
         <TabsContent value="limpieza" className="space-y-4 pt-4">
@@ -124,21 +133,30 @@ function Operaciones() {
               <Card key={date}>
                 <CardHeader className="pb-2">
                   <CardTitle className="text-base">
-                    {longDate(date)} {date === today && <span className="text-accent-foreground">· hoy</span>}
+                    {longDate(date)}{" "}
+                    {date === today && <span className="text-accent-foreground">· hoy</span>}
                   </CardTitle>
                 </CardHeader>
                 <CardContent className="space-y-2">
                   {tasks.map((t) => (
-                    <div key={t.id} className="flex flex-wrap items-center justify-between gap-3 rounded-md border px-3 py-2.5">
+                    <div
+                      key={t.id}
+                      className="flex flex-wrap items-center justify-between gap-3 rounded-md border px-3 py-2.5"
+                    >
                       <div className="min-w-0">
                         <p className="text-sm font-medium">{propById[t.property_id]?.name}</p>
                         <p className="text-xs text-muted-foreground">
-                          Salida {t.checkout_time ?? "—"} → entrada {t.next_checkin_time ?? "sin entrada"} ·{" "}
-                          {t.assignee ?? "sin asignar"}
+                          Salida {t.checkout_time ?? "—"} → entrada{" "}
+                          {t.next_checkin_time ?? "sin entrada"} · {t.assignee ?? "sin asignar"}
                         </p>
                       </div>
                       <div className="flex flex-wrap items-center gap-2">
-                        <AssigneeSelect kind="cleaning" taskId={t.id} value={t.assignee_user_id} roles={["cleaning", "manager"]} />
+                        <AssigneeSelect
+                          kind="cleaning"
+                          taskId={t.id}
+                          value={t.assignee_user_id}
+                          roles={["cleaning", "manager"]}
+                        />
                         <StatusPill value={t.priority} />
                         <StatusPill value={t.status} />
                         {t.status !== "completada" && (
@@ -164,8 +182,12 @@ function Operaciones() {
         </TabsContent>
 
         <TabsContent value="mantenimiento" className="space-y-2 pt-4">
+          <MaintenanceChecklist />
           {issues.map((i) => (
-            <Card key={i.id} className={i.blocks_guests && i.status !== "resuelta" ? "border-destructive/40" : ""}>
+            <Card
+              key={i.id}
+              className={i.blocks_guests && i.status !== "resuelta" ? "border-destructive/40" : ""}
+            >
               <CardContent className="flex flex-wrap items-start justify-between gap-3 pt-6">
                 <div className="min-w-0">
                   <div className="flex flex-wrap items-center gap-2">
@@ -174,19 +196,30 @@ function Operaciones() {
                     {i.blocks_guests && <StatusPill value="incidencia" className="normal-case" />}
                   </div>
                   <p className="text-xs text-muted-foreground">
-                    {propById[i.property_id]?.name} · reportada {i.reported_on} · {i.assignee ?? "sin asignar"}
+                    {propById[i.property_id]?.name} · reportada {i.reported_on} ·{" "}
+                    {i.assignee ?? "sin asignar"}
                   </p>
-                  {i.description && <p className="mt-1 text-sm text-muted-foreground">{i.description}</p>}
+                  {i.description && (
+                    <p className="mt-1 text-sm text-muted-foreground">{i.description}</p>
+                  )}
                 </div>
                 <div className="flex items-center gap-2">
-                  <AssigneeSelect kind="maintenance" taskId={i.id} value={i.assignee_user_id} roles={["maintenance", "manager"]} />
+                  <AssigneeSelect
+                    kind="maintenance"
+                    taskId={i.id}
+                    value={i.assignee_user_id}
+                    roles={["maintenance", "manager"]}
+                  />
                   <StatusPill value={i.status} />
                   {i.status !== "resuelta" && (
                     <Button
                       size="sm"
                       variant={i.status === "nueva" ? "outline" : "default"}
                       onClick={() =>
-                        updateIssue.mutate({ id: i.id, status: i.status === "nueva" ? "en_proceso" : "resuelta" })
+                        updateIssue.mutate({
+                          id: i.id,
+                          status: i.status === "nueva" ? "en_proceso" : "resuelta",
+                        })
                       }
                     >
                       {i.status === "nueva" ? "Tomar" : "Resolver"}

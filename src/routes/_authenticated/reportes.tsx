@@ -1,7 +1,14 @@
 import { createFileRoute } from "@tanstack/react-router";
+import { useMemo, useState } from "react";
 import { AppShell } from "@/components/app-shell";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { money, nightsBetween, useProperties, useReservations, useTransactions } from "@/lib/casaflow";
+import {
+  money,
+  nightsBetween,
+  useProperties,
+  useReservations,
+  useTransactions,
+} from "@/lib/casaflow";
 
 export const Route = createFileRoute("/_authenticated/reportes")({
   head: () => ({
@@ -9,7 +16,8 @@ export const Route = createFileRoute("/_authenticated/reportes")({
       { title: "Reportes de ocupación y desempeño — CasaFlow" },
       {
         name: "description",
-        content: "Ocupación mensual, tarifa promedio por noche, mezcla de canales y ranking de propiedades.",
+        content:
+          "Ocupación mensual, tarifa promedio por noche, mezcla de canales y ranking de propiedades.",
       },
       { property: "og:title", content: "Reportes — CasaFlow" },
       { property: "og:description", content: "Indicadores de desempeño de la cartera vacacional." },
@@ -22,14 +30,42 @@ function Reportes() {
   const { data: reservations = [] } = useReservations();
   const { data: properties = [] } = useProperties();
   const { data: transactions = [] } = useTransactions();
+  const [propertyId, setPropertyId] = useState("");
+  const [location, setLocation] = useState("");
+  const [channel, setChannel] = useState("");
+  const [from, setFrom] = useState("");
+  const [to, setTo] = useState("");
+  const locations = useMemo(
+    () =>
+      Array.from(new Set(properties.map((property) => property.location).filter(Boolean))).sort(),
+    [properties],
+  );
+  const channelsList = useMemo(
+    () => Array.from(new Set(reservations.map((reservation) => reservation.channel))).sort(),
+    [reservations],
+  );
+  const allowedPropertyIds = new Set(
+    properties
+      .filter((property) => !location || property.location === location)
+      .map((property) => property.id),
+  );
+  const filtered = reservations.filter(
+    (reservation) =>
+      !["cancelada", "cancelled"].includes(reservation.status) &&
+      (!propertyId || reservation.property_id === propertyId) &&
+      (!location || allowedPropertyIds.has(reservation.property_id)) &&
+      (!channel || reservation.channel === channel) &&
+      (!from || reservation.check_out >= from) &&
+      (!to || reservation.check_in <= to),
+  );
 
-  const nights = reservations.reduce((s, r) => s + nightsBetween(r.check_in, r.check_out), 0);
-  const gross = reservations.reduce((s, r) => s + Number(r.total_amount), 0);
+  const nights = filtered.reduce((s, r) => s + nightsBetween(r.check_in, r.check_out), 0);
+  const gross = filtered.reduce((s, r) => s + Number(r.total_amount), 0);
   const adr = nights ? gross / nights : 0;
 
-  const months = Array.from(new Set(reservations.map((r) => r.check_in.slice(0, 7)))).sort();
+  const months = Array.from(new Set(filtered.map((r) => r.check_in.slice(0, 7)))).sort();
   const monthly = months.map((m) => {
-    const rs = reservations.filter((r) => r.check_in.startsWith(m));
+    const rs = filtered.filter((r) => r.check_in.startsWith(m));
     const n = rs.reduce((s, r) => s + nightsBetween(r.check_in, r.check_out), 0);
     const capacity = properties.length * 30;
     return {
@@ -40,7 +76,7 @@ function Reportes() {
     };
   });
 
-  const channels = reservations.reduce<Record<string, { count: number; revenue: number }>>((acc, r) => {
+  const channels = filtered.reduce<Record<string, { count: number; revenue: number }>>((acc, r) => {
     const c = (acc[r.channel] ??= { count: 0, revenue: 0 });
     c.count += 1;
     c.revenue += Number(r.total_amount);
@@ -50,7 +86,7 @@ function Reportes() {
 
   const ranking = properties
     .map((p) => {
-      const rs = reservations.filter((r) => r.property_id === p.id);
+      const rs = filtered.filter((r) => r.property_id === p.id);
       return {
         p,
         revenue: rs.reduce((s, r) => s + Number(r.total_amount), 0),
@@ -59,15 +95,104 @@ function Reportes() {
     })
     .sort((a, b) => b.revenue - a.revenue);
 
-  const expenses = transactions.filter((t) => t.kind === "expense").reduce((s, t) => s + Number(t.amount), 0);
+  const relevantTransactions = transactions.filter(
+    (transaction) =>
+      (!propertyId || transaction.property_id === propertyId) &&
+      (!from || transaction.occurred_on >= from) &&
+      (!to || transaction.occurred_on <= to),
+  );
+  const expenses = relevantTransactions
+    .filter((t) => t.kind === "expense")
+    .reduce((s, t) => s + Number(t.amount), 0);
+  const profit = gross - expenses;
+  const averageStay = filtered.length ? nights / filtered.length : 0;
 
   return (
     <AppShell title="Reportes" subtitle="Desempeño histórico y proyectado de la cartera">
+      <Card className="mb-4">
+        <CardContent className="grid gap-3 pt-6 sm:grid-cols-2 xl:grid-cols-5">
+          <label className="grid gap-1 text-xs font-medium">
+            Desde
+            <input
+              className="h-9 rounded-md border bg-background px-2"
+              type="date"
+              value={from}
+              onChange={(event) => setFrom(event.target.value)}
+            />
+          </label>
+          <label className="grid gap-1 text-xs font-medium">
+            Hasta
+            <input
+              className="h-9 rounded-md border bg-background px-2"
+              type="date"
+              value={to}
+              onChange={(event) => setTo(event.target.value)}
+            />
+          </label>
+          <label className="grid gap-1 text-xs font-medium">
+            Alojamiento
+            <select
+              className="h-9 rounded-md border bg-background px-2"
+              value={propertyId}
+              onChange={(event) => setPropertyId(event.target.value)}
+            >
+              <option value="">Todos</option>
+              {properties
+                .filter((property) => !location || property.location === location)
+                .map((property) => (
+                  <option key={property.id} value={property.id}>
+                    {property.name}
+                  </option>
+                ))}
+            </select>
+          </label>
+          <label className="grid gap-1 text-xs font-medium">
+            Grupo / ubicación
+            <select
+              className="h-9 rounded-md border bg-background px-2"
+              value={location}
+              onChange={(event) => {
+                setLocation(event.target.value);
+                setPropertyId("");
+              }}
+            >
+              <option value="">Todos</option>
+              {locations.map((value) => (
+                <option key={value} value={value}>
+                  {value}
+                </option>
+              ))}
+            </select>
+          </label>
+          <label className="grid gap-1 text-xs font-medium">
+            Canal
+            <select
+              className="h-9 rounded-md border bg-background px-2"
+              value={channel}
+              onChange={(event) => setChannel(event.target.value)}
+            >
+              <option value="">Todos</option>
+              {channelsList.map((value) => (
+                <option key={value} value={value}>
+                  {value}
+                </option>
+              ))}
+            </select>
+          </label>
+        </CardContent>
+      </Card>
       <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
         <Kpi label="Noches vendidas" value={String(nights)} />
         <Kpi label="Tarifa promedio (ADR)" value={money(adr)} />
         <Kpi label="Ingreso bruto" value={money(gross)} />
         <Kpi label="Gasto acumulado" value={money(expenses)} />
+        <Kpi label="Utilidad estimada" value={money(profit)} />
+        <Kpi label="Reservaciones" value={String(filtered.length)} />
+        <Kpi label="Estancia promedio" value={`${averageStay.toFixed(1)} noches`} />
+        <Kpi
+          label="Propiedades incluidas"
+          value={String(propertyId ? 1 : allowedPropertyIds.size)}
+        />
       </div>
 
       <Card className="mt-4">
@@ -82,7 +207,9 @@ function Reportes() {
                 <div className="flex h-40 w-full items-end rounded-md bg-muted">
                   <div className="w-full rounded-md bg-primary" style={{ height: `${r.occ}%` }} />
                 </div>
-                <span className="text-[11px] text-muted-foreground">{r.m.slice(5)}/{r.m.slice(2, 4)}</span>
+                <span className="text-[11px] text-muted-foreground">
+                  {r.m.slice(5)}/{r.m.slice(2, 4)}
+                </span>
                 <span className="text-[10px] text-muted-foreground">{money(r.revenue)}</span>
               </div>
             ))}
@@ -105,7 +232,10 @@ function Reportes() {
                   </span>
                 </div>
                 <div className="mt-1 h-2 rounded-full bg-muted">
-                  <div className="h-2 rounded-full bg-accent" style={{ width: `${(c.revenue / maxRevenue) * 100}%` }} />
+                  <div
+                    className="h-2 rounded-full bg-accent"
+                    style={{ width: `${(c.revenue / maxRevenue) * 100}%` }}
+                  />
                 </div>
               </div>
             ))}
@@ -118,7 +248,10 @@ function Reportes() {
           </CardHeader>
           <CardContent className="space-y-1.5">
             {ranking.slice(0, 10).map((r, i) => (
-              <div key={r.p.id} className="flex items-center justify-between rounded-md border px-3 py-2 text-sm">
+              <div
+                key={r.p.id}
+                className="flex items-center justify-between rounded-md border px-3 py-2 text-sm"
+              >
                 <span className="flex items-center gap-2">
                   <span className="grid size-6 place-items-center rounded-full bg-muted text-xs font-semibold">
                     {i + 1}
