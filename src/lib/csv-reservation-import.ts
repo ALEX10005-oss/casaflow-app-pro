@@ -246,11 +246,28 @@ export function parseReservationsCsv(text: string): CsvReservationRow[] {
   const records = splitCsvRecords(text.replace(/^\uFEFF/, ""));
   if (records.length < 2) throw new Error("El CSV no contiene filas de reservas.");
 
-  const headers = parseCsvLine(records[0]!).map(normalize);
-  const airbnb = isAirbnb(headers);
-  const casaFlow = ["codigo", "propiedad", "huesped", "check_in", "check_out"].every((h) =>
-    headers.includes(h),
+  const headers = parseCsvLine(records[0]!).map(slug);
+  const dataRecords = records.slice(1);
+
+  const index = {
+    codigo: findIndex(headers, "codigo"),
+    propiedad: findIndex(headers, "propiedad"),
+    huesped: findIndex(headers, "huesped"),
+    check_in: findIndex(headers, "check_in"),
+    check_out: findIndex(headers, "check_out"),
+    huespedes: findIndex(headers, "huespedes"),
+    total: findIndex(headers, "total"),
+    canal: findIndex(headers, "canal"),
+    estado: findIndex(headers, "estado"),
+    pago: findIndex(headers, "pago"),
+    notas: findIndex(headers, "notas"),
+  };
+
+  const casaFlow = ["codigo", "propiedad", "huesped", "check_in", "check_out"].every((header) =>
+    headers.includes(header),
   );
+  const airbnb =
+    !casaFlow && index.codigo >= 0 && index.check_in >= 0 && index.check_out >= 0;
 
   if (!airbnb && !casaFlow) {
     throw new Error(
@@ -258,60 +275,53 @@ export function parseReservationsCsv(text: string): CsvReservationRow[] {
     );
   }
 
-  const parsedRows = records.slice(1).map((record, i) => {
-    const cells = parseCsvLine(record);
+  // Airbnb exporta las fechas en MM/DD/YYYY; la plantilla de CasaFlow usa YYYY-MM-DD.
+  const fallbackOrder: "dmy" | "mdy" = airbnb ? "mdy" : "dmy";
+  const dateOrder = inferDateOrder(
+    [
+      ...columnValues(dataRecords, index.check_in),
+      ...columnValues(dataRecords, index.check_out),
+    ],
+    fallbackOrder,
+  );
 
-    const codigo = airbnb
-      ? getCell(cells, headers, ["Código de confirmación"])
-      : getCell(cells, headers, ["codigo"]);
-    const propiedad = airbnb
-      ? getCell(cells, headers, ["Espacio"])
-      : getCell(cells, headers, ["propiedad"]);
-    const huesped = getCell(cells, headers, airbnb ? ["Huésped"] : ["huesped"]);
-    const checkIn = normalizeDate(
-      getCell(cells, headers, airbnb ? ["Fecha de inicio"] : ["check_in"]),
-      airbnb ? "mdy" : "dmy",
-    );
-    const checkOut = normalizeDate(
-      getCell(cells, headers, airbnb ? ["Fecha de finalización"] : ["check_out"]),
-      airbnb ? "mdy" : "dmy",
-    );
-    const guestsRaw = airbnb ? "1" : getCell(cells, headers, ["huespedes"]);
-    const guests = Number.parseInt(guestsRaw || "1", 10);
-    const totalRaw = airbnb
-      ? getCell(cells, headers, ["Ingresos brutos", "Monto", "Ingresos recibidos"])
-      : getCell(cells, headers, ["total"]);
+  const cell = (cells: string[], key: keyof typeof index) =>
+    index[key] >= 0 ? (cells[index[key]] ?? "").trim() : "";
+
+  const parsedRows = dataRecords.map((record, i) => {
+    const cells = parseCsvLine(record);
+    const guests = Number.parseInt(cell(cells, "huespedes") || "1", 10);
 
     return {
       rowNumber: i + 2,
-      codigo,
-      propiedad,
-      huesped,
+      codigo: cell(cells, "codigo"),
+      propiedad: cell(cells, "propiedad"),
+      huesped: cell(cells, "huesped"),
       email: "",
       telefono: "",
-      check_in: checkIn,
-      check_out: checkOut,
+      check_in: normalizeDate(cell(cells, "check_in"), dateOrder),
+      check_out: normalizeDate(cell(cells, "check_out"), dateOrder),
       huespedes: Number.isFinite(guests) && guests > 0 ? guests : 1,
-      total: parseMoney(totalRaw),
-      canal: airbnb ? "Airbnb" : normalizeChannel(getCell(cells, headers, ["canal"])),
-      estado: airbnb ? "confirmada" : getCell(cells, headers, ["estado"]) || "confirmada",
-      pago: airbnb ? "registrado" : getCell(cells, headers, ["pago"]) || "pendiente",
-      notas: "",
+      total: parseMoney(cell(cells, "total")),
+      canal: airbnb ? "Airbnb" : normalizeChannel(cell(cells, "canal")) || "directo",
+      estado: airbnb ? "confirmada" : cell(cells, "estado") || "confirmada",
+      pago: airbnb ? "registrado" : cell(cells, "pago") || "pendiente",
+      notas: airbnb ? "" : cell(cells, "notas"),
     };
   });
 
-  if (!airbnb) return parsedRows;
+  // Ignora filas puramente financieras (sin código, propiedad, huésped ni estancia).
+  const usableRows = parsedRows.filter((row) =>
+    Boolean(row.codigo || row.propiedad || row.huesped || row.check_in || row.check_out),
+  );
+
+  if (!airbnb) return usableRows;
 
   // El historial de transacciones de Airbnb suele repetir una reserva en varias
   // filas (alojamiento, limpieza, impuestos, ajustes). Conservamos una sola fila
   // completa por código y el importe positivo más alto disponible.
   const byCode = new Map<string, CsvReservationRow>();
-  for (const row of parsedRows) {
-    const hasReservationData = Boolean(
-      row.codigo || row.propiedad || row.huesped || row.check_in || row.check_out,
-    );
-    if (!hasReservationData) continue;
-
+  for (const row of usableRows) {
     const key = normalize(row.codigo);
     if (!key) {
       byCode.set(`fila-${row.rowNumber}`, row);
@@ -324,21 +334,23 @@ export function parseReservationsCsv(text: string): CsvReservationRow[] {
       continue;
     }
 
-    const previousCompleteness = [
-      previous.propiedad,
-      previous.huesped,
-      previous.check_in,
-      previous.check_out,
-    ].filter(Boolean).length;
-    const rowCompleteness = [row.propiedad, row.huesped, row.check_in, row.check_out].filter(
-      Boolean,
-    ).length;
-    const base = rowCompleteness > previousCompleteness ? row : previous;
-    byCode.set(key, { ...base, total: Math.max(previous.total, row.total, 0) });
+    const completeness = (item: CsvReservationRow) =>
+      [item.propiedad, item.huesped, item.check_in, item.check_out].filter(Boolean).length;
+    const base = completeness(row) > completeness(previous) ? row : previous;
+    byCode.set(key, {
+      ...base,
+      propiedad: base.propiedad || previous.propiedad || row.propiedad,
+      huesped: base.huesped || previous.huesped || row.huesped,
+      check_in: base.check_in || previous.check_in || row.check_in,
+      check_out: base.check_out || previous.check_out || row.check_out,
+      rowNumber: Math.min(previous.rowNumber, row.rowNumber),
+      total: Math.max(previous.total, row.total, 0),
+    });
   }
 
-  return [...byCode.values()];
+  return [...byCode.values()].sort((a, b) => a.rowNumber - b.rowNumber);
 }
+
 
 export function validateReservationsCsv(
   rows: CsvReservationRow[],
