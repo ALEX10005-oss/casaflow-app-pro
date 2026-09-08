@@ -269,7 +269,10 @@ export function ReservationCsvImport({
                       </td>
                       <td className="px-3 py-2">
                         {row.duplicate ? (
-                          <span className="font-medium text-amber-700">Duplicada · se omite</span>
+                          <span className="font-medium text-amber-700">
+                            Ya existe en CasaFlow · se omite
+                          </span>
+
                         ) : row.valid ? (
                           <span className="font-medium text-emerald-700">Lista</span>
                         ) : (
