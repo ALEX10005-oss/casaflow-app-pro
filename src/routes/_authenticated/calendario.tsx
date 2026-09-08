@@ -55,6 +55,13 @@ function channelKey(value: string) {
   return key;
 }
 
+function callRpc(fn: string, args: Record<string, unknown>) {
+  return supabase.rpc(fn as never, args as never) as unknown as Promise<{
+    data: unknown;
+    error: { message: string } | null;
+  }>;
+}
+
 function dayDiff(from: string, to: string) {
   return Math.round(
     (new Date(`${to}T12:00:00`).getTime() - new Date(`${from}T12:00:00`).getTime()) / 86_400_000,
@@ -189,11 +196,7 @@ function Calendario() {
       window.removeEventListener("pointerup", onUp);
       setResizePreview(null);
       if (finalCheckOut === original) return;
-      const rpc = supabase.rpc.bind(supabase) as unknown as (
-        fn: string,
-        args: Record<string, unknown>,
-      ) => Promise<{ data: unknown; error: { message: string } | null }>;
-      const { error } = await rpc("resize_reservation_checkout", {
+      const { error } = await callRpc("resize_reservation_checkout", {
         _id: reservation.id,
         _check_out: finalCheckOut,
       });
