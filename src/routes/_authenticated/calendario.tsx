@@ -33,9 +33,9 @@ export const Route = createFileRoute("/_authenticated/calendario")({
   component: Calendario,
 });
 
-const PROPERTY_WIDTH = 230;
-const DAY_WIDTH = 54;
-const ROW_HEIGHT = 58;
+const PROPERTY_WIDTH = 268;
+const DAY_WIDTH = 58;
+const ROW_HEIGHT = 72;
 const CANCELLED = ["cancelada", "cancelled", "no_show"];
 const CHANNEL_COLOR: Record<string, string> = {
   Airbnb: "bg-[#FF5A5F]",
@@ -261,13 +261,13 @@ function Calendario() {
         <CardContent
           ref={scrollRef}
           onScroll={() => syncScroll("main")}
-          className="h-[calc(100vh-235px)] min-h-[420px] overflow-auto p-0"
+          className="h-[calc(100vh-235px)] min-h-[460px] overflow-auto overscroll-contain p-0"
         >
           <div style={{ minWidth: fullWidth }}>
             <div className="sticky top-0 z-50 border-b bg-card shadow-md">
               <div className="flex">
                 <div
-                  className="sticky left-0 z-[60] shrink-0 border-r bg-card px-3 py-2 text-xs font-semibold uppercase tracking-wide text-muted-foreground"
+                  className="sticky left-0 z-[60] shrink-0 border-r bg-card px-4 py-3 text-xs font-semibold uppercase tracking-[0.12em] text-muted-foreground"
                   style={{ width: PROPERTY_WIDTH }}
                 >
                   Propiedad
@@ -276,7 +276,7 @@ function Calendario() {
                   {monthGroups.map((m) => (
                     <div
                       key={m.key}
-                      className="shrink-0 border-r bg-muted/50 py-2 text-xs font-semibold uppercase tracking-wide"
+                      className="shrink-0 border-r-2 bg-muted/40 py-3 text-xs font-semibold uppercase tracking-[0.1em] text-foreground"
                       style={{ width: m.days * DAY_WIDTH }}
                     >
                       <span className="px-3">
@@ -299,7 +299,7 @@ function Calendario() {
                       <div
                         key={iso}
                         className={cn(
-                          "shrink-0 border-r py-1 text-center leading-tight",
+                          "shrink-0 border-r py-2 text-center leading-tight",
                           weekend ? "bg-muted/60" : "bg-card",
                           iso === today && "bg-[#FF5A5F]/10",
                         )}
@@ -387,18 +387,18 @@ function Calendario() {
                   <div className="flex border-b">
                     <div
                       className={cn(
-                        "sticky left-0 z-30 shrink-0 border-r px-3 py-2",
-                        propertyIndex % 2 === 0 ? "bg-card" : "bg-muted/40",
+                        "sticky left-0 z-30 shrink-0 border-r px-4 py-3",
+                        propertyIndex % 2 === 0 ? "bg-card" : "bg-muted/25",
                       )}
                       style={{ width: PROPERTY_WIDTH, height: ROW_HEIGHT }}
                     >
-                      <p className="truncate text-xs font-semibold">{property.name}</p>
-                      <p className="truncate text-[10px] text-muted-foreground">
+                      <p className="truncate text-sm font-semibold leading-5" title={property.name}>{property.name}</p>
+                      <p className="truncate text-[11px] leading-4 text-muted-foreground" title={`${property.code} · ${property.location}`}>
                         {property.code} · {property.location}
                       </p>
                     </div>
                     <div
-                      className="relative bg-background"
+                      className={cn("relative", propertyIndex % 2 === 0 ? "bg-card" : "bg-muted/20")}
                       style={{ width: timelineWidth, height: ROW_HEIGHT }}
                     >
                       {columns.map((iso, index) => {
@@ -408,7 +408,7 @@ function Calendario() {
                             key={iso}
                             className={cn(
                               "absolute inset-y-0 border-r border-border/70",
-                              weekend ? "bg-muted/50" : "bg-card",
+                              weekend ? "bg-muted/35" : "bg-transparent",
                             )}
                             style={{ left: index * DAY_WIDTH, width: DAY_WIDTH }}
                           />
@@ -433,9 +433,15 @@ function Calendario() {
                           : null;
                         const isSelected = item.reservationId === selectedReservationId;
                         const labelText =
-                          item.kind === "reservation"
-                            ? `${item.name} · ${item.channel} · ${shortDate(item.from)}–${shortDate(item.to)} · ${widthDays} noches`
-                            : item.name;
+                          item.kind !== "reservation"
+                            ? item.name
+                            : widthDays <= 2
+                              ? item.name
+                              : widthDays <= 4
+                                ? `${item.name} · ${item.channel}`
+                                : widthDays <= 7
+                                  ? `${item.name} · ${item.channel} · ${widthDays} noches`
+                                  : `${item.name} · ${item.channel} · ${shortDate(item.from)}–${shortDate(item.to)} · ${widthDays} noches`;
                         return (
                           <div
                             key={item.id}
@@ -445,13 +451,14 @@ function Calendario() {
                               if (item.reservationId) setSelectedReservationId(item.reservationId);
                               else if (item.externalId) setSelectedExternalId(item.externalId);
                             }}
-                            className="absolute inset-y-[7px] z-[10] overflow-visible"
+                            className="absolute inset-y-[10px] z-[10] overflow-visible"
                             style={{ left: startIndex * DAY_WIDTH + 2, width: width - 4 }}
-                            title={`${item.name} · ${shortDate(item.from)} → ${shortDate(item.to)}`}
+                            title={`${item.name} · ${item.channel || "Bloqueo"} · ${shortDate(item.from)} → ${shortDate(item.to)} · ${widthDays} noches`}
+                            aria-label={`${item.name}, ${item.channel || "Bloqueo"}, del ${shortDate(item.from)} al ${shortDate(item.to)}, ${widthDays} noches`}
                           >
                             <div
                               className={cn(
-                                "absolute inset-0 flex items-center overflow-hidden rounded-full px-3 pr-14 text-left text-[11px] font-semibold text-white shadow-sm ring-1 ring-black/5",
+                                "absolute inset-0 flex items-center overflow-hidden rounded-lg px-3 pr-11 text-left text-xs font-semibold leading-tight text-white shadow-sm ring-1 ring-black/5 transition-[filter,transform]",
                                 item.kind === "block"
                                   ? "bg-[#334155]"
                                   : (CHANNEL_COLOR[item.channel] ?? "bg-[#FF5A5F]"),
@@ -467,7 +474,7 @@ function Calendario() {
                             {reservation && canEdit && (
                               <button
                                 type="button"
-                                className="absolute -right-1 top-1/2 z-40 grid h-9 w-6 -translate-y-1/2 cursor-ew-resize place-items-center rounded-md border border-white/80 bg-foreground text-background shadow-lg"
+                                className="absolute -right-1 top-1/2 z-40 grid h-10 w-7 -translate-y-1/2 cursor-ew-resize place-items-center rounded-md border border-white/80 bg-foreground text-background shadow-lg"
                                 title="Arrastrar para agregar o quitar noches"
                                 onPointerDown={(e) => startResize(e, reservation)}
                               >
