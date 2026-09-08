@@ -242,11 +242,11 @@ function Importar() {
   return (
     <AppShell
       title="Agregar reservaciones externas"
-      subtitle="Airbnb por CSV; Booking.com, Vrbo, Expedia y otros canales mediante captura manual"
+      subtitle="Airbnb por CSV o captura manual; Booking.com, Vrbo, Expedia y otros canales"
     >
       <Card className="mb-4">
         <CardHeader>
-          <CardTitle className="text-base">Captura manual de otros canales</CardTitle>
+          <CardTitle className="text-base">Captura manual de reservas</CardTitle>
         </CardHeader>
         <CardContent className="space-y-4">
           <p className="text-sm text-muted-foreground">
@@ -262,6 +262,7 @@ function Importar() {
                   setManual((value) => ({ ...value, channel: event.target.value }))
                 }
               >
+                <option value="airbnb">Airbnb</option>
                 <option value="booking">Booking.com</option>
                 <option value="vrbo">Vrbo</option>
                 <option value="expedia">Expedia</option>
