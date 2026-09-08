@@ -415,31 +415,34 @@ export function validateReservationsCsv(
     const errors: string[] = [];
     const property = findProperty(row.propiedad);
     const codeKey = normalize(row.codigo);
-    const stayKey = property
-      ? [property.id, normalize(row.canal), row.check_in, row.check_out].join("|")
-      : "";
+    const datesOk = validIsoDate(row.check_in) && validIsoDate(row.check_out);
+    const stayKey =
+      property && datesOk
+        ? [property.id, normalize(row.canal), row.check_in, row.check_out].join("|")
+        : "";
     const duplicate = Boolean(
       (codeKey && (existingCodes.has(codeKey) || seenCodes.has(codeKey))) ||
       (stayKey && (existingStays.has(stayKey) || seenStays.has(stayKey))),
     );
 
     if (!row.codigo) errors.push("Falta código de reserva.");
-    if (!property) errors.push("La propiedad no coincide con una propiedad existente de CasaFlow.");
+    if (!property) {
+      errors.push(
+        row.propiedad
+          ? `No encontramos "${row.propiedad}" entre tus propiedades: selecciónala manualmente.`
+          : "Falta el alojamiento: selecciónalo manualmente.",
+      );
+    }
     if (!row.huesped) errors.push("Falta el nombre del huésped.");
     if (!validIsoDate(row.check_in)) errors.push("La fecha de entrada no es válida.");
     if (!validIsoDate(row.check_out)) errors.push("La fecha de salida no es válida.");
-    if (
-      validIsoDate(row.check_in) &&
-      validIsoDate(row.check_out) &&
-      row.check_out <= row.check_in
-    ) {
+    if (datesOk && row.check_out <= row.check_in) {
       errors.push("La salida debe ser posterior a la entrada.");
     }
-    if (!Number.isFinite(row.total) || row.total < 0) errors.push("El total no es válido.");
-    if (!row.canal) errors.push("Falta el canal.");
 
     if (codeKey) seenCodes.add(codeKey);
     if (stayKey) seenStays.add(stayKey);
+
 
     return {
       ...row,
