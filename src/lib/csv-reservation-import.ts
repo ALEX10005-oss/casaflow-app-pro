@@ -359,22 +359,43 @@ export function validateReservationsCsv(
 ): CsvRowValidation[] {
   const propertyByKey = new Map<string, PropertyRef>();
   for (const property of properties) {
-    propertyByKey.set(normalize(property.code), property);
-    propertyByKey.set(normalize(property.name), property);
+    propertyByKey.set(slug(property.code), property);
+    propertyByKey.set(slug(property.name), property);
+    propertyByKey.set(slug(`${property.code} ${property.name}`), property);
   }
 
   const findProperty = (value: string) => {
-    const key = normalize(value);
+    const key = slug(value);
+    if (!key) return null;
     const exact = propertyByKey.get(key);
     if (exact) return exact;
-    if (key.length < 5) return null;
 
-    const matches = properties.filter((property) => {
-      const name = normalize(property.name);
-      return name.includes(key) || key.includes(name);
+    const contains = properties.filter((property) => {
+      const name = slug(property.name);
+      return name.length >= 4 && (name.includes(key) || key.includes(name));
     });
-    return matches.length === 1 ? matches[0]! : null;
+    if (contains.length === 1) return contains[0]!;
+
+    // Coincidencia por palabras significativas: solo se acepta si hay un único ganador claro.
+    const keyWords = new Set(key.split(" ").filter((word) => word.length > 2));
+    if (keyWords.size === 0) return null;
+
+    const scored = properties
+      .map((property) => {
+        const words = slug(property.name)
+          .split(" ")
+          .filter((word) => word.length > 2);
+        const hits = words.filter((word) => keyWords.has(word)).length;
+        return { property, score: words.length ? hits / words.length : 0, hits };
+      })
+      .filter((item) => item.hits >= 2 && item.score >= 0.6)
+      .sort((a, b) => b.score - a.score);
+
+    if (scored.length === 1) return scored[0]!.property;
+    if (scored.length > 1 && scored[0]!.score > scored[1]!.score) return scored[0]!.property;
+    return null;
   };
+
 
   const existingCodes = new Set(reservations.map((reservation) => normalize(reservation.code)));
   const existingStays = new Set(
