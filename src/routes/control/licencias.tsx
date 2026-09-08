@@ -51,13 +51,18 @@ function LicenseRow({ license }: { license: LicenseOverview }) {
   async function save(nextStatus?: string) {
     const propertyLimit = Number(maxProperties);
     const userLimit = Number(maxUsers);
-    if (!type.trim()) return toast.error("El plan es obligatorio");
-    if (!Number.isInteger(propertyLimit) || propertyLimit < license.properties_used)
-      return toast.error(
-        `El límite no puede ser menor a ${license.properties_used} propiedades en uso`,
-      );
-    if (!Number.isInteger(userLimit) || userLimit < license.users_used)
-      return toast.error(`El límite no puede ser menor a ${license.users_used} usuarios en uso`);
+    if (!type.trim()) {
+      toast.error("El plan es obligatorio");
+      return;
+    }
+    if (!Number.isInteger(propertyLimit) || propertyLimit < license.properties_used) {
+      toast.error(`El límite no puede ser menor a ${license.properties_used} propiedades en uso`);
+      return;
+    }
+    if (!Number.isInteger(userLimit) || userLimit < license.users_used) {
+      toast.error(`El límite no puede ser menor a ${license.users_used} usuarios en uso`);
+      return;
+    }
     try {
       await update.mutateAsync({
         org_id: license.id,

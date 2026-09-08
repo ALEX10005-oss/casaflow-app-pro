@@ -104,10 +104,12 @@ function Importar() {
 
   async function createManualReservation() {
     if (!manual.propertyId || !manual.guestName.trim() || !manual.checkIn || !manual.checkOut) {
-      return toast.error("Completa alojamiento, huésped y fechas.");
+      toast.error("Completa alojamiento, huésped y fechas.");
+      return;
     }
     if (manual.checkOut <= manual.checkIn) {
-      return toast.error("La salida debe ser posterior a la entrada.");
+      toast.error("La salida debe ser posterior a la entrada.");
+      return;
     }
 
     try {
@@ -144,7 +146,10 @@ function Importar() {
       .replace(/^\uFEFF/, "")
       .split(/\r?\n/)
       .filter(Boolean);
-    if (lines.length < 2) return toast.error("El archivo CSV no contiene reservaciones.");
+    if (lines.length < 2) {
+      toast.error("El archivo CSV no contiene reservaciones.");
+      return;
+    }
     const headers = parseLine(lines[0]!).map(normalize);
     const indexOf = (key: keyof typeof ALIASES) =>
       headers.findIndex((header) => ALIASES[key].includes(header as never));
@@ -161,7 +166,8 @@ function Importar() {
         (index) => index < 0,
       )
     ) {
-      return toast.error("Faltan columnas necesarias: alojamiento, huésped, entrada o salida.");
+      toast.error("Faltan columnas necesarias: alojamiento, huésped, entrada o salida.");
+      return;
     }
     const parsed = lines.slice(1).map((line): ParsedRow => {
       const cells = parseLine(line);
