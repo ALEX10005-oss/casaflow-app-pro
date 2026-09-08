@@ -53,6 +53,13 @@ type ReservationRef = {
   check_out: string;
 };
 
+function callRpc(fn: string, args: Record<string, unknown>) {
+  return supabase.rpc(fn as never, args as never) as unknown as Promise<{
+    data: unknown;
+    error: { message: string } | null;
+  }>;
+}
+
 function normalize(value: string) {
   return value
     .trim()
@@ -357,18 +364,13 @@ export function validateReservationsCsv(
 
 export async function importReservationsCsv(rows: CsvRowValidation[]): Promise<CsvImportResult> {
   const result: CsvImportResult = { imported: 0, skipped: 0, errors: [] };
-  const rpc = supabase.rpc.bind(supabase) as unknown as (
-    fn: string,
-    args: Record<string, unknown>,
-  ) => Promise<{ data: unknown; error: { message: string } | null }>;
-
   for (const row of rows) {
     if (!row.valid || row.duplicate || !row.propertyId) {
       result.skipped += 1;
       continue;
     }
 
-    const { data, error } = await rpc("import_external_reservation", {
+    const { data, error } = await callRpc("import_external_reservation", {
       _code: row.codigo,
       _property_id: row.propertyId,
       _guest_name: row.huesped,
