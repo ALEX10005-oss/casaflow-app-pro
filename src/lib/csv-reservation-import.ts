@@ -357,7 +357,7 @@ export function validateReservationsCsv(
 
 export async function importReservationsCsv(rows: CsvRowValidation[]): Promise<CsvImportResult> {
   const result: CsvImportResult = { imported: 0, skipped: 0, errors: [] };
-  const rpc = supabase.rpc as unknown as (
+  const rpc = supabase.rpc.bind(supabase) as unknown as (
     fn: string,
     args: Record<string, unknown>,
   ) => Promise<{ data: unknown; error: { message: string } | null }>;
