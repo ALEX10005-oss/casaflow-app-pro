@@ -48,6 +48,13 @@ const CHANNEL_COLOR: Record<string, string> = {
   Directo: "bg-[#F97316]",
 };
 
+function channelKey(value: string) {
+  const key = value.trim().toLowerCase();
+  if (key === "booking.com") return "booking";
+  if (key === "directa" || key === "web directa") return "directo";
+  return key;
+}
+
 function dayDiff(from: string, to: string) {
   return Math.round(
     (new Date(`${to}T12:00:00`).getTime() - new Date(`${from}T12:00:00`).getTime()) / 86_400_000,
@@ -182,7 +189,7 @@ function Calendario() {
       window.removeEventListener("pointerup", onUp);
       setResizePreview(null);
       if (finalCheckOut === original) return;
-      const rpc = supabase.rpc as unknown as (
+      const rpc = supabase.rpc.bind(supabase) as unknown as (
         fn: string,
         args: Record<string, unknown>,
       ) => Promise<{ data: unknown; error: { message: string } | null }>;
@@ -323,7 +330,13 @@ function Calendario() {
                   e.property_id === property.id &&
                   e.start_date < rangeEnd &&
                   e.end_date > rangeStart &&
-                  e.status !== "cancelled",
+                  e.status !== "cancelled" &&
+                  !propertyReservations.some(
+                    (reservation) =>
+                      reservation.check_in === e.start_date &&
+                      reservation.check_out === e.end_date &&
+                      channelKey(reservation.channel) === channelKey(e.channel),
+                  ),
               );
               const propertyBlocks = blocks.filter(
                 (b) =>
