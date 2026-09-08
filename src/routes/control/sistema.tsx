@@ -75,7 +75,7 @@ function ControlSistema() {
         <div>
           <h1 className="font-display text-xl font-semibold">Sistema y monitoreo</h1>
           <p className="text-sm text-neutral-400">
-            Diagnóstico preventivo de la plataforma. Automático cada 15 minutos.
+            Diagnóstico preventivo de la plataforma. Automático cada minuto.
           </p>
         </div>
         <button
