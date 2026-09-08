@@ -1,4 +1,11 @@
-import { createFileRoute, Link, Outlet, redirect, useNavigate, useRouterState } from "@tanstack/react-router";
+import {
+  createFileRoute,
+  Link,
+  Outlet,
+  redirect,
+  useNavigate,
+  useRouterState,
+} from "@tanstack/react-router";
 import { useQueryClient } from "@tanstack/react-query";
 import { Bell } from "lucide-react";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
@@ -9,9 +16,9 @@ import {
   useHealthSummary,
   useMarkNotificationsRead,
   useNotifications,
+  usePlatformRealtime,
 } from "@/lib/monitor";
 import { cn } from "@/lib/utils";
-
 
 const NAV = [
   { to: "/control/dashboard", label: "Dashboard" },
@@ -120,11 +127,11 @@ function NotificationBell() {
 }
 
 function ControlLayout() {
-
   const { isAdmin } = Route.useRouteContext();
   const pathname = useRouterState({ select: (s) => s.location.pathname });
   const navigate = useNavigate();
   const queryClient = useQueryClient();
+  const realtime = usePlatformRealtime();
 
   if (!isAdmin) return <NotAvailable />;
 
@@ -158,12 +165,32 @@ function ControlLayout() {
               </Link>
             ))}
           </nav>
+          <span
+            className={cn(
+              "inline-flex items-center gap-1.5 rounded-full border px-2.5 py-1 text-[11px] font-semibold",
+              realtime.connection === "live"
+                ? "border-emerald-500/40 bg-emerald-500/10 text-emerald-300"
+                : "border-amber-500/40 bg-amber-500/10 text-amber-300",
+            )}
+            title={
+              realtime.lastEventAt
+                ? `Último evento: ${monitorDateTime(realtime.lastEventAt)}`
+                : "Conectando con Supabase Realtime"
+            }
+          >
+            <span
+              className={cn(
+                "h-1.5 w-1.5 rounded-full",
+                realtime.connection === "live" ? "bg-emerald-400" : "bg-amber-400",
+              )}
+            />
+            {realtime.connection === "live" ? "Datos en vivo" : "Reconectando"}
+          </span>
           <HealthBadge />
           <NotificationBell />
           <button onClick={signOut} className="text-xs text-neutral-400 hover:text-neutral-100">
             Salir
           </button>
-
         </div>
       </header>
       <main className="mx-auto max-w-6xl px-5 py-6">
