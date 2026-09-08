@@ -208,9 +208,18 @@ export function ReservationCsvImport({
           <>
             <div className="grid gap-3 sm:grid-cols-3">
               <Summary label="Listas para importar" value={validRows.length} />
-              <Summary label="Duplicadas · se omiten" value={duplicateRows.length} />
-              <Summary label="Con errores" value={invalidRows.length} />
+              <Summary label="Ya existen en CasaFlow · se omiten" value={duplicateRows.length} />
+              <Summary label="Requieren corrección" value={invalidRows.length} />
             </div>
+
+            <div className="rounded-md border bg-muted/20 p-3 text-xs text-muted-foreground">
+              Las filas de cobros del mismo código de confirmación ya se agruparon en una sola
+              reserva con el importe más alto disponible. Se importarán las {validRows.length} filas
+              marcadas como “Lista”. Las que aparecen en rojo necesitan que asignes el alojamiento o
+              corrijas las fechas antes de importar. Los datos que el canal no envía (correo,
+              teléfono, notas) quedan vacíos y puedes completarlos después en cada reserva.
+            </div>
+
 
             <div className="overflow-x-auto rounded-lg border">
               <table className="w-full min-w-[980px] text-xs">
