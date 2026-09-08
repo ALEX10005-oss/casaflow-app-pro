@@ -12,6 +12,22 @@ export type PlatformStats = {
   properties: number;
 };
 
+export type LicenseOverview = {
+  id: string;
+  name: string;
+  license_type: string;
+  license_status: string;
+  max_properties: number;
+  max_users: number;
+  properties_used: number;
+  users_used: number;
+  reservations_total: number;
+  activated_at: string | null;
+  expires_at: string | null;
+  updated_at: string;
+  created_at: string;
+};
+
 export type PlatformUser = {
   id: string;
   email: string | null;
@@ -33,6 +49,8 @@ export async function checkPlatformAdmin(): Promise<boolean> {
 export function usePlatformStats() {
   return useQuery({
     queryKey: ["platform", "stats"],
+    refetchInterval: 30_000,
+    refetchOnWindowFocus: true,
     queryFn: async () => {
       const { data, error } = await supabase.rpc("platform_stats" as never);
       if (error) throw error;
@@ -44,10 +62,25 @@ export function usePlatformStats() {
 export function usePlatformOrganizations() {
   return useQuery({
     queryKey: ["platform", "organizations"],
+    refetchInterval: 30_000,
+    refetchOnWindowFocus: true,
     queryFn: async () => {
       const { data, error } = await supabase.rpc("platform_list_organizations" as never);
       if (error) throw error;
       return (data ?? []) as unknown as Organization[];
+    },
+  });
+}
+
+export function useLicenseOverview() {
+  return useQuery({
+    queryKey: ["platform", "licenses", "overview"],
+    refetchInterval: 30_000,
+    refetchOnWindowFocus: true,
+    queryFn: async () => {
+      const { data, error } = await supabase.rpc("platform_license_overview" as never);
+      if (error) throw error;
+      return (data ?? []) as unknown as LicenseOverview[];
     },
   });
 }
@@ -69,19 +102,24 @@ export type LicenseUpdate = {
   license_type?: string;
   max_properties?: number;
   max_users?: number;
+  expires_at?: string | null;
 };
 
 export function useUpdateLicense() {
   const qc = useQueryClient();
   return useMutation({
     mutationFn: async (input: LicenseUpdate) => {
-      const { error } = await supabase.rpc("platform_update_license" as never, {
-        _org_id: input.org_id,
-        _license_status: input.license_status ?? null,
-        _license_type: input.license_type ?? null,
-        _max_properties: input.max_properties ?? null,
-        _max_users: input.max_users ?? null,
-      } as never);
+      const { error } = await supabase.rpc(
+        "platform_update_license" as never,
+        {
+          _org_id: input.org_id,
+          _license_status: input.license_status ?? null,
+          _license_type: input.license_type ?? null,
+          _max_properties: input.max_properties ?? null,
+          _max_users: input.max_users ?? null,
+          _expires_at: input.expires_at ?? null,
+        } as never,
+      );
       if (error) throw error;
     },
     onSuccess: () => {
