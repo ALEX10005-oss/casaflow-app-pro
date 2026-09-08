@@ -119,6 +119,29 @@ export function ReservationCsvImport({
     }
   };
 
+  const assignProperty = (rowNumber: number, propertyName: string) => {
+    const updated = rows.map((row) =>
+      row.rowNumber === rowNumber ? { ...row, propiedad: propertyName } : row,
+    );
+    setRows(
+      validateReservationsCsv(
+        updated,
+        properties.map((property) => ({
+          id: property.id,
+          code: property.code,
+          name: property.name,
+        })),
+        reservations.map((reservation) => ({
+          code: reservation.code,
+          property_id: reservation.property_id,
+          channel: reservation.channel,
+          check_in: reservation.check_in,
+          check_out: reservation.check_out,
+        })),
+      ),
+    );
+  };
+
   return (
     <Dialog open={open} onOpenChange={handleOpenChange}>
       <DialogContent className="max-h-[90vh] max-w-5xl overflow-y-auto">
@@ -208,7 +231,25 @@ export function ReservationCsvImport({
                     <tr key={`${row.rowNumber}-${row.codigo}`} className="border-b last:border-0">
                       <td className="px-3 py-2">{row.rowNumber}</td>
                       <td className="px-3 py-2 font-mono">{row.codigo || "—"}</td>
-                      <td className="px-3 py-2">{row.propiedad || "—"}</td>
+                      <td className="px-3 py-2">
+                        {row.propertyId ? (
+                          row.propiedad
+                        ) : (
+                          <select
+                            className="max-w-56 rounded border bg-background px-2 py-1"
+                            value=""
+                            onChange={(event) => assignProperty(row.rowNumber, event.target.value)}
+                            aria-label={`Asignar propiedad a la fila ${row.rowNumber}`}
+                          >
+                            <option value="">Asignar propiedad…</option>
+                            {properties.map((property) => (
+                              <option key={property.id} value={property.name}>
+                                {property.code} · {property.name}
+                              </option>
+                            ))}
+                          </select>
+                        )}
+                      </td>
                       <td className="px-3 py-2">{row.huesped || "—"}</td>
                       <td className="px-3 py-2">
                         {row.check_in || "—"} → {row.check_out || "—"}
