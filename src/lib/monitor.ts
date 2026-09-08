@@ -1,3 +1,4 @@
+import { useEffect, useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 
@@ -48,6 +49,52 @@ export type PlatformNotification = {
   created_at: string;
 };
 
+export type RealtimeConnection = "connecting" | "live" | "reconnecting";
+
+/**
+ * Realtime is a wake-up signal; every event refetches the authoritative RPC/table data.
+ * The polling intervals remain as a recovery path after a dropped WebSocket event.
+ */
+export function usePlatformRealtime() {
+  const qc = useQueryClient();
+  const [connection, setConnection] = useState<RealtimeConnection>("connecting");
+  const [lastEventAt, setLastEventAt] = useState<string | null>(null);
+
+  useEffect(() => {
+    const refresh = () => {
+      setLastEventAt(new Date().toISOString());
+      void qc.invalidateQueries({ queryKey: ["platform"] });
+    };
+
+    const channel = supabase
+      .channel("platform-control-live")
+      .on("postgres_changes", { event: "*", schema: "public", table: "organizations" }, refresh)
+      .on(
+        "postgres_changes",
+        { event: "*", schema: "public", table: "system_health_checks" },
+        refresh,
+      )
+      .on("postgres_changes", { event: "*", schema: "public", table: "system_incidents" }, refresh)
+      .on(
+        "postgres_changes",
+        { event: "*", schema: "public", table: "platform_notifications" },
+        refresh,
+      )
+      .subscribe((status) => {
+        if (status === "SUBSCRIBED") setConnection("live");
+        else if (status === "CHANNEL_ERROR" || status === "TIMED_OUT" || status === "CLOSED") {
+          setConnection("reconnecting");
+        }
+      });
+
+    return () => {
+      void supabase.removeChannel(channel);
+    };
+  }, [qc]);
+
+  return { connection, lastEventAt };
+}
+
 export function useHealthSummary() {
   return useQuery({
     queryKey: ["platform", "health", "summary"],
@@ -63,6 +110,7 @@ export function useHealthSummary() {
 export function useHealthChecks() {
   return useQuery({
     queryKey: ["platform", "health", "checks"],
+    refetchInterval: 60_000,
     queryFn: async () => {
       const { data, error } = await supabase
         .from("system_health_checks" as never)
@@ -78,6 +126,7 @@ export function useHealthChecks() {
 export function useIncidents() {
   return useQuery({
     queryKey: ["platform", "health", "incidents"],
+    refetchInterval: 60_000,
     queryFn: async () => {
       const { data, error } = await supabase
         .from("system_incidents" as never)
@@ -127,9 +176,12 @@ export function useAcknowledgeIncident() {
   const invalidate = useInvalidateMonitor();
   return useMutation({
     mutationFn: async (id: string) => {
-      const { error } = await supabase.rpc("platform_acknowledge_incident" as never, {
-        _incident_id: id,
-      } as never);
+      const { error } = await supabase.rpc(
+        "platform_acknowledge_incident" as never,
+        {
+          _incident_id: id,
+        } as never,
+      );
       if (error) throw error;
     },
     onSuccess: invalidate,
@@ -140,9 +192,12 @@ export function useMarkNotificationsRead() {
   const invalidate = useInvalidateMonitor();
   return useMutation({
     mutationFn: async () => {
-      const { error } = await supabase.rpc("platform_mark_notifications_read" as never, {
-        _ids: null,
-      } as never);
+      const { error } = await supabase.rpc(
+        "platform_mark_notifications_read" as never,
+        {
+          _ids: null,
+        } as never,
+      );
       if (error) throw error;
     },
     onSuccess: invalidate,
@@ -150,9 +205,7 @@ export function useMarkNotificationsRead() {
 }
 
 export const monitorDateTime = (iso: string | null) =>
-  iso
-    ? new Date(iso).toLocaleString("es-MX", { dateStyle: "short", timeStyle: "short" })
-    : "Nunca";
+  iso ? new Date(iso).toLocaleString("es-MX", { dateStyle: "short", timeStyle: "short" }) : "Nunca";
 
 /* ---------------- Alertas por correo (solo platform admin) ---------------- */
 
@@ -204,10 +257,9 @@ export function useSaveEmailSettings() {
       if (!uid) throw new Error("Sesión no válida");
       const { error } = await supabase
         .from("platform_notification_settings" as never)
-        .upsert(
-          { platform_admin_user_id: uid, ...values } as never,
-          { onConflict: "platform_admin_user_id" },
-        );
+        .upsert({ platform_admin_user_id: uid, ...values } as never, {
+          onConflict: "platform_admin_user_id",
+        });
       if (error) throw error;
     },
     onSuccess: invalidate,
