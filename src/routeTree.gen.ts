@@ -20,7 +20,6 @@ import { Route as AuthenticatedConfiguracionRouteImport } from './routes/_authen
 import { Route as AuthenticatedEquipoRouteImport } from './routes/_authenticated/equipo'
 import { Route as AuthenticatedFinanzasRouteImport } from './routes/_authenticated/finanzas'
 import { Route as AuthenticatedHuespedesRouteImport } from './routes/_authenticated/huespedes'
-import { Route as AuthenticatedImportarRouteImport } from './routes/_authenticated/importar'
 import { Route as AuthenticatedIntegracionesRouteImport } from './routes/_authenticated/integraciones'
 import { Route as AuthenticatedOperacionesRouteImport } from './routes/_authenticated/operaciones'
 import { Route as AuthenticatedPanelRouteImport } from './routes/_authenticated/panel'
@@ -97,11 +96,6 @@ const AuthenticatedFinanzasRoute = AuthenticatedFinanzasRouteImport.update({
 const AuthenticatedHuespedesRoute = AuthenticatedHuespedesRouteImport.update({
   id: '/huespedes',
   path: '/huespedes',
-  getParentRoute: () => AuthenticatedRouteRoute,
-} as any)
-const AuthenticatedImportarRoute = AuthenticatedImportarRouteImport.update({
-  id: '/importar',
-  path: '/importar',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
 const AuthenticatedIntegracionesRoute =
@@ -237,7 +231,6 @@ export interface FileRoutesByFullPath {
   '/equipo': typeof AuthenticatedEquipoRoute
   '/finanzas': typeof AuthenticatedFinanzasRoute
   '/huespedes': typeof AuthenticatedHuespedesRoute
-  '/importar': typeof AuthenticatedImportarRoute
   '/integraciones': typeof AuthenticatedIntegracionesRoute
   '/operaciones': typeof AuthenticatedOperacionesRoute
   '/panel': typeof AuthenticatedPanelRoute
@@ -270,7 +263,6 @@ export interface FileRoutesByTo {
   '/equipo': typeof AuthenticatedEquipoRoute
   '/finanzas': typeof AuthenticatedFinanzasRoute
   '/huespedes': typeof AuthenticatedHuespedesRoute
-  '/importar': typeof AuthenticatedImportarRoute
   '/integraciones': typeof AuthenticatedIntegracionesRoute
   '/operaciones': typeof AuthenticatedOperacionesRoute
   '/panel': typeof AuthenticatedPanelRoute
@@ -307,7 +299,6 @@ export interface FileRoutesById {
   '/_authenticated/equipo': typeof AuthenticatedEquipoRoute
   '/_authenticated/finanzas': typeof AuthenticatedFinanzasRoute
   '/_authenticated/huespedes': typeof AuthenticatedHuespedesRoute
-  '/_authenticated/importar': typeof AuthenticatedImportarRoute
   '/_authenticated/integraciones': typeof AuthenticatedIntegracionesRoute
   '/_authenticated/operaciones': typeof AuthenticatedOperacionesRoute
   '/_authenticated/panel': typeof AuthenticatedPanelRoute
@@ -344,7 +335,6 @@ export interface FileRouteTypes {
     | '/equipo'
     | '/finanzas'
     | '/huespedes'
-    | '/importar'
     | '/integraciones'
     | '/operaciones'
     | '/panel'
@@ -377,7 +367,6 @@ export interface FileRouteTypes {
     | '/equipo'
     | '/finanzas'
     | '/huespedes'
-    | '/importar'
     | '/integraciones'
     | '/operaciones'
     | '/panel'
@@ -413,7 +402,6 @@ export interface FileRouteTypes {
     | '/_authenticated/equipo'
     | '/_authenticated/finanzas'
     | '/_authenticated/huespedes'
-    | '/_authenticated/importar'
     | '/_authenticated/integraciones'
     | '/_authenticated/operaciones'
     | '/_authenticated/panel'
@@ -525,13 +513,6 @@ declare module '@tanstack/react-router' {
       path: '/huespedes'
       fullPath: '/huespedes'
       preLoaderRoute: typeof AuthenticatedHuespedesRouteImport
-      parentRoute: typeof AuthenticatedRouteRoute
-    }
-    '/_authenticated/importar': {
-      id: '/_authenticated/importar'
-      path: '/importar'
-      fullPath: '/importar'
-      preLoaderRoute: typeof AuthenticatedImportarRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
     '/_authenticated/integraciones': {
@@ -721,7 +702,6 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedEquipoRoute: typeof AuthenticatedEquipoRoute
   AuthenticatedFinanzasRoute: typeof AuthenticatedFinanzasRoute
   AuthenticatedHuespedesRoute: typeof AuthenticatedHuespedesRoute
-  AuthenticatedImportarRoute: typeof AuthenticatedImportarRoute
   AuthenticatedIntegracionesRoute: typeof AuthenticatedIntegracionesRoute
   AuthenticatedOperacionesRoute: typeof AuthenticatedOperacionesRoute
   AuthenticatedPanelRoute: typeof AuthenticatedPanelRoute
@@ -739,7 +719,6 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedEquipoRoute: AuthenticatedEquipoRoute,
   AuthenticatedFinanzasRoute: AuthenticatedFinanzasRoute,
   AuthenticatedHuespedesRoute: AuthenticatedHuespedesRoute,
-  AuthenticatedImportarRoute: AuthenticatedImportarRoute,
   AuthenticatedIntegracionesRoute: AuthenticatedIntegracionesRoute,
   AuthenticatedOperacionesRoute: AuthenticatedOperacionesRoute,
   AuthenticatedPanelRoute: AuthenticatedPanelRoute,
