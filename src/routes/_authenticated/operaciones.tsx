@@ -30,6 +30,13 @@ export const Route = createFileRoute("/_authenticated/operaciones")({
 
 const MAINTENANCE_FORM_URL = "https://forms.gle/QNZjcC5yq9WwjXsp9";
 
+function callRpc(fn: string, args: Record<string, unknown>) {
+  return supabase.rpc(fn as never, args as never) as unknown as Promise<{
+    data: unknown;
+    error: { message: string } | null;
+  }>;
+}
+
 function Operaciones() {
   const qc = useQueryClient();
   const { data: cleaning = [] } = useCleaningTasks();
@@ -56,15 +63,10 @@ function Operaciones() {
   const [maintPriority, setMaintPriority] = useState("media");
   const [blocksGuests, setBlocksGuests] = useState(false);
 
-  const rpc = supabase.rpc.bind(supabase) as unknown as (
-    fn: string,
-    args: Record<string, unknown>,
-  ) => Promise<{ data: unknown; error: { message: string } | null }>;
-
   const scheduleCleaning = useMutation({
     mutationFn: async () => {
       if (!cleanProperty || !cleanDate) throw new Error("Selecciona propiedad y fecha.");
-      const { error } = await rpc("schedule_cleaning_task", {
+      const { error } = await callRpc("schedule_cleaning_task", {
         _property_id: cleanProperty,
         _scheduled_date: cleanDate,
         _scheduled_time: cleanTime || null,
@@ -84,7 +86,7 @@ function Operaciones() {
     mutationFn: async () => {
       if (!maintProperty || !maintTitle.trim())
         throw new Error("Selecciona propiedad y escribe el trabajo.");
-      const { error } = await rpc("schedule_maintenance_issue", {
+      const { error } = await callRpc("schedule_maintenance_issue", {
         _property_id: maintProperty,
         _title: maintTitle.trim(),
         _description: maintDescription.trim() || null,
