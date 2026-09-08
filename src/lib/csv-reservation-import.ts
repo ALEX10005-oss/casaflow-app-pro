@@ -442,15 +442,15 @@ export function validateReservationsCsv(
 
     if (codeKey) seenCodes.add(codeKey);
     if (stayKey) seenStays.add(stayKey);
-
-
     return {
       ...row,
+      total: Number.isFinite(row.total) && row.total > 0 ? row.total : 0,
       valid: errors.length === 0,
       errors,
       propertyId: property?.id ?? null,
       duplicate,
     };
+
   });
 }
 
