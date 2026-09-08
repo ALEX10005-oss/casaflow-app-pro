@@ -10,7 +10,7 @@ export type Database = {
   // Allows to automatically instantiate createClient with right options
   // instead of createClient<Database, { PostgrestVersion: 'XX' }>(URL, KEY)
   __InternalSupabase: {
-    PostgrestVersion: "14.15"
+    PostgrestVersion: "14.5"
   }
   public: {
     Tables: {
@@ -340,6 +340,57 @@ export type Database = {
           },
         ]
       }
+      maintenance_checklists: {
+        Row: {
+          answers: Json
+          checklist_month: string
+          completed_at: string
+          completed_by: string | null
+          created_at: string
+          id: string
+          notes: string | null
+          org_id: string
+          property_id: string
+        }
+        Insert: {
+          answers?: Json
+          checklist_month: string
+          completed_at?: string
+          completed_by?: string | null
+          created_at?: string
+          id?: string
+          notes?: string | null
+          org_id: string
+          property_id: string
+        }
+        Update: {
+          answers?: Json
+          checklist_month?: string
+          completed_at?: string
+          completed_by?: string | null
+          created_at?: string
+          id?: string
+          notes?: string | null
+          org_id?: string
+          property_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "maintenance_checklists_org_id_fkey"
+            columns: ["org_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "maintenance_checklists_property_id_fkey"
+            columns: ["property_id"]
+            isOneToOne: false
+            referencedRelation: "properties"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       maintenance_issues: {
         Row: {
           assignee: string | null
@@ -353,6 +404,8 @@ export type Database = {
           priority: string
           property_id: string
           reported_on: string
+          scheduled_date: string | null
+          scheduled_time: string | null
           status: string
           title: string
         }
@@ -368,6 +421,8 @@ export type Database = {
           priority?: string
           property_id: string
           reported_on?: string
+          scheduled_date?: string | null
+          scheduled_time?: string | null
           status?: string
           title: string
         }
@@ -383,6 +438,8 @@ export type Database = {
           priority?: string
           property_id?: string
           reported_on?: string
+          scheduled_date?: string | null
+          scheduled_time?: string | null
           status?: string
           title?: string
         }
@@ -446,29 +503,38 @@ export type Database = {
         Row: {
           created_at: string
           id: string
+          license_activated_at: string | null
+          license_expires_at: string | null
           license_status: string
           license_type: string
           max_properties: number
           max_users: number
           name: string
+          updated_at: string
         }
         Insert: {
           created_at?: string
           id?: string
+          license_activated_at?: string | null
+          license_expires_at?: string | null
           license_status?: string
           license_type?: string
           max_properties?: number
           max_users?: number
           name: string
+          updated_at?: string
         }
         Update: {
           created_at?: string
           id?: string
+          license_activated_at?: string | null
+          license_expires_at?: string | null
           license_status?: string
           license_type?: string
           max_properties?: number
           max_users?: number
           name?: string
+          updated_at?: string
         }
         Relationships: []
       }
@@ -1350,6 +1416,24 @@ export type Database = {
         }
         Returns: boolean
       }
+      import_external_reservation: {
+        Args: {
+          _channel?: string
+          _check_in?: string
+          _check_out?: string
+          _code: string
+          _guest_email?: string
+          _guest_name: string
+          _guest_phone?: string
+          _guests_count?: number
+          _notes?: string
+          _payment_status?: string
+          _property_id: string
+          _status?: string
+          _total_amount?: number
+        }
+        Returns: Json
+      }
       invitation_preview: { Args: { _token: string }; Returns: Json }
       is_my_task: {
         Args: { _assignee: string; _property: string }
@@ -1424,16 +1508,37 @@ export type Database = {
         }
       }
       platform_health_summary: { Args: never; Returns: Json }
-      platform_list_organizations: {
+      platform_license_overview: {
         Args: never
         Returns: {
+          activated_at: string
           created_at: string
+          expires_at: string
           id: string
           license_status: string
           license_type: string
           max_properties: number
           max_users: number
           name: string
+          properties_used: number
+          reservations_total: number
+          updated_at: string
+          users_used: number
+        }[]
+      }
+      platform_list_organizations: {
+        Args: never
+        Returns: {
+          created_at: string
+          id: string
+          license_activated_at: string | null
+          license_expires_at: string | null
+          license_status: string
+          license_type: string
+          max_properties: number
+          max_users: number
+          name: string
+          updated_at: string
         }[]
         SetofOptions: {
           from: "*"
@@ -1488,6 +1593,7 @@ export type Database = {
       platform_stats: { Args: never; Returns: Json }
       platform_update_license: {
         Args: {
+          _expires_at?: string
           _license_status?: string
           _license_type?: string
           _max_properties?: number
@@ -1497,11 +1603,14 @@ export type Database = {
         Returns: {
           created_at: string
           id: string
+          license_activated_at: string | null
+          license_expires_at: string | null
           license_status: string
           license_type: string
           max_properties: number
           max_users: number
           name: string
+          updated_at: string
         }
         SetofOptions: {
           from: "*"
@@ -1533,11 +1642,101 @@ export type Database = {
         }
         Returns: undefined
       }
+      resize_reservation_checkout: {
+        Args: { _check_out: string; _id: string }
+        Returns: {
+          channel: string
+          check_in: string
+          check_out: string
+          code: string
+          commission: number
+          created_at: string
+          guest_id: string | null
+          guests_count: number
+          id: string
+          notes: string | null
+          org_id: string
+          payment_status: string
+          property_id: string
+          status: string
+          total_amount: number
+        }
+        SetofOptions: {
+          from: "*"
+          to: "reservations"
+          isOneToOne: true
+          isSetofReturn: false
+        }
+      }
       role_of: {
         Args: { _uid: string }
         Returns: Database["public"]["Enums"]["app_role"]
       }
       run_platform_health_check: { Args: never; Returns: Json }
+      schedule_cleaning_task: {
+        Args: {
+          _assignee_user_id?: string
+          _priority?: string
+          _property_id: string
+          _scheduled_date: string
+          _scheduled_time?: string
+        }
+        Returns: {
+          assignee: string | null
+          assignee_user_id: string | null
+          checkout_time: string | null
+          created_at: string
+          id: string
+          next_checkin_time: string | null
+          org_id: string
+          priority: string
+          property_id: string
+          reservation_id: string | null
+          scheduled_date: string
+          status: string
+        }
+        SetofOptions: {
+          from: "*"
+          to: "cleaning_tasks"
+          isOneToOne: true
+          isSetofReturn: false
+        }
+      }
+      schedule_maintenance_issue: {
+        Args: {
+          _assignee_user_id?: string
+          _blocks_guests?: boolean
+          _description?: string
+          _priority?: string
+          _property_id: string
+          _scheduled_date?: string
+          _scheduled_time?: string
+          _title: string
+        }
+        Returns: {
+          assignee: string | null
+          assignee_user_id: string | null
+          blocks_guests: boolean
+          created_at: string
+          created_by: string | null
+          description: string | null
+          id: string
+          org_id: string
+          priority: string
+          property_id: string
+          reported_on: string
+          scheduled_date: string | null
+          scheduled_time: string | null
+          status: string
+          title: string
+        }
+        SetofOptions: {
+          from: "*"
+          to: "maintenance_issues"
+          isOneToOne: true
+          isSetofReturn: false
+        }
+      }
       update_reservation: {
         Args: {
           _channel?: string
@@ -1603,12 +1802,12 @@ export type Tables<
   DefaultSchemaTableNameOrOptions extends
     | keyof (DefaultSchema["Tables"] & DefaultSchema["Views"])
     | { schema: keyof DatabaseWithoutInternals },
-  TableName extends DefaultSchemaTableNameOrOptions extends {
+  TableName extends (DefaultSchemaTableNameOrOptions extends {
     schema: keyof DatabaseWithoutInternals
   }
     ? keyof (DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Tables"] &
         DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Views"])
-    : never = never,
+    : never) = never,
 > = DefaultSchemaTableNameOrOptions extends {
   schema: keyof DatabaseWithoutInternals
 }
@@ -1632,11 +1831,11 @@ export type TablesInsert<
   DefaultSchemaTableNameOrOptions extends
     | keyof DefaultSchema["Tables"]
     | { schema: keyof DatabaseWithoutInternals },
-  TableName extends DefaultSchemaTableNameOrOptions extends {
+  TableName extends (DefaultSchemaTableNameOrOptions extends {
     schema: keyof DatabaseWithoutInternals
   }
     ? keyof DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Tables"]
-    : never = never,
+    : never) = never,
 > = DefaultSchemaTableNameOrOptions extends {
   schema: keyof DatabaseWithoutInternals
 }
@@ -1657,11 +1856,11 @@ export type TablesUpdate<
   DefaultSchemaTableNameOrOptions extends
     | keyof DefaultSchema["Tables"]
     | { schema: keyof DatabaseWithoutInternals },
-  TableName extends DefaultSchemaTableNameOrOptions extends {
+  TableName extends (DefaultSchemaTableNameOrOptions extends {
     schema: keyof DatabaseWithoutInternals
   }
     ? keyof DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Tables"]
-    : never = never,
+    : never) = never,
 > = DefaultSchemaTableNameOrOptions extends {
   schema: keyof DatabaseWithoutInternals
 }
@@ -1682,11 +1881,11 @@ export type Enums<
   DefaultSchemaEnumNameOrOptions extends
     | keyof DefaultSchema["Enums"]
     | { schema: keyof DatabaseWithoutInternals },
-  EnumName extends DefaultSchemaEnumNameOrOptions extends {
+  EnumName extends (DefaultSchemaEnumNameOrOptions extends {
     schema: keyof DatabaseWithoutInternals
   }
     ? keyof DatabaseWithoutInternals[DefaultSchemaEnumNameOrOptions["schema"]]["Enums"]
-    : never = never,
+    : never) = never,
 > = DefaultSchemaEnumNameOrOptions extends {
   schema: keyof DatabaseWithoutInternals
 }
@@ -1699,11 +1898,11 @@ export type CompositeTypes<
   PublicCompositeTypeNameOrOptions extends
     | keyof DefaultSchema["CompositeTypes"]
     | { schema: keyof DatabaseWithoutInternals },
-  CompositeTypeName extends PublicCompositeTypeNameOrOptions extends {
+  CompositeTypeName extends (PublicCompositeTypeNameOrOptions extends {
     schema: keyof DatabaseWithoutInternals
   }
     ? keyof DatabaseWithoutInternals[PublicCompositeTypeNameOrOptions["schema"]]["CompositeTypes"]
-    : never = never,
+    : never) = never,
 > = PublicCompositeTypeNameOrOptions extends {
   schema: keyof DatabaseWithoutInternals
 }
