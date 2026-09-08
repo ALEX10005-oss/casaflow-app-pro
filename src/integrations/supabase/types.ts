@@ -139,13 +139,20 @@ export type Database = {
           created_at: string
           end_date: string
           external_uid: string
+          guest_email: string | null
+          guest_name: string | null
+          guest_phone: string | null
+          guests_count: number
           id: string
           last_seen_at: string
+          notes: string | null
           org_id: string
+          payment_status: string
           property_id: string
           start_date: string
           status: string
           summary: string | null
+          total_amount: number
           updated_at: string
         }
         Insert: {
@@ -154,13 +161,20 @@ export type Database = {
           created_at?: string
           end_date: string
           external_uid: string
+          guest_email?: string | null
+          guest_name?: string | null
+          guest_phone?: string | null
+          guests_count?: number
           id?: string
           last_seen_at?: string
+          notes?: string | null
           org_id: string
+          payment_status?: string
           property_id: string
           start_date: string
           status?: string
           summary?: string | null
+          total_amount?: number
           updated_at?: string
         }
         Update: {
@@ -169,13 +183,20 @@ export type Database = {
           created_at?: string
           end_date?: string
           external_uid?: string
+          guest_email?: string | null
+          guest_name?: string | null
+          guest_phone?: string | null
+          guests_count?: number
           id?: string
           last_seen_at?: string
+          notes?: string | null
           org_id?: string
+          payment_status?: string
           property_id?: string
           start_date?: string
           status?: string
           summary?: string | null
+          total_amount?: number
           updated_at?: string
         }
         Relationships: [
