@@ -23,6 +23,8 @@ import { homeForRole, useAlerts, useMyRole, useOrganization, useProfile } from "
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 
+const APP_VERSION = "2026.09.08.7";
+
 const ROLE_ACCESS: Record<string, string[] | "all"> = {
   owner: "all",
   manager: [
@@ -173,6 +175,7 @@ export function AppShell({
             {profile?.first_name ?? "Operador"} {profile?.last_name ?? ""}
           </p>
           <p className="text-sidebar-foreground/60">{org?.name ?? "Organización"}</p>
+          <p className="mt-1 text-[10px] text-sidebar-foreground/45">Versión {APP_VERSION}</p>
           <button
             onClick={signOut}
             className="mt-3 flex items-center gap-2 text-sidebar-foreground/70 hover:text-sidebar-accent-foreground"
