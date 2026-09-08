@@ -139,16 +139,37 @@ function normalizeDate(value: string, order: "dmy" | "mdy" = "dmy") {
   if (!raw) return "";
   if (/^\d{4}-\d{2}-\d{2}$/.test(raw)) return raw;
 
-  const match = raw.match(/^(\d{1,2})[/-](\d{1,2})[/-](\d{4})$/);
+  const match = raw.match(/^(\d{1,2})[/-](\d{1,2})[/-](\d{2,4})$/);
   if (match) {
-    const [, first, second, y] = match;
+    const [, first, second, rawYear] = match;
+    const year = rawYear!.length === 2 ? `20${rawYear}` : rawYear!;
     const [d, m] = order === "mdy" ? [second, first] : [first, second];
-    return `${y}-${m!.padStart(2, "0")}-${d!.padStart(2, "0")}`;
+    return `${year}-${m!.padStart(2, "0")}-${d!.padStart(2, "0")}`;
   }
 
   const parsed = new Date(raw);
-  if (!Number.isNaN(parsed.getTime())) return parsed.toISOString().slice(0, 10);
+  if (!Number.isNaN(parsed.getTime())) {
+    const y = parsed.getFullYear();
+    const mo = String(parsed.getMonth() + 1).padStart(2, "0");
+    const da = String(parsed.getDate()).padStart(2, "0");
+    return `${y}-${mo}-${da}`;
+  }
   return raw;
+}
+
+// Deduce el orden real (día/mes) observando toda la columna de fechas.
+function inferDateOrder(values: string[], fallback: "dmy" | "mdy"): "dmy" | "mdy" {
+  let firstOver12 = false;
+  let secondOver12 = false;
+  for (const value of values) {
+    const match = value.trim().match(/^(\d{1,2})[/-](\d{1,2})[/-](\d{2,4})$/);
+    if (!match) continue;
+    if (Number(match[1]) > 12) firstOver12 = true;
+    if (Number(match[2]) > 12) secondOver12 = true;
+  }
+  if (firstOver12 && !secondOver12) return "dmy";
+  if (secondOver12 && !firstOver12) return "mdy";
+  return fallback;
 }
 
 function normalizeChannel(value: string) {
@@ -171,28 +192,55 @@ function parseMoney(value: string) {
   return Number.isFinite(parsed) ? parsed : -1;
 }
 
-function findIndex(headers: string[], aliases: string[]) {
+const FIELD_ALIASES = {
+  codigo: ["codigo de confirmacion", "confirmation code", "codigo", "code"],
+  propiedad: ["espacio", "alojamiento", "anuncio", "listing", "propiedad", "property"],
+  huesped: ["huesped", "nombre del huesped", "guest name", "guest"],
+  check_in: ["fecha de inicio", "start date", "check in", "checkin", "llegada", "entrada"],
+  check_out: [
+    "fecha de finalizacion",
+    "fecha de fin",
+    "end date",
+    "check out",
+    "checkout",
+    "salida",
+  ],
+  huespedes: ["huespedes", "numero de huespedes", "guests", "of guests", "adultos"],
+  total: [
+    "ingresos brutos",
+    "gross earnings",
+    "ingresos recibidos",
+    "monto",
+    "amount",
+    "total",
+    "importe",
+  ],
+  canal: ["canal", "channel"],
+  estado: ["estado", "status"],
+  pago: ["pago", "payment", "estado de pago"],
+  notas: ["notas", "notes"],
+} as const;
+
+type FieldKey = keyof typeof FIELD_ALIASES;
+
+function findIndex(headers: string[], field: FieldKey) {
+  const aliases = FIELD_ALIASES[field].map(slug);
   for (const alias of aliases) {
-    const i = headers.indexOf(normalize(alias));
-    if (i >= 0) return i;
+    const exact = headers.indexOf(alias);
+    if (exact >= 0) return exact;
+  }
+  for (const alias of aliases) {
+    const partial = headers.findIndex((header) => header.includes(alias));
+    if (partial >= 0) return partial;
   }
   return -1;
 }
 
-function getCell(cells: string[], headers: string[], aliases: string[]) {
-  const i = findIndex(headers, aliases);
-  return i >= 0 ? (cells[i] ?? "").trim() : "";
+function columnValues(records: string[], index: number) {
+  if (index < 0) return [];
+  return records.map((record) => parseCsvLine(record)[index] ?? "");
 }
 
-function isAirbnb(headers: string[]) {
-  return [
-    "codigo de confirmacion",
-    "fecha de inicio",
-    "fecha de finalizacion",
-    "huesped",
-    "espacio",
-  ].every((header) => headers.includes(header));
-}
 
 export function parseReservationsCsv(text: string): CsvReservationRow[] {
   const records = splitCsvRecords(text.replace(/^\uFEFF/, ""));
