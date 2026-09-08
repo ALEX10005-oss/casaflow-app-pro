@@ -119,14 +119,15 @@ function validIsoDate(value: string) {
   );
 }
 
-function normalizeDate(value: string) {
+function normalizeDate(value: string, order: "dmy" | "mdy" = "dmy") {
   const raw = value.trim();
   if (!raw) return "";
   if (/^\d{4}-\d{2}-\d{2}$/.test(raw)) return raw;
 
   const match = raw.match(/^(\d{1,2})[/-](\d{1,2})[/-](\d{4})$/);
   if (match) {
-    const [, d, m, y] = match;
+    const [, first, second, y] = match;
+    const [d, m] = order === "mdy" ? [second, first] : [first, second];
     return `${y}-${m!.padStart(2, "0")}-${d!.padStart(2, "0")}`;
   }
 
@@ -194,7 +195,7 @@ export function parseReservationsCsv(text: string): CsvReservationRow[] {
     );
   }
 
-  return records.slice(1).map((record, i) => {
+  const parsedRows = records.slice(1).map((record, i) => {
     const cells = parseCsvLine(record);
 
     const codigo = airbnb
@@ -206,9 +207,11 @@ export function parseReservationsCsv(text: string): CsvReservationRow[] {
     const huesped = getCell(cells, headers, airbnb ? ["Huésped"] : ["huesped"]);
     const checkIn = normalizeDate(
       getCell(cells, headers, airbnb ? ["Fecha de inicio"] : ["check_in"]),
+      airbnb ? "mdy" : "dmy",
     );
     const checkOut = normalizeDate(
       getCell(cells, headers, airbnb ? ["Fecha de finalización"] : ["check_out"]),
+      airbnb ? "mdy" : "dmy",
     );
     const guestsRaw = airbnb ? "1" : getCell(cells, headers, ["huespedes"]);
     const guests = Number.parseInt(guestsRaw || "1", 10);
@@ -233,6 +236,45 @@ export function parseReservationsCsv(text: string): CsvReservationRow[] {
       notas: "",
     };
   });
+
+  if (!airbnb) return parsedRows;
+
+  // El historial de transacciones de Airbnb suele repetir una reserva en varias
+  // filas (alojamiento, limpieza, impuestos, ajustes). Conservamos una sola fila
+  // completa por código y el importe positivo más alto disponible.
+  const byCode = new Map<string, CsvReservationRow>();
+  for (const row of parsedRows) {
+    const hasReservationData = Boolean(
+      row.codigo || row.propiedad || row.huesped || row.check_in || row.check_out,
+    );
+    if (!hasReservationData) continue;
+
+    const key = normalize(row.codigo);
+    if (!key) {
+      byCode.set(`fila-${row.rowNumber}`, row);
+      continue;
+    }
+
+    const previous = byCode.get(key);
+    if (!previous) {
+      byCode.set(key, row);
+      continue;
+    }
+
+    const previousCompleteness = [
+      previous.propiedad,
+      previous.huesped,
+      previous.check_in,
+      previous.check_out,
+    ].filter(Boolean).length;
+    const rowCompleteness = [row.propiedad, row.huesped, row.check_in, row.check_out].filter(
+      Boolean,
+    ).length;
+    const base = rowCompleteness > previousCompleteness ? row : previous;
+    byCode.set(key, { ...base, total: Math.max(previous.total, row.total, 0) });
+  }
+
+  return [...byCode.values()];
 }
 
 export function validateReservationsCsv(
@@ -245,6 +287,19 @@ export function validateReservationsCsv(
     propertyByKey.set(normalize(property.code), property);
     propertyByKey.set(normalize(property.name), property);
   }
+
+  const findProperty = (value: string) => {
+    const key = normalize(value);
+    const exact = propertyByKey.get(key);
+    if (exact) return exact;
+    if (key.length < 5) return null;
+
+    const matches = properties.filter((property) => {
+      const name = normalize(property.name);
+      return name.includes(key) || key.includes(name);
+    });
+    return matches.length === 1 ? matches[0]! : null;
+  };
 
   const existingCodes = new Set(reservations.map((reservation) => normalize(reservation.code)));
   const existingStays = new Set(
@@ -262,7 +317,7 @@ export function validateReservationsCsv(
 
   return rows.map((row) => {
     const errors: string[] = [];
-    const property = propertyByKey.get(normalize(row.propiedad)) ?? null;
+    const property = findProperty(row.propiedad);
     const codeKey = normalize(row.codigo);
     const stayKey = property
       ? [property.id, normalize(row.canal), row.check_in, row.check_out].join("|")
