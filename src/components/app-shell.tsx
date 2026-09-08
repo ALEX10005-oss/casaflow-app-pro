@@ -14,7 +14,6 @@ import {
   MessageCircle,
   Plug,
   Receipt,
-  Upload,
   Users,
   UserCog,
 } from "lucide-react";
@@ -31,7 +30,6 @@ const ROLE_ACCESS: Record<string, string[] | "all"> = {
     "/panel",
     "/calendario",
     "/reservas",
-    "/importar",
     "/propiedades",
     "/huespedes",
     "/operaciones",
@@ -56,7 +54,6 @@ const GROUPS: { label: string; items: { to: string; label: string; icon: typeof 
         { to: "/panel", label: "Panel del día", icon: LayoutDashboard },
         { to: "/calendario", label: "Calendario PMS", icon: CalendarDays },
         { to: "/reservas", label: "Reservas", icon: ClipboardList },
-        { to: "/importar", label: "Importar CSV", icon: Upload },
         { to: "/propiedades", label: "Propiedades", icon: Building2 },
         { to: "/huespedes", label: "Huéspedes", icon: Users },
       ],
