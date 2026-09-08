@@ -68,6 +68,14 @@ function normalize(value: string) {
     .replace(/[\u0300-\u036f]/g, "");
 }
 
+function slug(value: string) {
+  return normalize(value)
+    .replace(/[^a-z0-9]+/g, " ")
+    .replace(/\s+/g, " ")
+    .trim();
+}
+
+
 function parseCsvLine(line: string) {
   const cells: string[] = [];
   let current = "";
