@@ -572,7 +572,8 @@ function InlineReservationEditor({
     setForm(reservationForm(reservation, guest));
   }, [
     reservation.id,
-    reservation.updated_at,
+    reservation.check_in,
+    reservation.check_out,
     guest?.id,
     guest?.email,
     guest?.phone,
@@ -581,14 +582,24 @@ function InlineReservationEditor({
 
   const set = (key: keyof typeof form, value: string) => setForm((f) => ({ ...f, [key]: value }));
   const save = async () => {
-    if (!form.guest_name.trim()) return toast.error("Escribe el nombre del huésped.");
-    if (!form.check_in || !form.check_out || form.check_out <= form.check_in)
-      return toast.error("La salida debe ser posterior a la entrada.");
+    if (!form.guest_name.trim()) {
+      toast.error("Escribe el nombre del huésped.");
+      return;
+    }
+    if (!form.check_in || !form.check_out || form.check_out <= form.check_in) {
+      toast.error("La salida debe ser posterior a la entrada.");
+      return;
+    }
     const guestsCount = Number(form.guests_count);
     const total = Number(form.total_amount);
-    if (!Number.isFinite(guestsCount) || guestsCount < 1)
-      return toast.error("El número de huéspedes debe ser válido.");
-    if (!Number.isFinite(total) || total < 0) return toast.error("El total debe ser válido.");
+    if (!Number.isFinite(guestsCount) || guestsCount < 1) {
+      toast.error("El número de huéspedes debe ser válido.");
+      return;
+    }
+    if (!Number.isFinite(total) || total < 0) {
+      toast.error("El total debe ser válido.");
+      return;
+    }
     try {
       await update.mutateAsync({
         id: reservation.id,
