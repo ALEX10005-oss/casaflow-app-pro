@@ -26,7 +26,10 @@ export function ExternalEventDetailDialog({ event, property, canEdit = false, on
 
   async function save() {
     if (!event) return;
-    if (!form.guest_name.trim()) return toast.error("Escribe el nombre del huésped.");
+    if (!form.guest_name.trim()) {
+      toast.error("Escribe el nombre del huésped.");
+      return;
+    }
     setSaving(true);
     try {
       const { error } = await supabase.from("external_calendar_events").update({
