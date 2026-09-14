@@ -200,7 +200,10 @@ function Calendario() {
         _id: reservation.id,
         _check_out: finalCheckOut,
       });
-      if (error) return toast.error(reservationErrorMessage(new Error(error.message)));
+      if (error) {
+        toast.error(reservationErrorMessage(new Error(error.message)));
+        return;
+      }
       await qc.invalidateQueries({ queryKey: ["reservations"] });
       toast.success(`Reserva ajustada hasta ${shortDate(finalCheckOut)}.`);
     };
