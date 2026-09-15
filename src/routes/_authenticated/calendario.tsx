@@ -1,6 +1,8 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useQueryClient } from "@tanstack/react-query";
 import { useEffect, useMemo, useRef, useState } from "react";
+import { useServerFn } from "@tanstack/react-start";
+
 import { Check, ChevronLeft, ChevronRight, GripVertical, Pencil, X } from "lucide-react";
 import { toast } from "sonner";
 import { AppShell } from "@/components/app-shell";
@@ -20,13 +22,16 @@ import {
   useGuests,
   useMyContext,
   useProperties,
+  usePropertyCalendars,
   useReservations,
   useUpdateReservation,
   type Guest,
   type Property,
   type Reservation,
 } from "@/lib/casaflow";
+import { syncPropertyCalendar } from "@/lib/ical.functions";
 import { cn } from "@/lib/utils";
+
 
 export const Route = createFileRoute("/_authenticated/calendario")({
   head: () => ({ meta: [{ title: "Calendario PMS — CasaFlow" }] }),
@@ -91,7 +96,11 @@ function Calendario() {
   const scrollRef = useRef<HTMLDivElement | null>(null);
   const bottomScrollRef = useRef<HTMLDivElement | null>(null);
   const syncingScroll = useRef(false);
+  const autoSyncStarted = useRef(false);
+  const runSync = useServerFn(syncPropertyCalendar);
+  const { data: calendars = [] } = usePropertyCalendars();
   const canEdit = canEditReservations(ctx?.role);
+
 
   const year = Number(anchor.slice(0, 4));
   const rangeStart = year === currentYear ? startOfMonth(today) : `${year}-01-01`;
@@ -145,6 +154,31 @@ function Calendario() {
 
   const todayIndex = today >= rangeStart && today < rangeEnd ? dayDiff(rangeStart, today) : -1;
   const todayScrollLeft = Math.max(0, (todayIndex - 5) * DAY_WIDTH);
+
+  useEffect(() => {
+    if (autoSyncStarted.current) return;
+    const stale = calendars.filter(
+      (calendar) =>
+        calendar.active &&
+        (!calendar.last_sync || Date.now() - new Date(calendar.last_sync).getTime() > 15 * 60_000),
+    );
+    if (!stale.length) return;
+    autoSyncStarted.current = true;
+    void (async () => {
+      for (const calendar of stale) {
+        try {
+          await runSync({ data: { calendar_id: calendar.id } });
+        } catch {
+          /* el estado del calendario ya queda registrado en la base */
+        }
+      }
+      await Promise.all([
+        qc.invalidateQueries({ queryKey: ["external_calendar_events"] }),
+        qc.invalidateQueries({ queryKey: ["property_calendars"] }),
+      ]);
+    })();
+  }, [calendars, qc, runSync]);
+
 
   useEffect(() => {
     if (year !== currentYear || todayIndex < 0 || !scrollRef.current) return;
@@ -367,7 +401,7 @@ function Calendario() {
                   externalId: e.id,
                   from: e.start_date,
                   to: e.end_date,
-                  name: e.summary || e.channel,
+                  name: e.guest_name || e.summary || `Estancia ${e.channel}`,
                   channel: e.channel,
                   kind: "external" as const,
                 })),
@@ -542,6 +576,8 @@ function Calendario() {
       <ExternalEventDetailDialog
         event={selectedExternal}
         property={selectedExternalProperty}
+        canEdit={canEdit}
+
         onOpenChange={(open) => {
           if (!open) setSelectedExternalId(null);
         }}

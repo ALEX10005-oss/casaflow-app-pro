@@ -32,18 +32,30 @@ export function ExternalEventDetailDialog({ event, property, canEdit = false, on
     }
     setSaving(true);
     try {
-      const { error } = await supabase.from("external_calendar_events").update({
-        guest_name: form.guest_name.trim(), guest_email: form.guest_email.trim() || null, guest_phone: form.guest_phone.trim() || null,
-        guests_count: Math.max(1, Number(form.guests_count) || 1), total_amount: Math.max(0, Number(form.total_amount) || 0),
-        payment_status: form.payment_status, channel: form.channel, notes: form.notes.trim() || null,
-      }).eq("id", event.id);
+      const { error } = await supabase.rpc("update_external_event_details" as never, {
+        _id: event.id,
+        _guest_name: form.guest_name.trim(),
+        _guest_email: form.guest_email.trim(),
+        _guest_phone: form.guest_phone.trim(),
+        _guests_count: Math.max(1, Number(form.guests_count) || 1),
+        _total_amount: Math.max(0, Number(form.total_amount) || 0),
+        _payment_status: form.payment_status,
+        _channel: form.channel,
+        _notes: form.notes.trim(),
+      } as never);
       if (error) throw error;
       await qc.invalidateQueries({ queryKey: ["external_calendar_events"] });
       setEditing(false);
       toast.success("Datos de la estancia guardados.");
     } catch (error) {
-      toast.error(error instanceof Error ? error.message : "No se pudieron guardar los datos.");
+      const message = error instanceof Error ? error.message : "No se pudieron guardar los datos.";
+      toast.error(
+        message.includes("forbidden")
+          ? "No tienes permiso para editar esta estancia."
+          : message,
+      );
     } finally { setSaving(false); }
+
   }
 
   return <Dialog open={Boolean(event)} onOpenChange={onOpenChange}><DialogContent className="max-h-[92vh] max-w-2xl overflow-y-auto">{event && <>
