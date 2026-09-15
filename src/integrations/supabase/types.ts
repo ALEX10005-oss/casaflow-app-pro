@@ -1758,6 +1758,47 @@ export type Database = {
           isSetofReturn: false
         }
       }
+      update_external_event_details: {
+        Args: {
+          _channel: string
+          _guest_email: string
+          _guest_name: string
+          _guest_phone: string
+          _guests_count: number
+          _id: string
+          _notes: string
+          _payment_status: string
+          _total_amount: number
+        }
+        Returns: {
+          calendar_id: string
+          channel: string
+          created_at: string
+          end_date: string
+          external_uid: string
+          guest_email: string | null
+          guest_name: string | null
+          guest_phone: string | null
+          guests_count: number
+          id: string
+          last_seen_at: string
+          notes: string | null
+          org_id: string
+          payment_status: string
+          property_id: string
+          start_date: string
+          status: string
+          summary: string | null
+          total_amount: number
+          updated_at: string
+        }
+        SetofOptions: {
+          from: "*"
+          to: "external_calendar_events"
+          isOneToOne: true
+          isSetofReturn: false
+        }
+      }
       update_reservation: {
         Args: {
           _channel?: string
