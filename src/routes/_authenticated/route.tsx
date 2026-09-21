@@ -60,18 +60,15 @@ function Blocked({ ctx: _ctx }: { ctx: MyContext }) {
       <Card className="w-full max-w-md">
         <CardHeader>
           <Lock className="size-6 text-muted-foreground" />
-          <CardTitle className="font-display text-xl">
-            Servicio temporalmente no disponible
-          </CardTitle>
+          <CardTitle className="font-display text-xl">Error de acceso</CardTitle>
           <CardDescription>
-            CasaFlow se encuentra temporalmente en mantenimiento. Tu información permanece segura y
-            no se ha eliminado ningún dato. Para restablecer el acceso, contacta al administrador.
+            No fue posible abrir CasaFlow. Contacta al administrador.
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-3 text-sm text-muted-foreground">
           <Button asChild className="w-full">
             <a href="https://wa.me/525636690877" target="_blank" rel="noreferrer">
-              <MessageCircle className="size-4" /> Contactar por WhatsApp
+              <MessageCircle className="size-4" /> Contactar al administrador
             </a>
           </Button>
           <Button variant="outline" className="w-full" onClick={signOut}>
