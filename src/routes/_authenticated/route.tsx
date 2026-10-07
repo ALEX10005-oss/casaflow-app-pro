@@ -60,9 +60,10 @@ function Blocked({ ctx: _ctx }: { ctx: MyContext }) {
       <Card className="w-full max-w-md">
         <CardHeader>
           <Lock className="size-6 text-muted-foreground" />
-          <CardTitle className="font-display text-xl">Error de acceso</CardTitle>
+          <CardTitle className="font-display text-xl">Error de conexión</CardTitle>
           <CardDescription>
-            No fue posible abrir CasaFlow. Contacta al administrador.
+            No fue posible conectar con la base de datos. Intenta de nuevo más
+            tarde o contacta al administrador.
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-3 text-sm text-muted-foreground">
