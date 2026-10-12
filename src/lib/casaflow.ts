@@ -276,9 +276,16 @@ export const RESERVATION_ERROR: Record<string, string> = {
 };
 
 export function reservationErrorMessage(err: unknown) {
-  const raw = err instanceof Error ? err.message : String(err);
+  let raw = "";
+  if (err instanceof Error) raw = err.message;
+  else if (err && typeof err === "object") {
+    const e = err as { message?: unknown; details?: unknown; hint?: unknown };
+    raw = [e.message, e.details, e.hint].filter((v) => typeof v === "string" && v).join(" ");
+  } else if (typeof err === "string") raw = err;
   const key = Object.keys(RESERVATION_ERROR).find((k) => raw.includes(k));
-  return key ? RESERVATION_ERROR[key]! : raw;
+  if (key) return RESERVATION_ERROR[key]!;
+  if (raw.includes("not_authenticated")) return "Tu sesión expiró. Vuelve a iniciar sesión.";
+  return raw || "No se pudo guardar la reserva. Intenta de nuevo.";
 }
 
 export const money = (n: number) =>
