@@ -16,6 +16,8 @@ export const Route = createFileRoute("/")({
         property: "og:description",
         content: "Un solo panel para calendario, reservas, operación y finanzas de tus propiedades.",
       },
+      { property: "og:type", content: "website" },
+      { name: "twitter:card", content: "summary_large_image" },
     ],
   }),
   component: Landing,
@@ -55,6 +57,15 @@ function Landing() {
               <Link to="/auth">
                 Entrar a CasaFlow <ArrowRight className="ml-1 size-4" />
               </Link>
+            </Button>
+            <Button asChild size="lg" variant="outline">
+              <a
+                href="https://wa.me/525636690877?text=Hola%2C%20quisiera%20solicitar%20una%20demostraci%C3%B3n%20de%20CasaFlow."
+                target="_blank"
+                rel="noopener noreferrer"
+              >
+                <MessageCircle className="size-4" /> Solicitar demostración
+              </a>
             </Button>
           </div>
         </section>
